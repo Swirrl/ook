@@ -1,0 +1,4 @@
+{:ook.concerns.reitit/router {:data
+                              [["/"
+                                {:get
+                                 {:handler #ig/ref :ook.handler/default-handler}}]]}}

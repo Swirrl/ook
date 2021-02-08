@@ -1,50 +1,19 @@
-# ook.core
+# OOK (ONS trade search)
 
-FIXME: my new application.
+## Running the project
 
-## Installation
+Start a repl with the dev alias (using e.g. `bin/repl` or however you normally do) and run:
 
-Download from https://github.com/ook/ook.core.
+```clojure
+(dev)
+(go)
+```
 
-## Usage
-
-FIXME: explanation
-
-Run the project directly:
-
-    $ clojure -m ook.core
-
-Run the project's tests (they'll fail until you edit them):
-
-    $ clojure -A:test:runner
-
-Build an uberjar:
-
-    $ clojure -A:uberjar
-
-Run that uberjar:
-
-    $ java -jar ook.core.jar
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+Visit `localhost:3000` in your browser (or whatever port you set if you overwrite it in `env/dev/resources/local.edn`).
 
 ## License
 
-Copyright © 2021 Kmclean
+Copyright © 2021 Swirrl
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

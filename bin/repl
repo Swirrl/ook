@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This mainly exists for documentation purposes...
+#
+# For non-cider/intellij users starts a repl with standard project setup
+
+clojure -A:dev

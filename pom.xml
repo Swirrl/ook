@@ -4,8 +4,8 @@
   <groupId>ook</groupId>
   <artifactId>ook.core</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <name>ook.core</name>
-  <description>FIXME: my new application.</description>
+  <name>OOK</name>
+  <description>ONS Trade Search</description>
   <url>https://github.com/ook/ook.core</url>
   <licenses>
     <license>
@@ -15,7 +15,7 @@
   </licenses>
   <developers>
     <developer>
-      <name>Kmclean</name>
+      <name>Swirrl</name>
     </developer>
   </developers>
   <scm>

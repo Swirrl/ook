@@ -1,0 +1,9 @@
+{:ook.concerns/jetty {:opts {:port 8080
+                             :join? false}
+                      :handler #ig/ref :ook.concerns.reitit/ring-handler}
+
+ :ook.concerns.reitit/ring-handler {:router #ig/ref :ook.concerns.reitit/router
+                                    :default-handler #ig/ref :ook.handler/default-handler
+                                    :opts {}}
+
+ :ook.handler/default-handler {}}

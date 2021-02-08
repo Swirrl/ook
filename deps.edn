@@ -1,14 +1,19 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.10.1"}}
- :aliases
- {:test {:extra-paths ["test"]
-         :extra-deps {org.clojure/test.check {:mvn/version "1.0.0"}}}
-  :runner
-  {:extra-deps {com.cognitect/test-runner
-                {:git/url "https://github.com/cognitect-labs/test-runner"
-                 :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
-   :main-opts ["-m" "cognitect.test-runner"
-               "-d" "test"]}
-  :uberjar {:extra-deps {seancorfield/depstar {:mvn/version "1.0.94"}}
-            :main-opts ["-m" "hf.depstar.uberjar" "ook.core.jar"
-                        "-C" "-m" "ook.core"]}}}
+ :deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        ring/ring-jetty-adapter {:mvn/version "1.8.2"}
+        ring/ring-core {:mvn/version "1.8.2"}
+        metosin/reitit {:mvn/version "0.5.10"}
+
+        org.clojure/tools.logging {:mvn/version "1.1.0"}
+        org.apache.logging.log4j/log4j-api {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
+
+        meta-merge/meta-merge {:mvn/version  "1.0.0"}
+        integrant/integrant {:mvn/version "0.8.0"}}
+
+ :aliases {:dev {:extra-paths ["env/dev/src"
+                               "env/dev/resources"
+                               "test"]
+                 :extra-deps {integrant/repl {:mvn/version "0.3.1"}
+                              vvvvalvalval/scope-capture {:mvn/version "0.3.2"}}}}}
