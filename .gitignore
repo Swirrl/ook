@@ -10,3 +10,4 @@
 .dir-locals.el
 .lsp
 .clj-kondo
+node_modules

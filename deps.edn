@@ -1,5 +1,8 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        meta-merge/meta-merge {:mvn/version  "1.0.0"}
+        integrant/integrant {:mvn/version "0.8.0"}
+
         ring/ring-jetty-adapter {:mvn/version "1.8.2"}
         ring/ring-core {:mvn/version "1.8.2"}
         metosin/reitit {:mvn/version "0.5.10"}
@@ -9,11 +12,23 @@
         org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
 
-        meta-merge/meta-merge {:mvn/version  "1.0.0"}
-        integrant/integrant {:mvn/version "0.8.0"}}
+        hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
+
+        reagent/reagent {:mvn/version "1.0.0"}}
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
                                "test"]
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
-                              vvvvalvalval/scope-capture {:mvn/version "0.3.2"}}}}}
+                              vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
+
+                              ;;;;;;;;;;;;;
+                              ;; CLJS DEPS
+                              ;;;;;;;;;;;;;
+
+                              devcards/devcards {:mvn/version "0.2.7"}
+
+                              ;; shadow-cljs is two parts. the JS parts that do the CLI stuff (in package.json)
+                              ;; and the JVM parts that do the actual compilation (here in deps.edn).
+                              ;; NOTE change in package.json too when bumping
+                              thheller/shadow-cljs {:mvn/version "2.11.18"}}}}}

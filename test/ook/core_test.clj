@@ -1,7 +1,7 @@
-(ns ook.core-test
-  (:require [clojure.test :refer :all]
-            [ook.core :refer :all]))
+(ns ook.main-test
+  (:require [clojure.test :refer [deftest testing is]]
+            [ook.main :refer :all]))
 
 (deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+  (testing "hey Kira write a real test someday"
+    (is (= 1 1))))

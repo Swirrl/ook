@@ -1,0 +1,55 @@
+;; shadow-cljs configuration
+{:deps {:aliases [:dev]}
+
+ ;; set an nrepl port for connection to a REPL.
+ :nrepl {:port 8777}
+
+ ;; HTTP server for serving devcards development UI
+ :dev-http {8000 ["env/devcards/resources/public"
+                  "target/dev/cljs-devcards/public"]}
+
+ :builds
+ {
+  ;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
+  :ook {:target :browser
+        :asset-path "/js"
+
+        :output-dir "target/dev/cljs/public/js"
+
+        ;; prod config
+        :release {:compiler-options {:optimizations :advanced}
+                  :output-dir "target/prod/resources/public/js"}
+
+        :modules
+        {:main {:entries [ook.main]
+                :init-fn ook.main/pre-init}}
+
+        :dev {:closure-defines {goog.DEBUG true}}
+
+        :devtools {:reload-strategy :full
+                   ;; serve the public directory over http at port 8700
+                   :http-root "target/dev/cljs/public"
+                   :http-port 8700
+                   :preloads [devtools.preload
+                              mut.error-formatter ;; <- pretty print spec errors with expound
+                              mut.front-end-specs ;; <- spec instrumentation
+                              ]}
+
+        ;; Cljs is compiled to ES5 by default. However, third-party NPM modules aren't
+        :compiler-options {:force-library-injection ["es6/array/includes" "es6/object/values"]}}
+  :cards {:target :browser
+          :asset-path "/js"
+          :output-dir "target/dev/cljs-devcards/public/js"
+
+          :dev {:closure-defines {goog.DEBUG true}}
+
+          :devtools {;; serve the public directory over http at port 8700
+                     :http-root "target/dev/cljs-devcards/public"
+                     :http-port 8701
+                     :preloads [devtools.preload]}
+
+          :modules {:main {:entries [ook.dev-cards]}}
+
+          :compiler-options {:devcards true}
+          :build-options {:ns-aliases {devcards-marked cljsjs.marked
+                                       devcards-syntax-highlighter cljsjs.highlight}}}}}
