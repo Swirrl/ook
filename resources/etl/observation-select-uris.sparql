@@ -1,0 +1,5 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+
+SELECT ?observation WHERE {
+  ?observation a qb:Observation
+}

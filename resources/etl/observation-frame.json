@@ -1,0 +1,16 @@
+{
+  "@context": {
+    "@base": "http://gss-data.org.uk/",
+    "@vocab": "http://gss-data.org.uk/",
+    "qb": "http://purl.org/linked-data/cube#",
+    "sdmxd": "http://purl.org/linked-data/sdmx/2009/dimension#",
+    "sdmxa": "http://purl.org/linked-data/sdmx/2009/attribute#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "pmdcat": "http://publishmydata.com/pmdcat#",
+    "dimension": "http://gss-data.org.uk/def/dimension/",
+    "measure": "http://gss-data.org.uk/def/measure/",
+    "skos": "http://www.w3.org/2004/02/skos/core#"
+  },
+  "@type": "qb:Observation"
+}

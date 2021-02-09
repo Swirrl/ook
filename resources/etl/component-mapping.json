@@ -1,0 +1,10 @@
+{
+    "mappings": {
+        "properties": {
+            "@type": { "type": "keyword" },
+            "label": { "type": "text" },
+            "codelist": { "type": "keyword" },
+            "subPropertyOf": { "type": "keyword" }
+        }
+    }
+}

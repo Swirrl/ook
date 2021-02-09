@@ -1,0 +1,17 @@
+{
+    "mappings": {
+        "properties": {
+            "@type": { "type": "constant_keyword", "value": "qb:Observation" }
+        },
+        "dynamic_templates": [
+            {
+                "string": {
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "keyword"
+                    } 
+                }
+            }
+        ] 
+    }
+}

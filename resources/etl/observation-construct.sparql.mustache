@@ -1,0 +1,19 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+CONSTRUCT {
+  <{{observation}}>#?observation
+    ?p ?o;
+} 
+WHERE {
+  #?observation
+    #qb:dataSet <{{dataset}}>;
+    #<{{dimension}}> <{{value}}>;
+  <{{observation}}>
+    ?p ?o;
+    .
+
+#  FILTER isIRI(?o)
+}

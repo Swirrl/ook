@@ -1,0 +1,28 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+    ?component
+        a ?component_property;
+        rdfs:label ?label;
+        qb:codeList ?codelist;
+        rdfs:subPropertyOf ?parent_component;
+        .
+} WHERE {
+    ?component_property rdfs:subClassOf qb:ComponentProperty .
+
+    ?component
+        a ?component_property;
+        rdfs:label ?label_;
+        .
+
+    BIND(STR(?label_) AS ?label)# strip language tag
+    
+    OPTIONAL {
+        ?component qb:codeList ?codelist;
+    }
+
+    OPTIONAL {
+        ?component rdfs:subPropertyOf ?parent_component;
+    }
+}

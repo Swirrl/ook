@@ -1,0 +1,14 @@
+{
+    "mappings": {
+        "properties": {
+            "@type": { "type": "constant_keyword", "value": "pmdcat:Dataset" },
+            "family": { "type": "keyword" },
+            "cube": { "type": "keyword" },
+            "publisher": { "type": "keyword" },
+            "label": { "type": "text" },
+            "comment": { "type": "text" },
+            "description": { "type": "text" },
+            "component": { "type": "keyword" }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+CONSTRUCT {
+  ?entry
+    a pmdcat:Dataset;
+    rdfs:label ?label;
+    pmdcat:datasetContents ?qb;
+    rdfs:comment ?comment;
+    dcterms:description ?description;
+    dcterms:publisher ?publisher;
+    <http://gss-data.org.uk/def/gdp#family> ?family;
+    <http://example.net/def/components> ?component;
+    .  
+} 
+WHERE {
+  ?entry
+    pmdcat:datasetContents ?qb;
+    rdfs:label ?label_;    
+    dcterms:publisher ?publisher;
+    <http://gss-data.org.uk/def/gdp#family> ?family;
+    .
+
+  BIND(STR(?label_) AS ?label)
+  
+  OPTIONAL {
+    ?entry rdfs:comment ?comment_;
+    BIND(STR(?comment_) AS ?comment)
+  }
+
+  OPTIONAL {
+    ?entry dcterms:description ?description;
+  }
+
+  ?qb a qb:DataSet;
+      qb:structure/qb:component/qb:dimension ?component; # TODO: attributes & measures
+      .
+}
