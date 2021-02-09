@@ -7,8 +7,8 @@
     </Properties>
 
     <Appenders>
-      <RollingFile name="file-log" fileName="${log-path}/eco-api.log"
-                     filePattern="${log-path}/muttnik-%d{yyyy-MM-dd}-%i.log">
+      <RollingFile name="file-log" fileName="${log-path}/ook.log"
+                     filePattern="${log-path}/ook-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout>
                 <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
             </PatternLayout>
