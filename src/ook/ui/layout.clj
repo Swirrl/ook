@@ -9,7 +9,7 @@
 (defn- page [& contents]
   (h/html {:mode :html}
           (h.u/raw-string "<!doctype html>\n")
-          [:html {:lang :en}
+          [:html.h-100 {:lang :en}
            contents]))
 
 (defn- head []
@@ -18,23 +18,35 @@
    [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
    [:title  "ONS Trade Search"]
-   [:script {:src "/assets/js/main.js" :type "text/javascript"}]])
+   [:link {:href "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+           :rel "stylesheet"
+           :integrity "sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+           :crossorigin "anonymous"}]])
 
 (defn- header []
-  [:header "This is the header"])
+  [:header
+   [:nav.navbar.navbar-light.bg-light
+    [:div.container-fluid
+     [:span.navbar-brand.mb-0.h1 "ONS Trade Search"]]]])
 
 (defn- footer []
-  [:footer "This is the footer"])
+  [:footer.footer.mt-auto.bg-light.p-3
+   "by Swirrl"])
 
-(defn- init-script []
-  [:script "ook.main.init()"])
+(defn- scripts []
+  (list
+   ;; <!-- JavaScript Bundle with Popper -->
+   ;; <script src= "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity= "sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin= "anonymous" ></script>
+
+   [:script {:src "/assets/js/main.js" :type "text/javascript"}]
+   [:script "ook.main.init()"]))
 
 (defn- body [contents]
-  [:body
+  [:body.d-flex.flex-column.h-100
    (header)
-   [:main  contents]
+   [:main.flex-shrink-0.p-3 contents]
    (footer)
-   (init-script)])
+   (scripts)])
 
 (defn- layout [contents]
   (page
