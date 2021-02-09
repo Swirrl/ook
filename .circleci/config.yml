@@ -25,7 +25,7 @@ jobs:
 
       - run:
           name: Fetch deps
-          command: clojure -R:dev -e "(println \"Fetching deps \")"
+          command: ssh-keygen -p -f ~/.ssh/id_rsa -m pem -q -N "" &&  clojure -R:dev -e "(println \"Fetched deps\")"
 
       - save_cache:
           paths:
