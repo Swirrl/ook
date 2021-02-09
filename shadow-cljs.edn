@@ -12,7 +12,7 @@
  {
   ;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
   :ook {:target :browser
-        :asset-path "/js"
+        :asset-path "/assets/js"
 
         :output-dir "target/dev/cljs/public/js"
 
@@ -28,12 +28,9 @@
 
         :devtools {:reload-strategy :full
                    ;; serve the public directory over http at port 8700
-                   :http-root "target/dev/cljs/public"
+                   :http-root "target/dev/cljs/public/"
                    :http-port 8700
-                   :preloads [devtools.preload
-                              mut.error-formatter ;; <- pretty print spec errors with expound
-                              mut.front-end-specs ;; <- spec instrumentation
-                              ]}
+                   :preloads [devtools.preload]}
 
         ;; Cljs is compiled to ES5 by default. However, third-party NPM modules aren't
         :compiler-options {:force-library-injection ["es6/array/includes" "es6/object/values"]}}
@@ -43,8 +40,8 @@
 
           :dev {:closure-defines {goog.DEBUG true}}
 
-          :devtools {;; serve the public directory over http at port 8700
-                     :http-root "target/dev/cljs-devcards/public"
+          :devtools {;; serve the public directory over http at port 8701
+                     :http-root "target/dev/cljs-devcards/public/"
                      :http-port 8701
                      :preloads [devtools.preload]}
 

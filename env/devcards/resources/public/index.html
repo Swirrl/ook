@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Devcards - Muttnik</title>
+    <link href="/maquette/maquette.css" rel="stylesheet" type="text/css">
+    <!-- disables devcards styles that conflict with our own -->
+    <style id="com-rigsomelight-devcards-addons-css"></style>
+  </head>
+  <body class="theme-default">
+    <script src="/js/main.js" type="text/javascript"></script>
+    <script>ook.dev_cards.init();</script>
+  </body>
+  <style>
+   /* don't constrain card width */
+   .com-rigsomelight-devcards-container {
+     width: 100%;
+     padding: 2rem;
+   }
+
+   /* don't show passing tests, they take up too much space */
+   .com-rigsomelight-devcards-test-line ~ .com-rigsomelight-devcards-pass {
+     display: none;
+   }
+  </style>
+</html>

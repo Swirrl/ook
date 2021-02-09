@@ -3,7 +3,8 @@
                       :handler #ig/ref :ook.concerns.reitit/ring-handler}
 
  :ook.concerns.reitit/ring-handler {:router #ig/ref :ook.concerns.reitit/router
-                                    :default-handler #ig/ref :ook.handler/default-handler
+                                    :default-handler #ig/ref :ook.concerns.reitit/default-handler
                                     :opts {}}
 
- :ook.handler/default-handler {}}
+ :ook.concerns.reitit/default-handler {}
+ :ook.concerns.reitit/resource-handler {}}

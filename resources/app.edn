@@ -1,4 +1,6 @@
-{:ook.concerns.reitit/router {:data
-                              [["/"
-                                {:get
-                                 {:handler #ig/ref :ook.handler/default-handler}}]]}}
+{:ook.concerns.reitit/router {:routes
+                              [["/" {:get {:handler #ig/ref :ook.handler/home}}]
+                               ["/assets/*" #ig/ref :ook.concerns.reitit/resource-handler]]
+                              :opts {}}
+
+ :ook.handler/home {}}

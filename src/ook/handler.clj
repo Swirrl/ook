@@ -1,11 +1,13 @@
 (ns ook.handler
   (:require [integrant.core :as ig]
             [ring.util.response :as resp]
-            [ook.ui.layout :as layout]))
+            [ook.ui.layout :as layout]
+            [cljs.reader :as edn]))
 
 (defn- home []
-  [:h1 "Hello Swirrl"])
+  [:div {:id ":home" :class "OokComponent" :data-ook-init "initial-state" }
+   [:h1 "Hello Swirrld"]])
 
-(defmethod ig/init-key :ook.handler/default-handler [_ opts]
-  (fn [request]
+(defmethod ig/init-key :ook.handler/home [_ _]
+  (fn [_request]
     (resp/response (layout/->html (home)))))

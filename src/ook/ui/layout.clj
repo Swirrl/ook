@@ -18,8 +18,7 @@
    [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]
    [:title  "ONS Trade Search"]
-   [:script {:src "js/main.js" :defer true :type "text/javascript"}]
-   [:script "ook.main.init()"]])
+   [:script {:src "/assets/js/main.js" :type "text/javascript"}]])
 
 (defn- header []
   [:header "This is the header"])
@@ -27,11 +26,15 @@
 (defn- footer []
   [:footer "This is the footer"])
 
+(defn- init-script []
+  [:script "ook.main.init()"])
+
 (defn- body [contents]
   [:body
    (header)
    [:main  contents]
-   (footer)])
+   (footer)
+   (init-script)])
 
 (defn- layout [contents]
   (page

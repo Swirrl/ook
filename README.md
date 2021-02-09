@@ -33,6 +33,8 @@ or, if you also want the devcards:
 yarn watch-all
 ```
 
+With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
+
 ## License
 
 Copyright © 2021 Swirrl

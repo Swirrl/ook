@@ -18,6 +18,7 @@
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
+                               "target/dev/cljs" ;; shadow-cljs watch compiled js output
                                "test"]
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
@@ -26,6 +27,7 @@
                               ;; CLJS DEPS
                               ;;;;;;;;;;;;;
 
+                              binaryage/devtools {:mvn/version "1.0.2"}
                               devcards/devcards {:mvn/version "0.2.7"}
 
                               ;; shadow-cljs is two parts. the JS parts that do the CLI stuff (in package.json)
