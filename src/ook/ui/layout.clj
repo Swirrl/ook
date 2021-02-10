@@ -25,13 +25,13 @@
 
 (defn- header []
   [:header
-   [:nav.navbar.navbar-light.bg-light
-    [:div.container-fluid
+   [:nav.navbar.navbar-light.bg-light.mb-3
+    [:div.container
      [:span.navbar-brand.mb-0.h1 "ONS Trade Search"]]]])
 
 (defn- footer []
   [:footer.footer.mt-auto.bg-light.p-3
-   "by Swirrl"])
+   [:div.container "by Swirrl"]])
 
 (defn- scripts []
   (list
@@ -44,7 +44,8 @@
 (defn- body [contents]
   [:body.d-flex.flex-column.h-100
    (header)
-   [:main.flex-shrink-0.p-3 contents]
+   [:main.flex-shrink-0
+    [:div.container contents]]
    (footer)
    (scripts)])
 

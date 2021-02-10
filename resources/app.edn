@@ -1,6 +1,8 @@
 {:ook.concerns.reitit/router {:routes
                               [["/" {:get {:handler #ig/ref :ook.handler/home}}]
+                               ["/search" {:get {:handler #ig/ref :ook.handler/search}}]
                                ["/assets/*" #ig/ref :ook.concerns.reitit/resource-handler]]
                               :opts {}}
 
- :ook.handler/home {}}
+ :ook.handler/home   {}
+ :ook.handler/search {}}
