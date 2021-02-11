@@ -7,8 +7,7 @@
    :count (->> response :hits :total :value)
    :results (->> response :hits :hits (map #(assoc (:_source %) :id (:_id %))))})
 
-(defn query [query]
-  ;; TODO: this should be pass as integrant config
-  (let [conn (esr/connect "http://127.0.0.1:9200" {:content-type :json})
+(defn query [es-endpoint query]
+  (let [conn (esr/connect es-endpoint {:content-type :json})
         response (esd/search conn "code" "_doc" :query {:match {:label query}})]
     (parse-elastic-response query response)))

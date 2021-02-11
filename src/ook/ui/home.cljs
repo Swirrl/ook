@@ -2,10 +2,10 @@
   (:require [ook.ui.common :as c]))
 
 (defn- search-form []
-  [:form.d-flex {:method "GET" :action "/search"}
+  [:form.d-flex.mt-4 {:method "GET" :action "/search" :style {:max-width "50rem"}}
    [:input.form-control.form-control.lg.me-2
     {:id "query"
-     :name "query"
+     :name "q"
      :type "search"
      :placeholder "Search"
      :aria-label "Search"}]
@@ -17,7 +17,6 @@
 
 (defn ui [state]
   [c/loading-wrapper state
-   [:h1 "ONS Trade Search"]
-   [:p "This is a reagent component"]
+   [:h1 "Search for a code"]
    (search-form)
    (results state)])
