@@ -2,20 +2,24 @@
   (:require [integrant.core :as ig]
             [ring.util.response :as resp]
             [ook.ui.layout :as layout]
-            [ook.search.elastic :as search]
-            [ook.ui.results :as results]
-            [ook.params.parse :as p]))
+            [ook.search.elastic :as es]
+            [ook.params.parse :as p]
+            [ook.concerns.transit :as t]))
 
-(defn- home []
-  [:div {:id ":home" :class "OokComponent" :data-ook-init "initial-state" }
-   [:p "Loading..."]])
 
-(defmethod ig/init-key :ook.handler/home [_ _]
+(defmethod ig/init-key :ook.handler/main [_ _]
   (fn [_request]
-    (resp/response (layout/->html (home)))))
+    (resp/response (layout/->html (layout/search)))))
+
+(defn- requesting-transit? [{:keys [headers]}]
+  (let [accept (headers "accept")]
+    (= "application/transit+json" accept)))
 
 (defmethod ig/init-key :ook.handler/search [_ {:keys [es-endpoint]}]
   (fn [request]
     (let [query (p/get-query request)
-          result (search/query es-endpoint query)]
-      (resp/response (layout/->html (results/search-results result))))))
+          result (es/query es-endpoint query)]
+      (if (requesting-transit? request)
+        (-> (resp/response (t/write-string result))
+            (resp/header "Content-Type" "application/transit+json"))
+        (resp/response (layout/->html (layout/search result)))))))

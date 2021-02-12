@@ -1,6 +1,8 @@
 (ns ook.ui.layout
   (:require [hiccup2.core :as h]
-            [hiccup.util :as h.u]))
+            [hiccup.util :as h.u]
+            [ook.ui.search :as search]
+            [ook.concerns.transit :as t]))
 
 ;; Hiccup2 doesn't include versions of the hiccup.page/html5 macro & doesn't
 ;; work with them. The latter issue seems more of an oversight.
@@ -27,7 +29,7 @@
   [:header
    [:nav.navbar.navbar-light.bg-light.mb-3
     [:div.container
-     [:span.navbar-brand.mb-0.h1 "ONS Trade Search"]]]])
+     [:span.navbar-brand.mb-0.h1 [:a {:href "/"} "ONS Trade Search"]]]]])
 
 (defn- footer []
   [:footer.footer.mt-auto.bg-light.p-3
@@ -35,9 +37,6 @@
 
 (defn- scripts []
   (list
-   ;; <!-- JavaScript Bundle with Popper -->
-   ;; <script src= "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity= "sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin= "anonymous" ></script>
-
    [:script {:src "/assets/js/main.js" :type "text/javascript"}]
    [:script "ook.main.init()"]))
 
@@ -56,3 +55,13 @@
 
 (defn ->html [& contents]
   (-> contents layout h/html str))
+
+(defn search
+  ([]
+   (search nil))
+  ([state]
+   (list
+    [:h1 "Search for a code"]
+    [:div (cond-> {:id ":search" :class "OokComponent"}
+            state (merge {:data-ook-init (t/write-string state)}))
+     (search/ui (delay state))])))

@@ -5,7 +5,8 @@
             [cljs.reader :as edn]
             [ook.ui.error-boundary :as err]
             [reagent.dom :as rdom]
-            [ook.ui.home :as home]))
+            [ook.ui.search :as search]
+            [ook.concerns.transit :as t]))
 
 (defn pre-init []
   (if ^boolean goog/DEBUG
@@ -13,14 +14,14 @@
     (set-print-fn! (constantly nil))))
 
 (def ^:private id->view-fn
-  {:home home/ui})
+  {:search search/ui})
 
 (defn read-state [el]
   (let [encoded-state (some-> el
                               (go/get "attributes")
                               (go/get "data-ook-init")
                               (go/get "value"))]
-    (edn/read-string encoded-state)))
+    (t/read-string encoded-state)))
 
 (defn- hydrate-component [el id]
   (swap! state/components-state assoc id :loading)
