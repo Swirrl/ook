@@ -1,0 +1,16 @@
+{:drafter-client/client {:auth-provider #ig/ref :drafter-client.auth.auth0/m2m-provider
+                         :drafter-uri #ig/ref :drafter/endpoint-url
+                         :batch-size 10000}
+
+ :drafter-client.auth.auth0/m2m-provider {:auth0-client #ig/ref :swirrl.auth0/client}
+
+ :swirrl.auth0/client {:swagger-json #resource "swirrl/auth0/swagger.json"
+                       :aud "https://pmd"
+                       :api #ig/ref :auth0.client/api
+                       :leeway 2
+                       :iss #ig/ref :auth0.client/endpoint
+                       :audience "https://pmd"
+
+                       :client-id #ig/ref :auth0.client/id
+                       :client-secret #ig/ref :auth0.client/secret
+                       :endpoint #ig/ref :auth0.client/endpoint}}

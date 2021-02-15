@@ -1,5 +1,15 @@
 # OOK (ONS trade search)
 
+## Set-up
+
+For connecting to the cogs-staging drafter endpoint (i.e. for ETL), you'll need to set the secret key for the [ook application](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8). You can configure the `AUTH0_SECRET` environmental variable, or create an encrypted file with this as it's contents:
+
+```bash
+echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > resources/secrets/AUTH0_SECRET.gpg
+```
+
+You can use this pattern and the `ook.concerns.integrant/secret` reader to encrypt other secrets.
+
 ## Running the project
 
 ### Server
@@ -34,6 +44,14 @@ yarn watch-all
 ```
 
 With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
+
+## Testing
+
+Run the tests with the alias:
+
+```bash
+clojure -A:test
+```
 
 ## License
 
