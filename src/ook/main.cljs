@@ -6,7 +6,8 @@
             [ook.ui.error-boundary :as err]
             [reagent.dom :as rdom]
             [ook.ui.search :as search]
-            [ook.concerns.transit :as t]))
+            [ook.concerns.transit :as t]
+            [ook.concerns.router :as router]))
 
 (defn pre-init []
   (if ^boolean goog/DEBUG
@@ -44,6 +45,7 @@
     (hydrate-component el id)))
 
 (defn ^:export init
-  "Client side entry point called via dev.cljs/prod.cljs depending on your env"
+  "Client side entry point called from the main layout"
   []
-  (mount-components))
+  (mount-components)
+  (router/init!))
