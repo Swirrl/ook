@@ -64,8 +64,6 @@
           ([]
            (search nil))
           ([state]
-           (list
-            [:h1 "Search for a code"]
-            [:div (cond-> {:id ":search" :class "OokComponent"}
-                    state (merge {:data-ook-init (t/write-string state)}))
-             (search/ui (delay state))]))))
+           [:div (cond-> {:id ":search" :class "OokComponent"}
+                   state (merge {:data-ook-init (t/write-string state)}))
+            (search/ui (delay state))])))

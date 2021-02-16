@@ -8,14 +8,10 @@
 (def ^:private routes
   [["/" {:name :ook.route/home
          :view search/search-form
-         :controllers [{:start #(swap! state/components-state assoc :search nil)
-                        :stop (fn [s] (js/console.log "stop / :::" s))
-                        :identity :data}]}]
+         :controllers [{:start search/reset-search-input!}]}]
    ["/search" {:name  :ook.route/search
                :view search/ui
-               :parameters {:query {:q string?}}
-               :controllers [{:start (fn [s] (js/console.log "stop / :::" s))
-                              :identity :data}]}]])
+               :parameters {:query {:q string?}}}]])
 
 (defn- handle-navigation [new-match]
   (swap! state/match (fn [old-match]
