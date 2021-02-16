@@ -8,6 +8,7 @@ CONSTRUCT {
         a skos:Concept;
         rdfs:label ?label;
         skos:inScheme ?scheme;
+        skos:notation ?notation;
         skos:broader ?broader;
         ui:sortPriority ?sort_priority;
     .
@@ -19,7 +20,11 @@ CONSTRUCT {
         .
 
     BIND(STR(?label_) AS ?label) # strip language tag
-    
+
+    OPTIONAL {
+        ?code skos:notation ?notation;
+    }
+
     OPTIONAL {
         ?code ui:sortPriority ?sort_priority;
     }

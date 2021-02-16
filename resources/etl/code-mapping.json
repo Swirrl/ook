@@ -4,6 +4,7 @@
             "@type": { "type": "constant_keyword", "value": "skos:Concept" },
             "label": { "type": "text" },
             "scheme": { "type": "keyword" },
+            "notation": { "type": "keyword" },
             "broader": { "type": "keyword" },
             "priority": { "type": "integer" }
         }
