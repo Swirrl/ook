@@ -27,11 +27,11 @@
     (str/join ", " label)
     label))
 
-(defn- codes [{:keys [count results query]}]
+(defn- codes [{:keys [result/count result/data result/query]}]
   (c/siblings
    [:p [:strong "Found " count " codes matching \"" query "\""]]
    [:form
-    (for [{:keys [id label]} results]
+    (for [{:keys [id label]} data]
       ^{:key id} [:div.form-check.mb-3.bg-light
                   [:div.p-2
                    [:input.form-check-input {:type "checkbox" :value id :id id}]
