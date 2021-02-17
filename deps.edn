@@ -22,10 +22,12 @@
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
+                               "env/test/resources"
                                "target/dev/cljs" ;; shadow-cljs watch compiled js output
                                "test"]
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
+                              ring/ring-mock {:mvn/version "0.4.0"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS

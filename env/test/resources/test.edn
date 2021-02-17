@@ -1,0 +1,4 @@
+{:ook.concerns/jetty {:opts {:port 3001 :join? false}}
+
+ :ook.handler/search {:search/db #ig/ref :ook.search.fake/db}
+ :ook.search.fake/db {}}

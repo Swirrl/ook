@@ -16,7 +16,7 @@
 
 (defmethod ig/init-key :ook.handler/search [_ {:keys [search/db]}]
   (fn [request]
-    (let [query (p/get-query request)
+    (let [query (or (p/get-query request) "")
           result (db/get-codes db query)]
       (if (requesting-transit? request)
         (-> (resp/response (t/write-string result))
