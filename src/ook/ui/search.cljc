@@ -1,25 +1,24 @@
 (ns ook.ui.search
   (:require [ook.ui.common :as c]
             [clojure.string :as str]
-            #?@(:cljs [[ook.handler :as handler]
-                       [ook.ui.state :as state]])))
+            #?@(:cljs [[ook.ui.state :as state]])))
 
 #?(:cljs
    (defn reset-search-input! []
      (swap! state/components-state assoc :search nil)
      (set! (.-value  (.getElementById js/document "query")) "")))
 
-(defn search-form [state]
+(defn search-form [state {:keys [handler/submit-search]}]
   [:form.d-flex.mt-4.mb-4
    #?(:clj {:id "search" :action "/search" :method "GET"}
-      :cljs {:id "search" :on-submit handler/submit-search})
+      :cljs {:id "search" :on-submit submit-search})
    [:input.form-control.form-control.lg.me-2
     (-> {:id "query"
          :name "q"
          :type "search"
          :placeholder "Search"
          :aria-label "Search"
-         :default-value (or (:query @state) "")})]
+         :default-value (or (:result/query @state) "")})]
    [:button.btn.btn-primary {:type "submit"} "Search"]])
 
 (defn- single-label [label]
@@ -43,10 +42,10 @@
   (when-let [current-state @state]
     (codes current-state)))
 
-(defn ui [state]
+(defn ui [state props]
   (c/state-wrapper
    state
    [:div {:style {:max-width "50rem" :margin "0 auto"}}
     [:h1 "Search for a code"]
-    (search-form state)
+    (search-form state props)
     (results state)]))

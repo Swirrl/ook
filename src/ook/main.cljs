@@ -7,7 +7,8 @@
             [reagent.dom :as rdom]
             [ook.ui.search :as search]
             [ook.concerns.transit :as t]
-            [ook.concerns.router :as router]))
+            [ook.concerns.router :as router]
+            [ook.handler :as handler]))
 
 (defn pre-init []
   (if ^boolean goog/DEBUG
@@ -16,6 +17,9 @@
 
 (def ^:private id->view-fn
   {:search search/ui})
+
+(def ^:private id->props
+  {:search {:handler/submit-search handler/submit-search}})
 
 (defn read-state [el]
   (let [encoded-state (some-> el
@@ -28,11 +32,12 @@
   (swap! state/components-state assoc id :loading)
   (let [state (read-state el)
         cursor (r/cursor state/components-state [id])
-        view-fn (id->view-fn id)]
+        view-fn (id->view-fn id)
+        props (id->props id)]
     (println "Hydrating component " id " from data attribute")
     (swap! state/components-state assoc id state)
     (rdom/render [err/error-boundary
-                  [(partial view-fn cursor)]]
+                  [view-fn cursor props]]
                  el)))
 
 (defn- find-components []

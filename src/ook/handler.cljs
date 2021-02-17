@@ -10,7 +10,7 @@
   (GET "/search"
     {:params {:q query}
      :response-format (transit-response-format)
-     :handler  (fn [result]
+     :handler (fn [result]
                  (swap! state/components-state assoc :search result)
                  (navigate :ook.route/search {:q query}))
      :error-handler (fn [error]

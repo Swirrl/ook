@@ -7,10 +7,8 @@
 
 (def ^:private routes
   [["/" {:name :ook.route/home
-         :view search/search-form
          :controllers [{:start search/reset-search-input!}]}]
    ["/search" {:name  :ook.route/search
-               :view search/ui
                :parameters {:query {:q string?}}}]])
 
 (defn- handle-navigation [new-match]

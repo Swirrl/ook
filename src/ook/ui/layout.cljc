@@ -66,4 +66,4 @@
           ([state]
            [:div (cond-> {:id ":search" :class "OokComponent"}
                    state (merge {:data-ook-init (t/write-string state)}))
-            (search/ui (delay state))])))
+            (search/ui (delay state) {})])))

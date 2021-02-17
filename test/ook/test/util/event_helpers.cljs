@@ -19,6 +19,16 @@
         (r/flush))
       (throw (js/Error. (str "No option found with label \"" label "\"."))))))
 
-(defn set-input-val [input val]
-  (.type ue/default input val)
+(defn clear-input [input]
+  (.clear ue/default input))
+
+(defn- send-keys [target val]
+  (.type ue/default target val)
   (r/flush))
+
+(defn set-input-val [input val]
+  (clear-input input)
+  (send-keys input val))
+
+(defn press-enter [target]
+  (send-keys target "{enter}"))
