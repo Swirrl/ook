@@ -5,7 +5,7 @@
             [ook.concerns.integrant :as igc]
             [meta-merge.core :as mm]))
 
-(defn read-config [config]
+(defn- read-config [config]
   (ig/read-string {:readers {'env igc/env 'resource io/resource}}
                   config))
 
@@ -17,7 +17,7 @@
 
 ;; Execution
 
-(defn merge-profiles [profiles]
+(defn- merge-profiles [profiles]
   (apply mm/meta-merge (map load-config profiles)))
 
 (defn prep-config [{:keys [profiles]}]

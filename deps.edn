@@ -5,6 +5,7 @@
         ring/ring-jetty-adapter {:mvn/version "1.8.2"}
         ring/ring-core {:mvn/version "1.8.2"}
         metosin/reitit {:mvn/version "0.5.10"}
+        com.cognitect/transit-clj {:mvn/version "1.0.324"}
 
         ;; Drafter
         drafter-client/drafter-client {:git/url "git@github.com:Swirrl/drafter.git"
@@ -27,7 +28,9 @@
 
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
 
-        reagent/reagent {:mvn/version "1.0.0"}}
+        reagent/reagent {:mvn/version "1.0.0"}
+        com.cognitect/transit-cljs {:mvn/version "0.8.264"}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}}
 
  :mvn/repos
  {"swirrl-jars-releases" {:url "s3://swirrl-jars/releases/"}
@@ -35,10 +38,12 @@
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
+                               "env/test/resources"
                                "target/dev/cljs" ;; shadow-cljs watch compiled js output
                                "test"]
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
+                              ring/ring-mock {:mvn/version "0.4.0"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS
