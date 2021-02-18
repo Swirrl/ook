@@ -2,12 +2,23 @@
   (:require [integrant.core :as ig]
             [ring.util.response :as resp]
             [ook.ui.layout :as layout]
-            [cljs.reader :as edn]))
+            [ook.search.db :as db]
+            [ook.params.parse :as p]
+            [ook.concerns.transit :as t]))
 
-(defn- home []
-  [:div {:id ":home" :class "OokComponent" :data-ook-init "initial-state" }
-   [:h1 "Hello Swirrld"]])
-
-(defmethod ig/init-key :ook.handler/home [_ _]
+(defmethod ig/init-key :ook.handler/main [_ _]
   (fn [_request]
-    (resp/response (layout/->html (home)))))
+    (resp/response (layout/->html (layout/search)))))
+
+(defn- requesting-transit? [{:keys [headers]}]
+  (let [accept (headers "accept")]
+    (= "application/transit+json" accept)))
+
+(defmethod ig/init-key :ook.handler/search [_ {:keys [search/db]}]
+  (fn [request]
+    (let [query (or (p/get-query request) "")
+          result (db/get-codes db query)]
+      (if (requesting-transit? request)
+        (-> (resp/response (t/write-string result))
+            (resp/header "Content-Type" "application/transit+json"))
+        (resp/response (layout/->html (layout/search result)))))))

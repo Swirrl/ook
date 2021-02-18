@@ -5,22 +5,29 @@
         ring/ring-jetty-adapter {:mvn/version "1.8.2"}
         ring/ring-core {:mvn/version "1.8.2"}
         metosin/reitit {:mvn/version "0.5.10"}
+        com.cognitect/transit-clj {:mvn/version "1.0.324"}
 
         org.clojure/tools.logging {:mvn/version "1.1.0"}
         org.apache.logging.log4j/log4j-api {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
 
+        clojurewerkz/elastisch {:mvn/version "2.2.1"}
+
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
 
-        reagent/reagent {:mvn/version "1.0.0"}}
+        reagent/reagent {:mvn/version "1.0.0"}
+        com.cognitect/transit-cljs {:mvn/version "0.8.264"}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}}
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
+                               "env/test/resources"
                                "target/dev/cljs" ;; shadow-cljs watch compiled js output
                                "test"]
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
+                              ring/ring-mock {:mvn/version "0.4.0"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS

@@ -5,7 +5,10 @@
             [cljs.reader :as edn]
             [ook.ui.error-boundary :as err]
             [reagent.dom :as rdom]
-            [ook.ui.home :as home]))
+            [ook.ui.search :as search]
+            [ook.concerns.transit :as t]
+            [ook.concerns.router :as router]
+            [ook.handler :as handler]))
 
 (defn pre-init []
   (if ^boolean goog/DEBUG
@@ -13,24 +16,28 @@
     (set-print-fn! (constantly nil))))
 
 (def ^:private id->view-fn
-  {:home home/ui})
+  {:search search/ui})
+
+(def ^:private id->props
+  {:search {:handler/submit-search handler/submit-search}})
 
 (defn read-state [el]
   (let [encoded-state (some-> el
                               (go/get "attributes")
                               (go/get "data-ook-init")
                               (go/get "value"))]
-    (edn/read-string encoded-state)))
+    (t/read-string encoded-state)))
 
 (defn- hydrate-component [el id]
   (swap! state/components-state assoc id :loading)
   (let [state (read-state el)
         cursor (r/cursor state/components-state [id])
-        view-fn (id->view-fn id)]
+        view-fn (id->view-fn id)
+        props (id->props id)]
     (println "Hydrating component " id " from data attribute")
     (swap! state/components-state assoc id state)
     (rdom/render [err/error-boundary
-                  [(partial view-fn cursor)]]
+                  [view-fn cursor props]]
                  el)))
 
 (defn- find-components []
@@ -43,6 +50,7 @@
     (hydrate-component el id)))
 
 (defn ^:export init
-  "Client side entry point called via dev.cljs/prod.cljs depending on your env"
+  "Client side entry point called from the main layout"
   []
-  (mount-components))
+  (mount-components)
+  (router/init!))

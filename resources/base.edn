@@ -2,9 +2,10 @@
                              :join? false}
                       :handler #ig/ref :ook.concerns.reitit/ring-handler}
 
+ :ook.concerns.elastic/endpoint "http://127.0.0.1:9200"
+
  :ook.concerns.reitit/ring-handler {:router #ig/ref :ook.concerns.reitit/router
-                                    :default-handler #ig/ref :ook.concerns.reitit/default-handler
-                                    :opts {}}
+                                    :default-handler #ig/ref :ook.concerns.reitit/default-handler}
 
  :ook.concerns.reitit/default-handler {}
  :ook.concerns.reitit/resource-handler {}}

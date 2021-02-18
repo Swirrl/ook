@@ -8,7 +8,7 @@
 
 (defmethod ig/init-key :ook/const [_ v] v)
 
-;; (derive :ook/some-const :ook/const) for constants
+(derive :ook.concerns.elastic/endpoint :ook/const)
 
 (defn env [[env-var default]]
   (or (System/getenv env-var) default))

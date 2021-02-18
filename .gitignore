@@ -13,3 +13,4 @@
 node_modules
 .shadow-cljs
 logs/*
+resources/elasticsearch/backup
