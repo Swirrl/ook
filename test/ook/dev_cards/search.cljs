@@ -2,11 +2,13 @@
   (:require [reagent.core :as r]
             [ook.ui.search :as search]
             [devcards.core :as dc :include-macros true :refer [defcard-rg deftest]]
-            [cljs.test :refer-macros [testing is]]
+            [cljs.test :refer-macros [testing is use-fixtures]]
             [ook.dev-cards.state :as state]
             [ook.test.util.event-helpers :as eh]
             [ook.test.util.query-helpers :as qh]))
 
+;; (use-fixtures :once
+;;   {:before (fn [] (dc/start-devcard-ui!))})
 
 (defonce search-results (r/atom (:initial state/search-results)))
 
