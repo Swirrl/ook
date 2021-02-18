@@ -22,6 +22,9 @@
         org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
 
+        clojurewerkz/elastisch {:mvn/version "5.0.0-beta1"}
+        org.clojure/data.json {:mvn/version "1.0.0"}
+
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
 
         reagent/reagent {:mvn/version "1.0.0"}}

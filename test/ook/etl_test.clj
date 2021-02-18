@@ -28,3 +28,16 @@
                (-> jsonld (get "@graph") first (get "label"))
 ))
         (ig/halt! system)))))
+
+(deftest load-test
+  (testing "Load json-ld into database"
+    (let [system (i/exec-config {:profiles ["drafter-client.edn"
+                                            "cogs-staging.edn"
+                                            "elasticsearch-local.edn"]})
+          graphs ["http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply-metadata"
+                  "http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply"]
+          datasets (with-cassette :extract-datasets (sut/extract-datasets system graphs))
+          jsonld (sut/transform-datasets datasets)
+          result (sut/load-datasets system jsonld)]
+      (is (= false (:errors result)))
+      (ig/halt! system))))

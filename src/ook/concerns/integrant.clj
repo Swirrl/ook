@@ -20,6 +20,7 @@
 (derive :auth0.client/endpoint :ook/const)
 (derive :auth0.client/api :ook/const)
 (derive :drafter/endpoint-url :ook/const)
+(derive :ook.concerns.elastic/endpoint :ook/const)
 
 (defn env [[env-var default]]
   (or (System/getenv env-var) default))
