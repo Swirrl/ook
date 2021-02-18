@@ -25,7 +25,10 @@ jobs:
 
       - run:
           name: Fetch deps
-          command: ssh-keygen -p -f ~/.ssh/id_rsa -m pem -q -N "" &&  clojure -R:dev -e "(println \"Fetched deps\")"
+          command: |
+            ssh-keygen -p -f ~/.ssh/id_rsa -m pem -q -N ""
+            cp .circle-ci/settings.xml ~/.m2
+            clojure -R:dev -e "(println \"Fetched deps\")"
 
       - save_cache:
           paths:
