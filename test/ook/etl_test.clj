@@ -7,11 +7,24 @@
             [ook.etl :as sut]))
 
 (deftest extract-test
-  (testing "Extract data from a drafter endpoint"
+  (testing "Extract triples from a drafter endpoint"
     (with-cassette :extract-datasets
       (let [system (i/exec-config {:profiles ["drafter-client.edn", "cogs-staging.edn"]})
             graphs ["http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply-metadata"
                     "http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply"]
             datasets (sut/extract-datasets system graphs)]
         (is (= 13 (count datasets)))
+        (ig/halt! system)))))
+
+(deftest transform-test
+  (testing "Transform triples into json-ld"
+    (with-cassette :extract-datasets
+      (let [system (i/exec-config {:profiles ["drafter-client.edn", "cogs-staging.edn"]})
+            graphs ["http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply-metadata"
+                    "http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply"]
+            datasets (sut/extract-datasets system graphs)
+            jsonld (sut/transform-datasets datasets)]
+        (is (= "Imports and Exports of services by country, by modes of supply"
+               (-> jsonld (get "@graph") first (get "label"))
+))
         (ig/halt! system)))))

@@ -10,9 +10,12 @@
         drafter-client/drafter-client {:git/url "git@github.com:Swirrl/drafter.git"
                                        :sha "250df5d226f5f8f299038f86e095935e9024b3a3"
                                        :deps/root "drafter-client"}
-        clj-http/clj-http {:mvn/version "3.10.0"}
         com.auth0/jwks-rsa {:mvn/version "0.8.1"}
+
+        ;; ETL
+        clj-http/clj-http {:mvn/version "3.10.0"}
         com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
+        com.github.jsonld-java/jsonld-java {:mvn/version "0.13.2"}
 
         org.clojure/tools.logging {:mvn/version "1.1.0"}
         org.apache.logging.log4j/log4j-api {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
