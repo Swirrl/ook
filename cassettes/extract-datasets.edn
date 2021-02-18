@@ -1223,7 +1223,7 @@
                    :headers #vcr-clj/clj-http-header-map
                    {"Connection" "close",
                     "Content-Type" "application/json;charset=utf-8",
-                    "Date" "Tue, 16 Feb 2021 16:38:47 GMT",
+                    "Date" "Thu, 18 Feb 2021 08:58:49 GMT",
                     "Server" "nginx",
                     "Strict-Transport-Security" "max-age=15768000",
                     "Transfer-Encoding" "chunked",
@@ -1237,7 +1237,7 @@
                    :streaming? true,
                    :trace-redirects []},
           :var-name "clj-http.core/request"}
-         {:arg-key {:query-string "query=PREFIX+qb%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23%3E%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX+pmdcat%3A+%3Chttp%3A%2F%2Fpublishmydata.com%2Fpmdcat%23%3E%0APREFIX+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0A%0ACONSTRUCT+%7B%0A++%3Fentry%0A++++a+pmdcat%3ADataset%3B%0A++++rdfs%3Alabel+%3Flabel%3B%0A++++pmdcat%3AdatasetContents+%3Fqb%3B%0A++++rdfs%3Acomment+%3Fcomment%3B%0A++++dcterms%3Adescription+%3Fdescription%3B%0A++++dcterms%3Apublisher+%3Fpublisher%3B%0A++++%3Chttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Fgdp%23family%3E+%3Ffamily%3B%0A++++%3Chttp%3A%2F%2Fexample.net%2Fdef%2Fcomponents%3E+%3Fcomponent%3B%0A++++.++%0A%7D%0AWHERE+%7B%0A++%3Fentry%0A++++pmdcat%3AdatasetContents+%3Fqb%3B%0A++++rdfs%3Alabel+%3Flabel_%3B++++%0A++++dcterms%3Apublisher+%3Fpublisher%3B%0A++++%3Chttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Fgdp%23family%3E+%3Ffamily%3B%0A++++.%0A%0A++BIND%28STR%28%3Flabel_%29+AS+%3Flabel%29%0A++%0A++OPTIONAL+%7B%0A++++%3Fentry+rdfs%3Acomment+%3Fcomment_%3B%0A++++BIND%28STR%28%3Fcomment_%29+AS+%3Fcomment%29%0A++%7D%0A%0A++OPTIONAL+%7B%0A++++%3Fentry+dcterms%3Adescription+%3Fdescription%3B%0A++%7D%0A%0A++%3Fqb+a+qb%3ADataSet%3B%0A++++++qb%3Astructure%2Fqb%3Acomponent%2Fqb%3Adimension+%3Fcomponent%3B+%23+TODO%3A+attributes+%26+measures%0A++++++.%0A%7D&default-graph-uri=http%3A%2F%2Fgss-data.org.uk%2Fgraph%2Fgss_data%2Ftrade%2Fons-exports-of-services-by-country-by-modes-of-supply-metadata&default-graph-uri=http%3A%2F%2Fgss-data.org.uk%2Fgraph%2Fgss_data%2Ftrade%2Fons-exports-of-services-by-country-by-modes-of-supply",
+         {:arg-key {:query-string "query=PREFIX+qb%3A+%3Chttp%3A%2F%2Fpurl.org%2Flinked-data%2Fcube%23%3E%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX+pmdcat%3A+%3Chttp%3A%2F%2Fpublishmydata.com%2Fpmdcat%23%3E%0APREFIX+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0A%0ACONSTRUCT+%7B%0A++%3Fentry%0A++++a+pmdcat%3ADataset%3B%0A++++rdfs%3Alabel+%3Flabel%3B%0A++++pmdcat%3AdatasetContents+%3Fqb%3B%0A++++rdfs%3Acomment+%3Fcomment%3B%0A++++dcterms%3Adescription+%3Fdescription%3B%0A++++dcterms%3Apublisher+%3Fpublisher%3B%0A++++%3Chttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Fgdp%23family%3E+%3Ffamily%3B%0A++++%3Chttp%3A%2F%2Fexample.net%2Fdef%2Fcomponents%3E+%3Fcomponent%3B%0A++++.++%0A%7D+WHERE+%7B%0A++%3Fentry%0A++++pmdcat%3AdatasetContents+%3Fqb%3B%0A++++rdfs%3Alabel+%3Flabel_%3B++++%0A++++dcterms%3Apublisher+%3Fpublisher%3B%0A++++%3Chttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Fgdp%23family%3E+%3Ffamily%3B%0A++++.%0A%0A++BIND%28STR%28%3Flabel_%29+AS+%3Flabel%29%0A++%0A++OPTIONAL+%7B%0A++++%3Fentry+rdfs%3Acomment+%3Fcomment_%3B%0A++++BIND%28STR%28%3Fcomment_%29+AS+%3Fcomment%29%0A++%7D%0A%0A++OPTIONAL+%7B%0A++++%3Fentry+dcterms%3Adescription+%3Fdescription%3B%0A++%7D%0A%0A++%3Fqb+a+qb%3ADataSet%3B%0A++++++qb%3Astructure%2Fqb%3Acomponent%2Fqb%3Adimension+%3Fcomponent%3B+%23+TODO%3A+attributes+%26+measures%0A++++++.%0A%7D&named-graph-uri=http%3A%2F%2Fgss-data.org.uk%2Fgraph%2Fgss_data%2Ftrade%2Fons-exports-of-services-by-country-by-modes-of-supply-metadata&named-graph-uri=http%3A%2F%2Fgss-data.org.uk%2Fgraph%2Fgss_data%2Ftrade%2Fons-exports-of-services-by-country-by-modes-of-supply",
                     :request-method :get,
                     :server-name "cogs-staging-drafter.publishmydata.com",
                     :server-port nil,
@@ -1337,7 +1337,7 @@
                    :headers #vcr-clj/clj-http-header-map
                    {"Connection" "close",
                     "Content-Type" "application/n-triples",
-                    "Date" "Tue, 16 Feb 2021 16:38:48 GMT",
+                    "Date" "Thu, 18 Feb 2021 08:58:51 GMT",
                     "Server" "nginx",
                     "Strict-Transport-Security" "max-age=15768000",
                     "Transfer-Encoding" "chunked",
@@ -1351,4 +1351,4 @@
                    :streaming? true,
                    :trace-redirects []},
           :var-name "clj-http.core/request"}],
- :recorded-at #inst "2021-02-16T16:38:45.764-00:00"}
+ :recorded-at #inst "2021-02-18T08:58:49.809-00:00"}

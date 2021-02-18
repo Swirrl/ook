@@ -14,7 +14,7 @@
   "Creates a function for calling construct queries with optional graph restrictions"
   (fn
     ([system] (construct system query))
-    ([system graphs] (construct system query :default-graph-uri graphs))))
+    ([system graphs] (construct system query :named-graph-uri graphs))))
 
 (def extract-datasets
   (constructor (slurp (io/resource "etl/dataset-construct.sparql"))))
