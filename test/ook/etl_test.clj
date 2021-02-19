@@ -38,6 +38,8 @@
                   "http://gss-data.org.uk/graph/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply"]
           datasets (with-cassette :extract-datasets (sut/extract-datasets system graphs))
           jsonld (sut/transform-datasets datasets)
+          indicies (sut/create-indicies system)
           result (sut/load-datasets system jsonld)]
       (is (= false (:errors result)))
+      (is (= true (get-in (sut/delete-indicies system) [:dataset :acknowledged])))
       (ig/halt! system))))
