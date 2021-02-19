@@ -9,7 +9,7 @@
   (true? (:acknowledged response)))
 
 (deftest create-and-delete-index-test
-  (with-system [system ["elasticsearch-local.edn"]]
+  (with-system [system ["elasticsearch-test.edn"]]
     (let [responses (sut/create-indicies system)]
       (is (every? acknowledged? (vals responses))))
     (let [responses (sut/delete-indicies system)]

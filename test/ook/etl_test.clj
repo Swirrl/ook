@@ -27,7 +27,7 @@
 
 (deftest load-test
   (testing "Load json-ld into database"
-    (i/with-system [system ["drafter-client.edn" "cogs-staging.edn" "elasticsearch-local.edn"]]
+    (i/with-system [system ["drafter-client.edn" "cogs-staging.edn" "elasticsearch-test.edn"]]
       (let [datasets (with-cassette :extract-datasets (sut/extract-datasets system test-graphs))
             jsonld (sut/transform-datasets datasets)
             indicies (idx/create-indicies system)

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# This mainly exists for documentation purposes...
+#
+# For non-cider/intellij users starts a repl with standard project setup
+
+docker-compose up -d elasticsearch-test
+docker-compose up -d elasticsearch-development
+clojure -A:dev:test:cider
+docker-compose down
