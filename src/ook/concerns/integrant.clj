@@ -42,7 +42,7 @@
         default)))
 
 (defn load-config [profile]
-  (->> (io/resource profile)
+  (->> (if (string? profile) (io/resource profile) profile)
        slurp
        (ig/read-string {:readers {'env env
                                   'secret secret
@@ -53,3 +53,17 @@
 
 (defn exec-config [{:keys [profiles] :as opts}]
   (ig/init (doto (config profiles) (ig/load-namespaces))))
+
+(defn start-system! [profiles]
+  (exec-config {:profiles profiles}))
+
+(def stop-system! ig/halt!)
+
+(defmacro with-system
+  "Start a system with the given profiles"
+  [[sym profiles] & body]
+  `(let [~sym (start-system! ~profiles)]
+     (try
+       ~@body
+       (finally
+         (stop-system! ~sym)))))
