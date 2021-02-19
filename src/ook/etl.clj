@@ -5,7 +5,6 @@
    [grafter-2.rdf4j.io :as gio]
    [grafter-2.rdf.protocols :as gpr]
    [clojurewerkz.elastisch.rest :as es]
-   [clojurewerkz.elastisch.rest.index :as esi]
    [clojurewerkz.elastisch.rest.bulk :as esb]
    [clojure.data.json :as json])
   (:import (java.io ByteArrayOutputStream)
@@ -74,24 +73,6 @@
 
 
 ;; Load
-
-(defn create-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-  (let [conn (es/connect endpoint {:content-type :json})]
-    (esi/create conn index (-> mapping-file io/reader json/read))))
-
-(defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (let [conn (es/connect endpoint {:content-type :json})]
-    (esi/delete conn index)))
-
-(defn create-indicies [system]
-  {:dataset (create-index system "dataset" (io/resource "etl/dataset-mapping.json"))
-   :component (create-index system "component" (io/resource "etl/component-mapping.json"))
-   :code (create-index system "code" (io/resource "etl/code-mapping.json"))
-   :observation (create-index system "observation" (io/resource "etl/observation-mapping.json"))})
-
-(defn delete-indicies [system]
-  (let [indicies ["dataset" "component" "code" "observation"]]
-    (zipmap (map keyword indicies) (map (partial delete-index system) indicies))))
 
 (defn add-id [object]
   (assoc (into {} object) :_id (get object "@id")))
