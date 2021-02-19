@@ -7,12 +7,12 @@
 
   (get-codes [_ query]
     (condp = query
-      "" {:result/query ""
-          :result/count 0
-          :result/data []}
-      "test" {:result/query "test"
-              :result/count 1
-              :result/data [{:id "http://test"
+      "" {:result.codes/query ""
+          :result.codes/count 0
+          :result.codes/data []}
+      "test" {:result.codes/query "test"
+              :result.codes/count 1
+              :result.codes/data [{:id "http://test"
                              :label "This is a test label"}]})))
 
 (defmethod ig/init-key :ook.search.fake/db [_ _]
