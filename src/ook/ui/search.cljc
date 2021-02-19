@@ -18,7 +18,7 @@
          :type "search"
          :placeholder "Search"
          :aria-label "Search"
-         :default-value (or (:result/query @state) "")})]
+         :default-value (or (:result.codes/query @state) "")})]
    [:button.btn.btn-primary {:type "submit"} "Search"]])
 
 (defn- single-label [label]
@@ -26,21 +26,46 @@
     (str/join ", " label)
     label))
 
-(defn- codes [{:keys [result/count result/data result/query]}]
+(defn- codes [{:keys [result.codes/count result.codes/data result.codes/query]}
+              {:keys [handler/apply-code-selection]}]
   (c/siblings
    [:p [:strong "Found " count " codes matching \"" query "\""]]
-   [:form
-    (for [{:keys [id label]} data]
+   [:form {:id "codes"
+           :action "/apply-filters" :method "GET"
+           ;; :on-submit apply-code-selection
+           }
+    [:button.btn.btn-primary.mb-3 {:type "submit"} "Find datasets with selected codes"]
+    (for [{:keys [id label scheme]} data]
       ^{:key id} [:div.form-check.mb-3.bg-light
                   [:div.p-2
-                   [:input.form-check-input {:type "checkbox" :value id :id id}]
+                   [:input.form-check-input {:type "checkbox" :name "code"
+                                             :value [id, scheme] :id id}]
                    [:label.form-check-label {:for id}
                     [:strong (single-label label)]
                     [:p.m-0 "id: " [:code id]]]]])]))
 
-(defn results [state]
+(defn- datasets [{:keys [result.datasets/data]} props]
+  (when data
+    [:table.table
+     [:thead
+      [:tr
+       [:th {:scope "col"} "Dataset Id"]
+       [:th {:scopt "col"}]]]
+
+     [:tbody
+      (for [{:keys [dataset matching-observations]} data]
+        ^{:key dataset} [:tr
+                         [:th {:scope "row"} dataset]
+                         [:td
+                          [:small (str "Found " matching-observations " matching observations")]
+                          [:div
+                           [:a.btn.btn-secondary.btn-sm {:href "#"} "View Data"]]]])]]))
+
+(defn- results [state props]
   (when-let [current-state @state]
-    (codes current-state)))
+    (c/siblings
+     (codes current-state props)
+     (datasets current-state props))))
 
 (defn ui [state props]
   (c/state-wrapper
@@ -48,4 +73,4 @@
    [:div {:style {:max-width "50rem" :margin "0 auto"}}
     [:h1 "Search for a code"]
     (search-form state props)
-    (results state)]))
+    (results state props)]))

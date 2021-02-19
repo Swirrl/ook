@@ -14,7 +14,6 @@
 ;; init of constants is a no-op
 (defmethod ig/init-key :ook/const [_ v] v)
 
-;; (derive :ook/some-const :ook/const) for constants
 (derive :auth0.client/id :ook/const)
 (derive :auth0.client/secret :ook/const)
 (derive :auth0.client/endpoint :ook/const)
