@@ -24,10 +24,13 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      - add_ssh_keys:
+          fingerprints:
+            - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
+
       - run:
           name: Fetch deps
           command: |
-            ssh-keygen -p -f ~/.ssh/id_rsa -m pem -q -N ""
             cp .circleci/settings.xml ~/.m2
             clojure -R:dev -e "(println \"Fetched deps\")"
 
