@@ -89,9 +89,8 @@
   (assoc (into {} object) :_id (get object "@id")))
 
 (defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
-  (let [docs (map (partial into {}) (get jsonld "@graph"))
-        conn (es/connect endpoint {:content-type :json})
-        operations (esb/bulk-index (map add-id docs))]
+  (let [conn (es/connect endpoint {:content-type :json})
+        operations (esb/bulk-index (map add-id (get jsonld "@graph")))]
     (esb/bulk-with-index conn index operations)))
 
 (defn load-datasets [system jsonld]
