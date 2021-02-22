@@ -14,8 +14,7 @@ CONSTRUCT {
     <http://gss-data.org.uk/def/gdp#family> ?family;
     <http://example.net/def/components> ?component;
     .  
-} 
-WHERE {
+} WHERE {
   ?entry
     pmdcat:datasetContents ?qb;
     rdfs:label ?label_;    

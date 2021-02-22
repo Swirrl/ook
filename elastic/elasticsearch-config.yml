@@ -1,0 +1,7 @@
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+path.repo: /mount/backup
+
+cluster.routing.allocation.disk.watermark.low: 3gb
+cluster.routing.allocation.disk.watermark.high: 2gb
+cluster.routing.allocation.disk.watermark.flood_stage: 1gb

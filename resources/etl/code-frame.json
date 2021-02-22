@@ -13,6 +13,7 @@
     "skos": "http://www.w3.org/2004/02/skos/core#",
     "label": {"@id": "rdfs:label" },
     "scheme": {"@id": "skos:inScheme", "@type": "@id"},
+    "notation": {"@id": "skos:notation" },
     "broader": {"@id": "skos:broader", "@type": "@id"},
     "priority": {"@id": "http://www.w3.org/ns/ui#sortPriority"}
   },

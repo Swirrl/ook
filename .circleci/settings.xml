@@ -1,0 +1,17 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>swirrl-jars-releases</id>
+      <username>${env.AWS_ACCESS_KEY_ID}</username>
+      <password>${env.AWS_SECRET_ACCESS_KEY}</password>      
+    </server>
+    <server>
+      <id>swirrl-jars-snapshots</id>
+      <username>${env.AWS_ACCESS_KEY_ID}</username>
+      <password>${env.AWS_SECRET_ACCESS_KEY}</password>      
+    </server>
+  </servers>
+</settings>

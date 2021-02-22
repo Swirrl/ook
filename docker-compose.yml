@@ -1,0 +1,53 @@
+version: "2"
+services:
+  elasticsearch-development:
+    build:
+      context: ./elastic
+      dockerfile: Dockerfile.opendistro-es
+    environment:
+      - discovery.type=single-node
+      #- cluster.name=odfe-cluster
+      #- node.name=elasticsearch
+      #- discovery.seed_hosts=elasticsearch
+      #- cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - es-data-development:/usr/share/elasticsearch/data
+      - ./elastic/backup:/mount/backup
+    ports:
+      - 9200:9200
+  elasticsearch-test:
+    build:
+      context: ./elastic
+      dockerfile: Dockerfile.opendistro-es
+    environment:
+      - discovery.type=single-node
+      #- cluster.name=odfe-cluster
+      #- node.name=elasticsearch
+      #-discovery.seed_hosts=elasticsearch
+      #- cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - es-data-test:/usr/share/elasticsearch/data
+      - ./elastic/backup:/mount/backup
+    ports:
+      - 9201:9200
+volumes:
+  es-data-development:
+  es-data-test:

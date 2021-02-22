@@ -7,18 +7,34 @@
         metosin/reitit {:mvn/version "0.5.10"}
         com.cognitect/transit-clj {:mvn/version "1.0.324"}
 
+        ;; Drafter
+        drafter-client/drafter-client {:git/url "git@github.com:Swirrl/drafter.git"
+                                       :sha "250df5d226f5f8f299038f86e095935e9024b3a3"
+                                       :deps/root "drafter-client"}
+        com.auth0/jwks-rsa {:mvn/version "0.8.1"}
+
+        ;; ETL
+        clj-http/clj-http {:mvn/version "3.10.0"}
+        com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
+        com.github.jsonld-java/jsonld-java {:mvn/version "0.13.2"}
+
         org.clojure/tools.logging {:mvn/version "1.1.0"}
         org.apache.logging.log4j/log4j-api {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
 
-        clojurewerkz/elastisch {:mvn/version "2.2.1"}
+        clojurewerkz/elastisch {:mvn/version "5.0.0-beta1"}
+        org.clojure/data.json {:mvn/version "1.0.0"}
 
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
 
         reagent/reagent {:mvn/version "1.0.0"}
         com.cognitect/transit-cljs {:mvn/version "0.8.264"}
         cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}}
+
+ :mvn/repos
+ {"swirrl-jars-releases" {:url "s3://swirrl-jars/releases/"}
+  "swirrl-jars-snapshots" {:url "s3://swirrl-jars/snapshots/"}}
 
  :aliases {:dev {:extra-paths ["env/dev/src"
                                "env/dev/resources"
@@ -45,4 +61,5 @@
                                {:git/url "https://github.com/cognitect-labs/test-runner"
                                 :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
                   :main-opts ["-m" "cognitect.test-runner"
-                              "-d" "test"]}}}
+                              "-d" "test"]}
+           :ci {:extra-paths ["env/ci/resources"]}}}
