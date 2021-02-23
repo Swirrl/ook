@@ -15,8 +15,8 @@
 (defn- es-search [query {:keys [elastic/endpoint]}]
   (let [conn (esr/connect endpoint {:content-type :json})
         response (esd/search conn "code" "_doc"
-                             :query {:match {:label query}}
-                             :size 10000)]
+                             {:query {:match {:label query}}
+                              :size 10000})]
     (parse-elastic-response query response)))
 
 (defrecord Elasticsearch [opts]
