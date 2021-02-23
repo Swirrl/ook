@@ -16,10 +16,11 @@
     (set-print-fn! (constantly nil))))
 
 (def ^:private id->view-fn
-  {:search search/ui})
+  {:main search/ui})
 
 (def ^:private id->props
-  {:search {:handler/submit-search handler/submit-search}})
+  {:main {:handler/submit-search handler/submit-search
+          :handler/apply-code-selection handler/apply-code-selection}})
 
 (defn read-state [el]
   (let [encoded-state (some-> el

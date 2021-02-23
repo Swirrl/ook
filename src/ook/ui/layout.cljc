@@ -36,7 +36,7 @@
        "ONS Trade Search"]]]]])
 
 (defn- footer []
-  [:footer.footer.mt-auto.bg-light.p-3
+  [:footer.footer.bg-light.p-3.mt-auto
    [:div.container "by Swirrl"]])
 
 (defn- scripts []
@@ -47,7 +47,7 @@
 (defn- body [contents]
   [:body.d-flex.flex-column.h-100
    (header)
-   [:main.flex-shrink-0
+   [:main.flex-shrink-0.mb-4
     [:div.container contents]]
    (footer)
    (scripts)])
@@ -60,10 +60,10 @@
 (defn ->html [& contents]
   (-> contents layout h/html str))
 
-#?(:clj (defn search
+#?(:clj (defn main
           ([]
-           (search nil))
+           (main nil))
           ([state]
-           [:div (cond-> {:id ":search" :class "OokComponent"}
+           [:div (cond-> {:id ":main" :class "OokComponent"}
                    state (merge {:data-ook-init (t/write-string state)}))
             (search/ui (delay state) {})])))
