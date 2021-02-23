@@ -9,13 +9,12 @@
   (esr/connect endpoint {:content-type :json}))
 
 (defn- parse-codes-response [query response]
-  {:result.codes/query query
-   :result.codes/count (->> response :hits :total :value)
-   :result.codes/data (->> response :hits :hits
-                           (map (fn [result]
-                                  {:id (-> result :_id)
-                                   :scheme (-> result :_source :scheme)
-                                   :label (-> result :_source :label)})))})
+  {:results {:codes {:query query
+                     :data (->> response :hits :hits
+                                (map (fn [result]
+                                       {:id (-> result :_id)
+                                        :scheme (-> result :_source :scheme)
+                                        :label (-> result :_source :label)})))}}})
 
 (defn- es-search [query {:keys [elastic/endpoint]}]
   (let [conn (get-connection endpoint)
@@ -64,7 +63,7 @@
                  (-> result :aggregations :observation-count :buckets)))
        (map (fn [{:keys [key doc_count]}]
               {:dataset key :matching-observations doc_count}))
-       (assoc {} :result.datasets/data)))
+       (assoc-in {} [:results :datasets :data])))
 
 (defn- es-find-datasets [codes {:keys [elastic/endpoint]}]
   (let [conn (get-connection endpoint)

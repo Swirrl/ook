@@ -50,8 +50,13 @@
     (eh/click (search-button))
     (is (= "england" @latest-search)))
 
+  (testing "it shows the apply button when there are results"
+    (is (not (nil? (qh/query-text "Apply filter")))))
+
   (testing "it shows something sensible when there are no results"
     (eh/set-input-val (search-input) "missing")
     (eh/click (search-button))
     (is (= "Found 0 codes matching \"missing\"" (result-text))))
-  )
+
+  (testing "it does not show the apply button when there are no results"
+    (is (nil? (qh/query-text "Apply filter")))))

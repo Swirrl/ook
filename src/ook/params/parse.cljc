@@ -8,7 +8,7 @@
   (if (coll? v) v [v]))
 
 (defn parse-filters [{:keys [query-params]}]
-  (->> (get query-params "code")
-       box
-       (map #(str/split % #","))
-       (map (fn [[id scheme]] {:id id :scheme scheme}))))
+  (some->> (get query-params "code")
+           box
+           (map #(str/split % #","))
+           (map (fn [[id scheme]] {:id id :scheme scheme}))))
