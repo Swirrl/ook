@@ -4,16 +4,8 @@ PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
 CONSTRUCT {
-  <{{observation}}>#?observation
-    ?p ?o;
-} 
-WHERE {
-  #?observation
-    #qb:dataSet <{{dataset}}>;
-    #<{{dimension}}> <{{value}}>;
-  <{{observation}}>
-    ?p ?o;
-    .
-
+  ?observation ?p ?o .
+} WHERE {
+  ?observation ?p ?o .
 #  FILTER isIRI(?o)
 }

@@ -1,0 +1,6 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?component WHERE {
+  ?component a/rdfs:subClassOf qb:ComponentProperty .
+}
