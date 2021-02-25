@@ -1,5 +1,7 @@
 PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 
 SELECT ?observation WHERE {
-  ?observation a qb:Observation .
+  ?dataset pmdcat:datasetContents ?cube .
+  ?observation qb:dataSet ?cube .
 }

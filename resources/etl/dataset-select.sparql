@@ -1,5 +1,5 @@
 PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 
-SELECT ?entry WHERE {
-  ?entry a pmdcat:Dataset .
+SELECT (?dataset AS ?entry) WHERE {
+  ?dataset a pmdcat:Dataset .
 }

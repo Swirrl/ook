@@ -46,9 +46,12 @@
    inserting into another query. Each page is a map of the var name to a seq of URIs.
    NB: Only expecting a single variable to be bound in the results.
    See `insert-values-clause`."
-  [{:keys [drafter-client/client] :as system} page-query]
+  [{:keys [drafter-client/client ook.etl/target-datasets] :as system} page-query]
   (log/info "Fetching subjects")
   (let [client (interceptors/accept client "text/csv")
+        page-query (if target-datasets
+                     (insert-values-clause page-query "dataset" target-datasets)
+                     page-query)
         reader (io/reader (query client page-query))]
     (let [[name & values] (row-seq reader)]
       (map #(assoc {} name %)

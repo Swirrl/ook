@@ -1,5 +1,9 @@
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
 
-SELECT ?code WHERE {
-  ?code a skos:Concept;
+SELECT DISTINCT ?code WHERE {
+  ?code skos:inScheme ?scheme .
+
+  ?dataset pmdcat:datasetContents/qb:structure/qb:component/qb:dimension/qb:codeList ?scheme .
 }
