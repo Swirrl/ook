@@ -71,6 +71,22 @@ yarn watch-all
 
 With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
 
+## Fixtures
+
+You can load data from a drafter server into your elasticsearch development index from the shell as follows:
+
+```bash
+clojure -X:dev:ook.etl/fixtures
+```
+
+You can check that the indicies have some documents loaded with:
+
+```bash
+curl -X GET "localhost:9200/_cat/indices?v=true"
+```
+
+Alternatively you can create an integrant profile with the `:ook.index/data` component which will populate the database when the system is started. Use `:ook.etl/target-datasets` to scope the data to a set of `pmdcat:Dataset` URIs. See e.g. [resources/fixture-data.edn](resources/fixture-data.edn).
+
 ## Testing
 
 Run the tests with the alias:
