@@ -15,9 +15,8 @@
 
 (defn example-datasets [system]
   (with-cassette :extract-datasets
-    (let [page {"qb" example-cubes}
-          query (slurp (io/resource "etl/dataset-construct.sparql"))]
-      (sut/extract system query page))))
+    (let [query (slurp (io/resource "etl/dataset-construct.sparql"))]
+      (sut/extract system query "qb" example-cubes))))
 
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
@@ -41,5 +40,5 @@
             jsonld (sut/transform frame datasets)
             indicies (idx/create-indicies system)
             result (sut/load-documents system "dataset" jsonld)]
-        (is (= false (:errors result)))
+        (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))

@@ -14,6 +14,8 @@
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
 
+;; Query utilities
+
 (defn query
   "Gets a query from the live draftset.
    May include `:named-graph-uri` or `:default-graph-uri` options."
@@ -31,35 +33,52 @@
         clause (str "\n  VALUES ?" var-name " { " terms " }\n")]
     (str top clause bottom)))
 
-;; Select subjects for paging
-(defn row-seq
-  "Returns a lazy seq of lines from the reader, closing it when everything is consumed"
-  [^java.io.BufferedReader rdr]
-  (if-let [row (.readLine rdr)]
-    (cons row (lazy-seq (row-seq rdr)))
-    (.close rdr)))
+(defn append-limit-offset
+  "Adds a LIMIT and OFFSET clause to a sparql query"
+  [query-string limit offset]
+  {:pre [(string? query-string) (int? limit) (int? offset)]}
+  (str query-string "\nLIMIT " limit " OFFSET " offset))
 
 (def page-length 50000)
 
+(defn select-paged
+  "Executes a select query one page at a time returning a lazy seq of pages.
+   Pages are vectors - the variable name followed by the values."
+  ([client query-string]
+   (select-paged client query-string page-length))
+  ([client query-string page-size]
+   (select-paged client query-string page-size 0))
+  ([client query-string page-size offset]
+   (let [client (interceptors/accept client "text/csv")
+         query-page (append-limit-offset query-string page-size offset)
+         results (s/split-lines (slurp (io/reader (query client query-page))))]
+     (if (< (dec (count results)) page-size)
+       (list results)
+       (cons results
+             (lazy-seq (select-paged client
+                                     query-string
+                                     page-size
+                                     (+ offset page-size))))))))
+
+
+
+;; Extract
+
 (defn subject-pages
   "Executes a query to get a collection of URIs. Returns pages of URIs for
-   inserting into another query. Each page is a map of the var name to a seq of URIs.
-   NB: Only expecting a single variable to be bound in the results.
+   inserting into another query. Each page is a vector beginning with the var name
+   followed by the URIs. NB: Only expecting a single variable to be bound in the results.
    See `insert-values-clause`."
-  [{:keys [drafter-client/client ook.etl/target-datasets] :as system} page-query]
+  [{:keys [drafter-client/client ook.etl/target-datasets] :as system} subject-query]
   (log/info "Fetching subjects")
-  (let [client (interceptors/accept client "text/csv")
-        page-query (if target-datasets
-                     (insert-values-clause page-query "dataset" target-datasets)
-                     page-query)
-        reader (io/reader (query client page-query))]
-    (let [[name & values] (row-seq reader)]
-      (map #(assoc {} name %)
-           (partition-all page-length values)))))
+  (let [subject-query (if target-datasets
+                        (insert-values-clause subject-query "dataset" target-datasets)
+                        subject-query)]
+    (select-paged client subject-query)))
 
 (defn extract
   "Executes the construct query binding in values from page"
-  [{:keys [drafter-client/client] :as system} construct-query [[var-name uris] & _]]
+  [{:keys [drafter-client/client] :as system} construct-query var-name uris]
   (log/info "Constructing resources")
   (let [query-string (insert-values-clause construct-query var-name uris)]
     (query client query-string)))
@@ -99,20 +118,15 @@
 (defn add-id [object]
   (assoc (into {} object) :_id (get object "@id")))
 
+(def batch-size 10000)
+
 (defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
-  (log/info "Loading documents")
+  (log/info "Loading documents into " index " index")
   (let [conn (es/connect endpoint {:content-type :json})
-        operations (esb/bulk-index (map add-id (get jsonld "@graph")))]
-    (esb/bulk-with-index conn index operations)))
-
-#_(def batch-size 40000)
-
-#_(defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
-  (log/info "Loading documents")
-  (let [conn (es/connect endpoint {:content-type :json})
-        doc-batches (partition-all batch-size (map add-id (get jsonld "@graph")))]
-    (doseq [docs doc-batches]
-      (esb/bulk-with-index conn index (esb/bulk-index docs)))))
+        docs (map add-id (get jsonld "@graph"))
+        batches (partition-all batch-size docs)]
+    (for [batch batches]
+      (esb/bulk-with-index conn index (esb/bulk-index batch)))))
 
 
 ;; Pipeline
@@ -120,11 +134,13 @@
 (defn pipeline-fn [page-query construct-query jsonld-frame index]
   (fn [system]
     (log/info (str "Pipeline Started:" index))
-    (doseq [page (subject-pages system page-query)]
+    (doseq [[var-name & uris] (subject-pages system page-query)]
       (log/info "Processing page")
-      (->> (extract system construct-query page)
-           (transform jsonld-frame)
-           (load-documents system index)))
+      (if uris
+        (->> (extract system construct-query var-name uris)
+             (transform jsonld-frame)
+             (load-documents system index))
+        (log/warn (str "No compatible (" index ") subjects found!"))))
     (log/info (str "Pipeline Complete: " index))))
 
 (def dataset-pipeline
