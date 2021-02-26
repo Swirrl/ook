@@ -31,7 +31,7 @@
 
         reagent/reagent {:mvn/version "1.0.0"}
         com.cognitect/transit-cljs {:mvn/version "0.8.264"}
-        cljs-ajax/cljs-ajax{:mvn/version "0.8.1"}}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}}
 
  :mvn/repos
  {"swirrl-jars-releases" {:url "s3://swirrl-jars/releases/"}
@@ -58,7 +58,8 @@
                               ;; NOTE change in package.json too when bumping
                               thheller/shadow-cljs {:mvn/version "2.11.18"}}}
            :test {:extra-paths ["test"]
-                  :extra-deps {com.cognitect/test-runner
+                  :extra-deps {ring/ring-mock {:mvn/version "0.4.0"}
+                               com.cognitect/test-runner
                                {:git/url "https://github.com/cognitect-labs/test-runner"
                                 :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
                   :main-opts ["-m" "cognitect.test-runner"
