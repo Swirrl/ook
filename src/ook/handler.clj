@@ -37,3 +37,9 @@
         (-> (resp/response (t/write-string result))
             (resp/header "Content-Type" "application/transit+json"))
         {:status  406 :headers {} :body "Unsupported content type"}))))
+
+;;;;;;;;;;;;;;; NEW
+-
+(defmethod ig/init-key :ook.handler/main [_ _]
+  (fn [_request]
+    (resp/response (layout/->html (layout/main)))))

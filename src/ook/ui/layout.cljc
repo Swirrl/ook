@@ -44,26 +44,30 @@
    [:script {:src "/assets/js/main.js" :type "text/javascript"}]
    [:script "ook.main.init()"]))
 
-(defn- body [contents]
+(defn- body []
   [:body.d-flex.flex-column.h-100
    (header)
    [:main.flex-shrink-0.mb-4
-    [:div.container contents]]
+    [:noscript "For full functionality of this site it is necessary to enable JavaScript.
+ Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
+    [:div.container
+     [:h1.my-4 "Structural Search"]
+     [:div {:id "app"}]]]
    (footer)
    (scripts)])
 
-(defn- layout [contents]
+(defn main []
   (page
    (head)
-   (body contents)))
+   (body)))
 
-(defn ->html [& contents]
-  (-> contents layout h/html str))
+(defn ->html [contents]
+  (-> contents h/html str))
 
-#?(:clj (defn main
-          ([]
-           (main nil))
-          ([state]
-           [:div (cond-> {:id ":main" :class "OokComponent"}
-                   state (merge {:data-ook-init (t/write-string state)}))
-            (search/ui (delay state) {})])))
+;; #?(:clj (defn main
+;;           ([]
+;;            (main nil))
+;;           ([state]
+;;            [:div (cond-> {:id ":main" :class "OokComponent"}
+;;                    state (merge {:data-ook-init (t/write-string state)}))
+;;             (search/ui (delay state) {})])))
