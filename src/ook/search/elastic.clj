@@ -8,20 +8,19 @@
 (defn- get-connection [endpoint]
   (esr/connect endpoint {:content-type :json}))
 
-(defn- parse-codes-response [query response]
-  {:results {:codes {:query query
-                     :data (->> response :hits :hits
-                                (map (fn [result]
-                                       {:id (-> result :_id)
-                                        :scheme (-> result :_source :scheme)
-                                        :label (-> result :_source :label)})))}}})
+(defn- parse-codes-response [response]
+  (->> response :hits :hits
+       (map (fn [result]
+              {:id (-> result :_id)
+               :scheme (-> result :_source :scheme)
+               :label (-> result :_source :label)}))))
 
 (defn- es-search [query {:keys [elastic/endpoint]}]
   (let [conn (get-connection endpoint)
         response (esd/search conn "code" "_doc"
                              {:query {:match {:label query}}
                               :size 10000})]
-    (parse-codes-response query response)))
+    (parse-codes-response response)))
 
 (defn- workaround-hack
   "This is a temporary workaround to move forward with a snapshot db

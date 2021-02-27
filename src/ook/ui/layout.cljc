@@ -50,7 +50,8 @@
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
     [:div.container
      [:h1.my-4 "Structural Search"]
-     [:div {:id "app"}]]]
+     [:div {:id "app"}
+      [:p "Loading..."]]]]
    (footer)
    (scripts)])
 

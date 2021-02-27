@@ -15,3 +15,13 @@
   :results.codes/data
   (fn [db _]
     (:results.codes/data db)))
+
+(rf/reg-sub
+ :results.codes/query
+ (fn [db _]
+   (:results.codes/query db)))
+
+(rf/reg-sub
+ :ui.codes/selection
+ (fn [db _]
+   (:ui.codes/selection db)))

@@ -2,8 +2,14 @@
   (:require
    [re-frame.core :as rf]))
 
+(defn- submit-search [event]
+  (.preventDefault event)
+  (let [query @(rf/subscribe [:ui.codes/query])]
+    (rf/dispatch [:codes/submit-search query])
+    (rf/dispatch [:app/navigate :ook.route/search {:q query}])))
+
 (defn- search-form []
-  [:form.d-flex.my-3 {:id "search" :on-submit #(rf/dispatch [:codes/submit-search])}
+  [:form.d-flex.my-3 {:id "search" :on-submit submit-search}
    [:input.form-control.form-control.lg.me-2
     {:id "query"
      :name "q"
@@ -23,14 +29,3 @@
    (when (seq children)
      [:div.card-body
       children])])
-
-(defn home []
-  (create-filter-card))
-
-(defn results []
-  (let [codes @(rf/subscribe [:results.codes/data])]
-    (create-filter-card
-      "codes here..."
-      ;; do something with the codes...
-      )
-    ))
