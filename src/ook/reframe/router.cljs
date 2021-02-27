@@ -15,8 +15,12 @@
                :view views/results
                :parameters {:query {:q string? :code [string?]}}
                :controllers [{:start (fn [params]
-                                       (rf/dispatch [:codes/submit-search (-> params :query :q)]))
-                              :parameters {:query [:q]}}]}]])
+                                       (let [query (-> params :query :q)
+                                             codes (-> params :query :code)]
+                                         (rf/dispatch [:codes/submit-search query])
+                                         (when codes
+                                           (rf/dispatch [:filters/apply-code-selection codes]))))
+                              :parameters {:query [:q :code]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

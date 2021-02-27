@@ -61,8 +61,7 @@
        (mapcat (fn [result]
                  (-> result :aggregations :observation-count :buckets)))
        (map (fn [{:keys [key doc_count]}]
-              {:dataset key :matching-observations doc_count}))
-       (assoc-in {} [:results :datasets :data])))
+              {:dataset key :matching-observations doc_count}))))
 
 (defn- es-find-datasets [codes {:keys [elastic/endpoint]}]
   (let [conn (get-connection endpoint)

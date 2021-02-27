@@ -1,5 +1,7 @@
 (ns ook.reframe.subs
-  (:require [re-frame.core :as rf]))
+  (:require
+   [re-frame.core :as rf]
+   [ook.reframe.db :as db]))
 
 (rf/reg-sub
   :app/current-route
@@ -12,6 +14,11 @@
     (:ui.codes/query db)))
 
 (rf/reg-sub
+ :ui.codes/selection
+ (fn [db _]
+   (:ui.codes/selection db)))
+
+(rf/reg-sub
   :results.codes/data
   (fn [db _]
     (:results.codes/data db)))
@@ -22,6 +29,11 @@
    (:results.codes/query db)))
 
 (rf/reg-sub
- :ui.codes/selection
+ :results.datasets/data
  (fn [db _]
-   (:ui.codes/selection db)))
+   (:results.datasets/data db)))
+
+(rf/reg-sub
+ :http-data.codes/selection
+ (fn [db _]
+   (db/code-selection->list db)))

@@ -5,3 +5,6 @@
   [word count]
   (cond-> word
     (or (= 0 count) (> count 1)) (str "s")))
+
+(defn box [v]
+  (if (coll? v) v [v]))

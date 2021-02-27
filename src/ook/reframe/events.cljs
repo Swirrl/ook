@@ -2,6 +2,7 @@
   (:require [re-frame.core :as rf]
             [ook.reframe.db :as db]
             [ajax.core :as ajax]
+            [ook.util :as u]
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
@@ -17,9 +18,24 @@
     (assoc db :ui.codes/query new-query)))
 
 (rf/reg-event-db
-  :ui.codes/selection-change
+  :ui.codes/toggle-selection
   (fn [db [_ val]]
     (update-in db [:ui.codes/selection val] not)))
+
+(rf/reg-event-db
+  :ui.codes/set-selection
+  (fn [db [_ selection]]
+    (assoc db :ui.codes/selection selection)))
+
+(rf/reg-event-db
+ :ui.codes.selection/reset
+ (fn [db _]
+   (dissoc db :ui.codes/selection)))
+
+(rf/reg-event-db
+ :results.datasets/reset
+ (fn [db _]
+   (dissoc db :results.datasets/data :ui.codes/selection)))
 
 ;;; HTTP RESPONSES
 
@@ -33,42 +49,46 @@
 (rf/reg-event-db
   :results.codes.request/error
   (fn [db [_ error]]
-    (assoc-in db :results.codes/error error)))
+    (assoc db :results.codes/error error)))
 
 (rf/reg-event-db
  :results.datasets.request/success
  (fn [db [_ result]]
-   (assoc-in db :results.datasets/data result)))
-
+   (assoc db :results.datasets/data result)))
 
 (rf/reg-event-db
  :results.datasets.request/error
  (fn [db [_ result]]
-   (assoc-in db :results.datasets/error result)))
+   (assoc db :results.datasets/error result)))
 
 ;;;;; EFFECTS
 
 (rf/reg-event-fx
  :codes/submit-search
  (fn [_ [_ query]]
+   (println "SUBMITTING-SEARCH -----")
    {:http-xhrio {:method :get
                  :uri "/get-codes"
                  :params {:q query}
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.codes.request/success query]
                  :on-error [:results.codes.request/errror]}
-    :dispatch [:ui.codes/query-change query]}))
+    :fx [[:dispatch [:ui.codes/query-change query]]
+         [:dispatch [:results.datasets/reset]]]}))
 
 (rf/reg-event-fx
-  :filters/apply-code-selection
- (fn [{:keys [db]} [_]]
-   (let [codes (:ui.codes/selection db)]
-     {:http-xhrio {:method :get
-                   :uri "/apply-filters"
-                   :params {:code codes}
-                   :response-format (ajax/transit-response-format)
-                   :on-success [:results.datasets.request/success]
-                   :on-error [:results.datasets.request/errror]}})))
+ :filters/apply-code-selection
+ (fn [{:keys [db]} [_ codes]]
+   (println "APPLYING CODES SELECTION ---- " codes)
+   {:http-xhrio {:method :get
+                 :uri "/apply-filters"
+                 :params {:code codes}
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:results.datasets.request/success]
+                 :on-error [:results.datasets.request/errror]}
+    :dispatch [:ui.codes/set-selection (zipmap (u/box codes) (repeat true))]
+    ;; :fx ;; [[:dispatch [:ui.codes/selection-change (zipmap codes (repeat true))]]]
+    }))
 
 ;;;; NAVIGATION
 
@@ -79,9 +99,10 @@
 
 (rf/reg-event-fx
  :app/navigate
- (fn [_ [_ route query]]
-   {:app/navigate! {:route route
-                    :query query}}))
+ (fn [{:keys [db]} [_ route]]
+   (let [query-params (db/->query-params db)]
+     {:app/navigate! (cond-> {:route route}
+                       (= :ook.route/search route) (merge {:query query-params}))})))
 
 (rf/reg-fx
  :app/navigate!

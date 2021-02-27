@@ -20,14 +20,7 @@
 
 ;; Transit-only handlers for fetching partial UI data when JS is available
 
-(defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
-  (fn [request]
-    (let [filters (p/parse-filters request)
-          result (db/get-datasets db filters)]
-      (if (requesting-transit? request)
-        (-> (resp/response (t/write-string result))
-            (resp/header "Content-Type" "application/transit+json"))
-        {:status  406 :headers {} :body "Unsupported content type"}))))
+
 
 ;;;;;;;;;;;;;;; NEW
 
@@ -47,6 +40,13 @@
       (if (requesting-transit? request)
         (-> (resp/response (t/write-string codes))
             (resp/header "Content-Type" "application/transit+json"))
-        {:status  406 :headers {} :body "Unsupported content type"}
-        ;; (resp/response (layout/->html (layout/main (assoc-in codes [:ui :codes :query] query))))
-        ))))
+        {:status  406 :headers {} :body "Unsupported content type"}))))
+
+(defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
+  (fn [request]
+    (let [filters (p/parse-filters request)
+          result (db/get-datasets db filters)]
+      (if (requesting-transit? request)
+        (-> (resp/response (t/write-string result))
+            (resp/header "Content-Type" "application/transit+json"))
+        {:status  406 :headers {} :body "Unsupported content type"}))))

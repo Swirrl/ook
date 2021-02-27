@@ -11,9 +11,7 @@
 
 (defn- apply-code-selection [event]
   (.preventDefault event)
-  (rf/dispatch :filters/apply-code-selection)
-  ;; (rf/dispatch :app/navigate)
-  )
+  (rf/dispatch [:app/navigate :ook.route/search]))
 
 (defn filters []
   (let [codes @(rf/subscribe [:results.codes/data])
@@ -38,7 +36,7 @@
                           :value value
                           :checked (-> @(rf/subscribe [:ui.codes/selection]) (get value))
                           :id id
-                          :on-change #(rf/dispatch [:ui.codes/selection-change
+                          :on-change #(rf/dispatch [:ui.codes/toggle-selection
                                                     (-> % .-target .-value)])}]
                         [:label.form-check-label {:for id}
                          [:strong (single-label label)]

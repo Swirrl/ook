@@ -4,9 +4,8 @@
 
 (defn- submit-search [event]
   (.preventDefault event)
-  (let [query @(rf/subscribe [:ui.codes/query])]
-    (rf/dispatch [:codes/submit-search query])
-    (rf/dispatch [:app/navigate :ook.route/search {:q query}])))
+  (rf/dispatch [:ui.codes.selection/reset])
+  (rf/dispatch [:app/navigate :ook.route/search]))
 
 (defn- search-form []
   [:form.d-flex.my-3 {:id "search" :on-submit submit-search}
