@@ -50,9 +50,9 @@
 
 (rf/reg-event-fx
  :codes/submit-search
- (fn [{:keys [db]} [_ query]]
+ (fn [_ [_ query]]
    {:http-xhrio {:method :get
-                 :uri "/search"
+                 :uri "/get-codes"
                  :params {:q query}
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.codes.request/success query]
