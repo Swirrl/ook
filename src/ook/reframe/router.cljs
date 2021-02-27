@@ -32,7 +32,8 @@
 (defn init! []
   (println "Initializing router...")
   (rtfe/start! (rt/router routes
-                          ;; don't use coercion, there's a bug for multiple values
+                          ;; don't use coercion, there's a bug for single-item lists
+                          ;; https://github.com/metosin/reitit/issues/298
                           ;; {:data {:coercion rss/coercion}}
                           )
                handle-navigation

@@ -46,12 +46,12 @@
   [:body.d-flex.flex-column.h-100
    (header)
    [:main.flex-shrink-0.mb-4
-    [:noscript "For full functionality of this site it is necessary to enable JavaScript.
- Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
     [:div.container
      [:h1.my-4 "Structural Search"]
-     [:div {:id "app"}
-      [:p "Loading..."]]]]
+     [:noscript "For full functionality of this site it is necessary to enable JavaScript.
+ Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
+
+     [:div {:id "app"}]]]
    (footer)
    (scripts)])
 
@@ -62,11 +62,3 @@
 
 (defn ->html [contents]
   (-> contents h/html str))
-
-;; #?(:clj (defn main
-;;           ([]
-;;            (main nil))
-;;           ([state]
-;;            [:div (cond-> {:id ":main" :class "OokComponent"}
-;;                    state (merge {:data-ook-init (t/write-string state)}))
-;;             (search/ui (delay state) {})])))
