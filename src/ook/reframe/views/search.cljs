@@ -14,14 +14,23 @@
      :on-change #(rf/dispatch [:ui.codes/query-change (-> % .-target .-value)])}]
    [:button.btn.btn-primary {:type "submit"} "Search"]])
 
-(defn create-filter-card []
+(defn create-filter-card [& children]
   [:div.card
    [:div.card-header
     [:h2.d-inline.h5.me-2 "Create a custom filter"]
     [:span.text-muted "search for a code"]
     (search-form)]
-   (when @(rf/subscribe [:results.codes/data])
+   (when (seq children)
      [:div.card-body
-      "Filters here :)"
-      ;; (filters/filters state props)
-      ])])
+      children])])
+
+(defn home []
+  (create-filter-card))
+
+(defn results []
+  (let [codes @(rf/subscribe [:results.codes/data])]
+    (create-filter-card
+      "codes here..."
+      ;; do something with the codes...
+      )
+    ))

@@ -1,8 +1,6 @@
 (ns ook.ui.layout
   (:require [hiccup2.core :as h]
             [hiccup.util :as h.u]
-            [ook.ui.search :as search]
-            [ook.concerns.transit :as t]
             #?@(:cljs [[reitit.frontend.easy :as rfe]])))
 
 ;; Hiccup2 doesn't include versions of the hiccup.page/html5 macro & doesn't

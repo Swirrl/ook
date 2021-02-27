@@ -5,7 +5,7 @@
             [ook.ui.error-boundary :as err]
             [ook.ui.search :as search]
             [ook.concerns.transit :as t]
-            [ook.concerns.router :as router]
+            ;; [ook.concerns.router :as router]
             [ook.handler :as handler]
 
             ;;
@@ -13,6 +13,7 @@
             [re-frame.core :as rf]
             [reagent.dom :as rdom]
             [ook.reframe.views :as views]
+            [ook.reframe.router :as router]
             ;; these just need to be included somewhere
             [ook.reframe.events]
             [ook.reframe.subs]))
@@ -82,4 +83,5 @@
 
 (defn ^:export init []
   (rf/dispatch-sync [:init/initialize-db])
+  (router/init!)
   (render))

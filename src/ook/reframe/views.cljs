@@ -1,6 +1,8 @@
 (ns ook.reframe.views
   (:require
-   [ook.reframe.views.search :as search]))
+   [re-frame.core :as rf]))
 
 (defn main []
-  (search/create-filter-card))
+  (let [current-route @(rf/subscribe [:app/current-route])]
+    (when current-route
+     [(-> current-route :data :view)])))

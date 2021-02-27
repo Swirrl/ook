@@ -10,8 +10,7 @@
   [["/" {:name :ook.route/home
          :controllers [{:start search/reset-state!}]}]
    ["/search" {:name :ook.route/search
-               :parameters {:query {:q string?
-                                    :code [string?]}}
+               :parameters {:query {:q string? :code [string?]}}
                :controllers [{:start (fn [params]
                                        (let [query (-> params :query :q)
                                              ui (-> @state/components-state :main :ui :codes :query)]
