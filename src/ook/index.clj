@@ -16,6 +16,9 @@
 (defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
   (esi/delete (connect endpoint) index))
 
+(defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
+  (esi/update-settings (connect endpoint) index settings))
+
 (defn each-index [f]
   (let [indicies ["dataset" "component" "code" "observation"]]
     (zipmap (map keyword indicies)
@@ -29,8 +32,21 @@
   (log/info "Deleting indicies")
   (each-index (partial delete-index system)))
 
+(defn bulk-mode [system]
+  (log/info "Configuring indicies for load")
+  (each-index #(update-settings system % {"index.refresh_interval" "-1"
+                                          "index.number_of_replicas" "0"})))
+
+(defn normal-mode [system]
+  (log/info "Configuring indicies for search")
+  (each-index #(update-settings system % {"index.refresh_interval" nil
+                                          "index.number_of_replicas" "1"})))
+
 ;; Loads an index with the configured content
 (defmethod ig/init-key ::data [_ system]
   (delete-indicies system) ;; todo, make this "ensure indicies"
   (create-indicies system)
-  (etl/pipeline system))
+  (bulk-mode system)
+  (let [result (etl/pipeline system)]
+    (normal-mode system)
+    result))
