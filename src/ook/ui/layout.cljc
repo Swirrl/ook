@@ -1,8 +1,6 @@
 (ns ook.ui.layout
   (:require [hiccup2.core :as h]
             [hiccup.util :as h.u]
-            [ook.ui.search :as search]
-            [ook.concerns.transit :as t]
             #?@(:cljs [[reitit.frontend.easy :as rfe]])))
 
 ;; Hiccup2 doesn't include versions of the hiccup.page/html5 macro & doesn't
@@ -36,7 +34,7 @@
        "ONS Trade Search"]]]]])
 
 (defn- footer []
-  [:footer.footer.mt-auto.bg-light.p-3
+  [:footer.footer.bg-light.p-3.mt-auto
    [:div.container "by Swirrl"]])
 
 (defn- scripts []
@@ -44,26 +42,23 @@
    [:script {:src "/assets/js/main.js" :type "text/javascript"}]
    [:script "ook.main.init()"]))
 
-(defn- body [contents]
+(defn- body []
   [:body.d-flex.flex-column.h-100
    (header)
-   [:main.flex-shrink-0
-    [:div.container contents]]
+   [:main.flex-shrink-0.mb-4
+    [:div.container
+     [:h1.my-4 "Structural Search"]
+     [:noscript "For full functionality of this site it is necessary to enable JavaScript.
+ Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
+
+     [:div {:id "app"}]]]
    (footer)
    (scripts)])
 
-(defn- layout [contents]
+(defn main []
   (page
    (head)
-   (body contents)))
+   (body)))
 
-(defn ->html [& contents]
-  (-> contents layout h/html str))
-
-#?(:clj (defn search
-          ([]
-           (search nil))
-          ([state]
-           [:div (cond-> {:id ":search" :class "OokComponent"}
-                   state (merge {:data-ook-init (t/write-string state)}))
-            (search/ui (delay state) {})])))
+(defn ->html [contents]
+  (-> contents h/html str))

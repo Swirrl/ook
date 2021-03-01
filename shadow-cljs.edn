@@ -9,8 +9,7 @@
                   "target/dev/cljs-devcards/public"]}
 
  :builds
- {
-  ;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
+ {;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
   :ook {:target :browser
         :asset-path "/assets/js"
 
@@ -30,10 +29,12 @@
                    ;; serve the public directory over http at port 8700
                    :http-root "target/dev/cljs/public/"
                    :http-port 8700
-                   :preloads [devtools.preload]}
+                   :preloads [devtools.preload
+                              day8.re-frame-10x.preload]}
 
         ;; Cljs is compiled to ES5 by default. However, third-party NPM modules aren't
-        :compiler-options {:force-library-injection ["es6/array/includes" "es6/object/values"]}}
+        :compiler-options {:force-library-injection ["es6/array/includes" "es6/object/values"]
+                           :clojure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
   :cards {:target :browser
           :asset-path "/js"
           :output-dir "target/dev/cljs-devcards/public/js"

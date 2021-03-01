@@ -1,8 +1,16 @@
 {:ook.concerns.reitit/router {:routes
-                              [["/" {:get {:handler #ig/ref :ook.handler/main}}]
-                               ["/search" {:get {:handler #ig/ref :ook.handler/search}}]
+                              [;; permalink-able routes that returning html
+                               ["/" {:get {:handler #ig/ref :ook.handler/main}}]
+                               ["/search" {:get {:handler #ig/ref :ook.handler/main}}]
+
+                               ;; internal API routes
+                               ["/get-codes" {:get {:handler #ig/ref :ook.handler/get-codes}}]
+                               ["/apply-filters" {:get {:handler #ig/ref :ook.handler/apply-filters}}]
+
+                               ;; assets
                                ["/assets/*" #ig/ref :ook.concerns.reitit/resource-handler]]}
 
- :ook.handler/main   {}
- :ook.handler/search {:search/db #ig/ref :ook.search.elastic/db}
- :ook.search.elastic/db {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint}}
+ :ook.handler/main          {}
+ :ook.handler/get-codes     {:search/db #ig/ref :ook.search.elastic/db}
+ :ook.handler/apply-filters {:search/db #ig/ref :ook.search.elastic/db}
+ :ook.search.elastic/db     {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint}}

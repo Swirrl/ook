@@ -6,19 +6,32 @@
             [ook.params.parse :as p]
             [ook.concerns.transit :as t]))
 
-(defmethod ig/init-key :ook.handler/main [_ _]
-  (fn [_request]
-    (resp/response (layout/->html (layout/search)))))
-
 (defn- requesting-transit? [{:keys [headers]}]
   (let [accept (headers "accept")]
     (= "application/transit+json" accept)))
 
-(defmethod ig/init-key :ook.handler/search [_ {:keys [search/db]}]
+;; App entry handler
+
+(defmethod ig/init-key :ook.handler/main [_ _]
+  (fn [_request]
+    (resp/response (layout/->html (layout/main)))))
+
+;;; Internal transit API
+
+(defmethod ig/init-key :ook.handler/get-codes [_ {:keys [search/db]}]
   (fn [request]
     (let [query (or (p/get-query request) "")
-          result (db/get-codes db query)]
+          codes (db/get-codes db query)]
+      (if (requesting-transit? request)
+        (-> (resp/response (t/write-string codes))
+            (resp/header "Content-Type" "application/transit+json"))
+        {:status  406 :headers {} :body "Unsupported content type"}))))
+
+(defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
+  (fn [request]
+    (let [filters (p/parse-filters request)
+          result (db/get-datasets db filters)]
       (if (requesting-transit? request)
         (-> (resp/response (t/write-string result))
             (resp/header "Content-Type" "application/transit+json"))
-        (resp/response (layout/->html (layout/search result)))))))
+        {:status  406 :headers {} :body "Unsupported content type"}))))
