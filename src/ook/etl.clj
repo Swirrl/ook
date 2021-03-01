@@ -9,7 +9,8 @@
    [clojurewerkz.elastisch.rest.bulk :as esb]
    [clojure.data.json :as json]
    [clojure.tools.logging :as log]
-   [clojure.string :as s])
+   [clojure.string :as s]
+   [integrant.core :as ig])
   (:import (java.io ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
@@ -178,3 +179,24 @@
   (code-pipeline system)
   (observation-pipeline system)
   (log/info "All pipelines complete"))
+
+
+(defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
+  (if sparql
+    (let [client (interceptors/accept client "text/csv")
+          results (s/split-lines (slurp (io/reader (query client sparql))))]
+      (rest results))
+    opts))
+
+(comment
+  (require 'ook.concerns.integrant)
+  (def result
+    (ook.concerns.integrant/exec-config
+     {:profiles ["drafter-client.edn"
+                 "cogs-staging.edn"
+                 "elasticsearch-development.edn"
+                 ;;"all-data.edn"
+                 "trade-data.edn"
+                 ]}))
+
+  )
