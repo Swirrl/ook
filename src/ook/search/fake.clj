@@ -7,13 +7,17 @@
 
   (get-codes [_ query]
     (condp = query
-      "" {:result.codes/query ""
-          :result.codes/count 0
-          :result.codes/data []}
-      "test" {:result.codes/query "test"
-              :result.codes/count 1
-              :result.codes/data [{:id "http://test"
-                             :label "This is a test label"}]})))
+      "" []
+      "test" [{:id "http://test" :label "This is a test label"}]))
+
+  (get-datasets [_ filters]
+    (condp = filters
+      nil []
+
+      [{:id "a-code" :scheme "scheme-1"}] "valid response 1"
+
+      [{:id "a-code", :scheme "scheme-1"} {:id "another-code", :scheme "scheme-2"}]
+      "valid response 2")))
 
 (defmethod ig/init-key :ook.search.fake/db [_ _]
   (->FakeSearch))

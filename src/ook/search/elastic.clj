@@ -40,11 +40,12 @@
        (into {})))
 
 (defn- get-dimensions [conn codes]
-  (let [schemes (->> codes (map :scheme) distinct)]
-    (->> (esd/search conn "component" "_doc"
-                     {:query {:terms {:codelist schemes}}})
-         :hits :hits
-         index-by-codelist)))
+  (when (seq codes)
+    (let [schemes (->> codes (map :scheme) distinct)]
+      (->> (esd/search conn "component" "_doc"
+                       {:query {:terms {:codelist schemes}}})
+           :hits :hits
+           index-by-codelist))))
 
 (defn- get-query-terms [codes dimensions]
   (->> codes
@@ -66,7 +67,9 @@
 (defn- es-find-datasets [codes {:keys [elastic/endpoint]}]
   (let [conn (get-connection endpoint)
         dimensions (get-dimensions conn codes)]
-    (get-datasets conn codes dimensions)))
+    (if (seq dimensions)
+      (get-datasets conn codes dimensions)
+      [])))
 
 (defrecord Elasticsearch [opts]
   db/SearchBackend

@@ -1,10 +1,8 @@
 (ns ook.etl-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [ook.index :as idx]
-            [clj-http.client :as client]
             [vcr-clj.clj-http :refer [with-cassette]]
             [ook.etl :as sut]))
 
@@ -38,7 +36,6 @@
       (let [datasets (example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (sut/transform frame datasets)
-            indicies (idx/create-indicies system)
             result (sut/load-documents system "dataset" jsonld)]
         (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))
