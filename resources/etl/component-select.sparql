@@ -1,0 +1,11 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
+
+SELECT DISTINCT ?component WHERE {
+  VALUES ?property { qb:dimension qb:attribute qb:measure }
+
+  ?dataset pmdcat:datasetContents/qb:structure/qb:component ?component_specification .
+  
+  ?component_specification ?property ?component .
+}

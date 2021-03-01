@@ -1,0 +1,3 @@
+{:ook.index/data
+ {:ook.concerns.elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
+  :drafter-client/client #ig/ref :drafter-client/client}}
