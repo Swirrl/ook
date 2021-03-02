@@ -1,0 +1,32 @@
+upstream ook {
+    server 127.0.0.1:3010 fail_timeout=0;
+}
+
+# Sets a $real_scheme variable whose value is the scheme passed by the load
+# balancer in X-Forwarded-Proto (if any), defaulting to $scheme.
+#
+# Similar to how the HttpRealIp module treats X-Forwarded-For.
+map $http_x_forwarded_proto $real_scheme {
+  default $http_x_forwarded_proto;
+  ''      $scheme;
+}
+
+server {
+  listen 80;
+  server_name {{ook/domain}};
+
+  ## Optionally set a site-wide password
+  ## sudo htpasswd -c /etc/nginx/.htpasswd guest
+  # auth_basic "Restricted";
+  # auth_basic_user_file /etc/nginx/.htpasswd;
+
+  location / {
+    proxy_pass http://ook;
+    proxy_redirect off;
+    proxy_read_timeout 60s;
+    proxy_set_header            Host $host;
+    proxy_set_header            X-Real-IP $remote_addr;
+    proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header            X-Forwarded-Proto $real_scheme;
+  }
+}

@@ -1,0 +1,10 @@
+#! /bin/bash
+
+cd {{omni/install-dir}}
+
+java -Dhttp.maxConnections=70 \
+     -Dlog4j.configurationFile={{omni/install-dir}}/log4j2.xml \
+     -Dcom.sun.management.jmxremote.ssl=false \
+     -Dcom.sun.management.jmxremote.authenticate=false \
+     -Dcom.sun.management.jmxremote.port={{ook/jmx-port}} \
+     -cp {{ook/project-jar}}:lib/* -Xmx3g clojure.main -m ook.main

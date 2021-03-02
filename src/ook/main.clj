@@ -33,7 +33,7 @@
       ig/init))
 
 (defn -main [& args]
-  (let [profiles (if-let [supplied-profile(first args)]
+  (let [profiles (if-let [supplied-profile (first args)]
                    (conj core-profiles supplied-profile)
                    core-profiles)]
     (println "Starting profiles " profiles)
