@@ -1,0 +1,3 @@
+{:ook/install-dir "/opt/muttnik"
+ :ook/http-port 3010
+ :ook/logs-dir #path "/var/lib/ook/logs"}

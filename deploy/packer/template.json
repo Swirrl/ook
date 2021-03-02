@@ -1,0 +1,58 @@
+{
+  "variables": {
+    "gcloud_project": "",
+    "base_image_name": "",
+    "template_name": "",
+    "deploy_s3_access_key": "",
+    "deploy_s3_secret_key": "",
+    "gcloud_account_file": "",
+    "kms_location": "",
+    "kms_keyring": "",
+    "kms_key": ""
+  },
+  "sensitive-variables": ["deploy_s3_secret_key"],
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "{{user `gcloud_account_file`}}",
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/compute",
+        "https://www.googleapis.com/auth/devstorage.full_control",
+        "https://www.googleapis.com/auth/cloud-platform"
+      ],
+      "project_id": "{{user `gcloud_project`}}",
+      "source_image": "{{user `base_image_name`}}",
+      "image_name": "{{user `template_name`}}-{{timestamp}}",
+      "zone": "europe-west1-b",
+      "ssh_username": "packer"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "../server",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "./template/fetch-omni.sh",
+        "./template/install-dependencies.sh"
+      ],
+      "environment_vars": ["FILES_DIR=/tmp/server/files/",
+        "BOOTSTRAP_DIR=/tmp/server/",
+        "OMNI_JAR=/tmp/server/omni.jar",
+        "TEMPLATE_NAME={{user `template_name`}}",
+        "DEPLOY_S3_SECRET_ACCESS_KEY={{user `deploy_s3_secret_key`}}",
+        "DEPLOY_S3_ACCESS_KEY_ID={{user `deploy_s3_access_key`}}",
+        "KMS_KEYRING={{user `kms_keyring`}}",
+        "KMS_LOCATION={{user `kms_location`}}",
+        "KMS_KEY={{user `kms_key`}}",
+        "GCLOUD_PROJECT={{user `gcloud_project`}}",
+        "OOK_PACKAGE_NAME={{user `ook_package_name`}}",
+        "OOK_PACKAGE_VERSION={{user `ook_package_version`}}"
+      ]
+    }
+  ]
+}
