@@ -122,11 +122,11 @@
 (def batch-size 10000)
 
 (defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
-  (log/info "Loading documents into " index " index")
+  (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
         docs (map add-id (get jsonld "@graph"))
         batches (partition-all batch-size docs)]
-    (for [batch batches]
+    (doseq [batch batches]
       (esb/bulk-with-index conn index (esb/bulk-index batch)))))
 
 
