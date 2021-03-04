@@ -3,8 +3,8 @@
 # Check https://circleci.com/docs/2.0/language-clojure/ for more details
 #
 version: 2.1
-jobs:
-  build:
+executors:
+  main:
     docker:
       - image: circleci/clojure:openjdk-11-tools-deps
       - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
@@ -17,6 +17,9 @@ jobs:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
 
+jobs:
+  build:
+    executor: main
     steps:
       - checkout
 
