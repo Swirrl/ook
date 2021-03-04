@@ -17,18 +17,41 @@ executors:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
 
-jobs:
-  build:
-    executor: main
+commands:
+  restore_caches:
     steps:
-      - checkout
-
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      - restore_cache:
+          keys:
+            - v1-yarn-deps-{{ checksum "yarn.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-yarn-deps-
+
+  save_caches:
+    steps:
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/repo/.cpcache
+            - ~/.gitlibs
+          key: v1-dependencies-{{ checksum "deps.edn" }}
+
+      - save_cache:
+          paths:
+            - ~/repo/node_modules
+          key: v1-yarn-deps-{{ checksum "yarn.lock" }}
+
+jobs:
+  build:
+    executor: main
+    steps:
+      - checkout
+      - restore_caches
       - add_ssh_keys:
           fingerprints:
             - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
@@ -39,12 +62,7 @@ jobs:
             cp .circleci/settings.xml ~/.m2
             clojure -R:dev -e "(println \"Fetched deps\")"
 
-      - save_cache:
-          paths:
-            - ~/.m2
-            - ~/.gitlibs
-          key: v1-dependencies-{{ checksum "deps.edn" }}
-
+      - save_caches
       - run:
           name: Run tests
           command: clojure -M:ci:dev:test
