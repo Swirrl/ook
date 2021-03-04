@@ -22,9 +22,9 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "deps.edn" }}
+            - v1-clojure-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v1-clojure-dependencies-
 
       - restore_cache:
           keys:
@@ -44,7 +44,8 @@ commands:
           name: Fetch clojure deps
           command: |
             cp .circleci/settings.xml ~/.m2
-            clojure -R:dev -e "(println \"Fetched deps\")"
+            # force tools.deps to resolve with `-Sthreads 1` to avoid parallel resolution bug
+            clojure -Sthreads 1 -A:dev -e "(println \"Fetched deps\")"
 
       - run:
           name: Fetch yarn dependencies
@@ -57,7 +58,7 @@ commands:
             - ~/.m2
             - ~/repo/.cpcache
             - ~/.gitlibs
-          key: v1-dependencies-{{ checksum "deps.edn" }}
+          key: v1-clojure-dependencies-{{ checksum "deps.edn" }}
 
       - save_cache:
           paths:
@@ -102,6 +103,6 @@ workflows:
             branches:
               only:
                 - main
-                - km/package-and-deploy
+                # - km/package-and-deploy
           requires:
             - run_tests
