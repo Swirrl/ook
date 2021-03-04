@@ -1,8 +1,4 @@
-{:ook.index/data
- {:ook.concerns.elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
-  :drafter-client/client #ig/ref :drafter-client/client
-  :ook.etl/target-datasets
-  ["http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-production-catalog-entry"
-   "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
-   "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-clearances-catalog-entry"]
-  }}
+{:ook.etl/target-datasets
+ ["http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-production-catalog-entry"
+  "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
+  "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-clearances-catalog-entry"]}
