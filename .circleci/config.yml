@@ -32,6 +32,12 @@ commands:
             # fallback to using the latest cache if no exact match is found
             - v1-yarn-deps-
 
+  setup_ssh:
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
+
   save_caches:
     steps:
       - save_cache:
@@ -47,14 +53,12 @@ commands:
           key: v1-yarn-deps-{{ checksum "yarn.lock" }}
 
 jobs:
-  build:
+  run_tests:
     executor: main
     steps:
       - checkout
       - restore_caches
-      - add_ssh_keys:
-          fingerprints:
-            - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
+      - setup_ssh
 
       - run:
           name: Fetch deps
@@ -66,3 +70,10 @@ jobs:
       - run:
           name: Run tests
           command: clojure -M:ci:dev:test
+  # build_and_publish:
+
+workflows:
+  version: 2.1
+  test_build_publish:
+    jobs:
+      - run_tests
