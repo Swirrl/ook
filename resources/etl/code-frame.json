@@ -15,7 +15,7 @@
     "scheme": {"@id": "skos:inScheme", "@type": "@id"},
     "notation": {"@id": "skos:notation" },
     "broader": {"@id": "skos:broader", "@type": "@id"},
-    "priority": {"@id": "http://www.w3.org/ns/ui#sortPriority"}
+    "priority": {"@id": "http://www.w3.org/ns/ui#sortPriority", "@type": "http://www.w3.org/2001/XMLSchema#integer" }
   },
   "label": {},
   "@type": {},
