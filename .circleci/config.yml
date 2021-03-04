@@ -38,6 +38,18 @@ commands:
           fingerprints:
             - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
 
+  fetch_deps:
+    steps:
+      - run:
+          name: Fetch clojure deps
+          command: |
+            cp .circleci/settings.xml ~/.m2
+            clojure -R:dev -e "(println \"Fetched deps\")"
+
+      - run:
+          name: Fetch yarn dependencies
+          command: yarn install
+
   save_caches:
     steps:
       - save_cache:
@@ -59,21 +71,37 @@ jobs:
       - checkout
       - restore_caches
       - setup_ssh
-
-      - run:
-          name: Fetch deps
-          command: |
-            cp .circleci/settings.xml ~/.m2
-            clojure -R:dev -e "(println \"Fetched deps\")"
-
+      - fetch_deps
       - save_caches
       - run:
           name: Run tests
           command: clojure -M:ci:dev:test
-  # build_and_publish:
+
+  build_and_publish:
+    executor: main
+    steps:
+      - checkout
+      - restore_caches
+      - setup_ssh
+      - fetch_deps
+      - run: source ./.circleci/set_environment.sh
+      - run:
+          name: Build omni package
+          command: cd ~/repo && ./bin/package
+      - run:
+          name: Publish omni package
+          command: cd ~/repo && ./bin/publish-package
 
 workflows:
   version: 2.1
   test_build_publish:
     jobs:
       - run_tests
+      - build_and_publish:
+          filters:
+            branches:
+              only:
+                - main
+                - km/package_and_deploy
+          requires:
+            - run_tests
