@@ -10,7 +10,7 @@ sudo apt-get upgrade -yy -q
 
 sleep 10
 
-sudo apt-get install -yy -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget bsdtar python-pip openjdk-8-jdk htop rpl
+sudo apt-get install -yy -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget bsdtar python-pip openjdk-11-jdk htop rpl
 
 # timezone and ntp
 sudo timedatectl set-timezone UTC

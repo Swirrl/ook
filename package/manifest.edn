@@ -2,6 +2,7 @@
  :omni/package-name "ook"
  :omni/package-version #join [#env BRANCH_ESCAPED "-" #env BUILD_NUMBER]
  :omni/dependencies {}
+ :omni/defs {:zip-name "ook.zip"}
 
  :omni/keys {:ook/project-jar {:doc "Name of the project jar"
                                :default "ook.jar"}
@@ -26,7 +27,12 @@
 
  :omni/metadata {:omni/repository-uri "https://github.com/swirrl/ook"}
 
- :omni/facets {:install [{:type :selmer/template
+ :omni/facets {:install [{:type :zip
+                          :path #ref [:omni/defs :zip-name]
+                          :dest-path #ref [:omni/defs :zip-name]
+                          :extract-dir "."}
+
+                         {:type :selmer/template
                           :path "ook-start.sh.template"
                           :dest-path "ook-start.sh"
                           :mode "755"}

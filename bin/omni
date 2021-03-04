@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# If you want to update the OMNI version change this SHA
+OMNI_SHA=d3a621e2784f9f0a4843dbeecee8af4f88cbfa86
+
+OMNI_DEPS="{:deps,{swirrl/omni,{:git/url,\"git@github.com:Swirrl/omni.git\",:sha,\"$OMNI_SHA\"}}}"
+
+clojure -Srepro -Sdeps $OMNI_DEPS -M -m omni.main "$@"

@@ -74,4 +74,14 @@
             :exec-args {:profiles ["drafter-client.edn"
                                    "cogs-staging.edn"
                                    "elasticsearch-development.edn"
-                                   "fixture-data.edn"]}}}}
+                                   "fixture-data.edn"]}}
+
+           :prod {:extra-paths ["env/prod/resources"
+                                "target/prod/cljs"]}
+
+           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+           ;; Tooling
+           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+           :pack {:extra-deps {pack/pack.alpha {:git/url "https://github.com/juxt/pack.alpha.git"
+                                                :sha "0e8731e0f24db05b74769e219051b0e92b50624a"}}}}}
