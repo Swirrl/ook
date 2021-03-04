@@ -22,9 +22,9 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-clojure-dependencies-{{ checksum "deps.edn" }}
+            - v1-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-clojure-dependencies-
+            - v1-dependencies-
 
       - restore_cache:
           keys:
@@ -58,7 +58,7 @@ commands:
             - ~/.m2
             - ~/repo/.cpcache
             - ~/.gitlibs
-          key: v1-clojure-dependencies-{{ checksum "deps.edn" }}
+          key: v1-dependencies-{{ checksum "deps.edn" }}
 
       - save_cache:
           paths:
@@ -70,6 +70,7 @@ jobs:
     executor: main
     steps:
       - checkout
+      - run: sudo .circleci/install_base.sh
       - restore_caches
       - setup_ssh
       - fetch_deps
@@ -82,16 +83,22 @@ jobs:
     executor: main
     steps:
       - checkout
+      - run: sudo .circleci/install_base.sh
       - restore_caches
       - setup_ssh
       - fetch_deps
-      - run: source ./.circleci/set_environment.sh
       - run:
           name: Build omni package
-          command: cd ~/repo && ./bin/package
+          command: |
+            cd ~/repo
+            source .circleci/set_environment.sh
+            ./bin/package
       - run:
           name: Publish omni package
-          command: cd ~/repo && ./bin/publish-package
+          command: |
+            cd ~/repo
+            source .circleci/set_environment.sh
+            ./bin/publish-package
 
 workflows:
   version: 2.1
@@ -103,6 +110,6 @@ workflows:
             branches:
               only:
                 - main
-                # - km/package-and-deploy
+                - km/package-and-deploy
           requires:
             - run_tests
