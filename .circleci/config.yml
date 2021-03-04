@@ -3,8 +3,8 @@
 # Check https://circleci.com/docs/2.0/language-clojure/ for more details
 #
 version: 2.1
-executors:
-  main:
+jobs:
+  build:
     docker:
       - image: circleci/clojure:openjdk-11-tools-deps
       - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
@@ -17,92 +17,31 @@ executors:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
 
-commands:
-  resolve_deps:
     steps:
-      - run:
-          name: Fetch deps
-          command: |
-            cp .circleci/settings.xml ~/.m2
-            clojure -A:dev -e "(println \"Fetched deps\")"
-
-      - run:
-          name: Fetch yarn dependencides
-          command: yarn install
-
-  restore_caches:
-    steps:
-      - restore_cache:
-          keys:
-            - v1-clj-deps-{{ checksum "deps.edn" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-clj-deps-
+      - checkout
 
       - restore_cache:
           keys:
-            - v1-yarn-deps-{{ checksum "yarn.lock" }}
+            - v1-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-yarn-deps-
+            - v1-dependencies-
 
-  save_caches:
-    steps:
-      - save_cache:
-          paths:
-            - ~/.m2
-            - ~/repo/.cpcache
-            - ~/.gitlibs
-          key: v1-clj-deps-{{ checksum "deps.edn" }}
-
-      - save_cache:
-          paths:
-            - ~/repo/node_modules
-          key: v1-yarn-deps-{{ checksum "yarn.lock" }}
-
-  setup_ssh:
-    steps:
       - add_ssh_keys:
           fingerprints:
             - "9b:3c:90:2a:d7:c1:76:ed:23:c8:83:b6:8b:cc:e3:18"
 
-jobs:
-  run_tests:
-    executor: main
-    steps:
-      - checkout
-      - restore_caches
-      - setup_ssh
-      - resolve_deps
+      - run:
+          name: Fetch deps
+          command: |
+            cp .circleci/settings.xml ~/.m2
+            clojure -R:dev -e "(println \"Fetched deps\")"
 
-      - save_caches
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/.gitlibs
+          key: v1-dependencies-{{ checksum "deps.edn" }}
+
       - run:
           name: Run tests
           command: clojure -M:ci:dev:test
-
-  build_and_publish:
-    executor: main
-    steps:
-      - checkout
-      - restore_caches
-      - setup_ssh
-      - resolve_deps
-      - run: source ./.circleci/set_environment.sh
-      - run:
-          name: Build omni package
-          command: cd ~/repo && ./bin/package
-      - run:
-          name: Publish omni package
-          command: cd ~/repo && ./bin/publish-package
-
-workflows:
-  version: 2.1
-  test_build_publish:
-    jobs:
-      - run_tests
-      - build_and_publish:
-          filters:
-            branches:
-              only:
-                - main
-                - km/package-and-deploy
-          requires:
-            - run_tests
