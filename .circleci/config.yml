@@ -6,7 +6,7 @@ version: 2.1
 executors:
   main:
     docker:
-      - image: circleci/clojure:openjdk-11-tools-deps
+      - image: circleci/clojure:openjdk-11-tools-deps-node
       - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
         environment:
           discovery.type: single-node
