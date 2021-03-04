@@ -102,6 +102,6 @@ workflows:
             branches:
               only:
                 - main
-                - km/package_and_deploy
+                - km/package-and-deploy
           requires:
             - run_tests
