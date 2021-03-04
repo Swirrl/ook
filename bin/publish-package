@@ -1,0 +1,32 @@
+#! /bin/bash
+
+set -o errexit
+
+if [[ -z "${BRANCH_ESCAPED}" ]]; then
+    echo ERROR: You must run with the BRANCH_ESCAPED env var set
+    exit -1
+fi
+
+if [[ -z "${BUILD_NUMBER}" ]]; then
+    echo ERROR: You must run with the BUILD_NUMBER env var set
+    exit -1
+fi
+
+
+echo "Publishing packages for ook"
+
+echo "branch: $BRANCH_ESCAPED"
+echo "build : $BUILD_NUMBER"
+
+
+cd `dirname $0`
+cd ..
+PROJECT_ROOT=`pwd`
+
+
+PACKAGING_BASE_DIR=$PROJECT_ROOT/target/packaging
+OMNI_PACKAGES_DIR=$PACKAGING_BASE_DIR/omni-packages
+
+ZIPPED_PACKAGE=$OMNI_PACKAGES_DIR/ook-$PROJ-$BRANCH_ESCAPED-$BUILD_NUMBER.zip
+echo $PROJ: Publishing zipped omni package $ZIPPED_PACKAGE
+./bin/omni publish -f $ZIPPED_PACKAGE

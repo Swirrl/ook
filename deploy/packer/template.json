@@ -6,6 +6,8 @@
     "deploy_s3_access_key": "",
     "deploy_s3_secret_key": "",
     "gcloud_account_file": "",
+    "ook_package_name": "",
+    "ook_package_version": "",
     "kms_location": "",
     "kms_keyring": "",
     "kms_key": ""
