@@ -9,8 +9,8 @@
       "type": "googlecompute",
       "account_file": "{{user `gcloud_account_file`}}",
       "project_id": "{{user `gcloud_project`}}",
-      "source_image": "ubuntu-1804-bionic-v20191021",
-      "image_name": "{{user `output_image_name`}}",
+      "source_image": "ubuntu-1804-bionic-v20210224",
+      "image_name": "{{user `output_image_name`}}-{{timestamp}}",
       "zone": "europe-west1-b",
       "ssh_username": "packer"
     }

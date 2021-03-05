@@ -4,26 +4,34 @@ set -e #exit on error
 
 echo '>> INSTALL PACKAGES'
 
-# install basics
-sudo apt-get update -yy -q
-sudo apt-get upgrade -yy -q
+# # install basics
+sudo apt-get update -y -q
+sudo apt-get upgrade -y -q
 
-sleep 10
-
-sudo apt-get install -yy -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget bsdtar python-pip openjdk-11-jdk htop rpl
+sudo apt-get install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
 
 # timezone and ntp
 sudo timedatectl set-timezone UTC
 sudo timedatectl set-ntp on
 
-echo '>>> AWS CLI'
-cd /opt
-sudo curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-sudo unzip awscli-bundle.zip
-sudo ./awscli-bundle/install -i /opt/aws
-sudo rm awscli-bundle.zip
-sudo rm -r awscli-bundle
-
 # so datadog can read it, if we need it to.
 echo '>>> nginx log file perms'
 sudo chmod 644 /var/log/nginx/*.log
+
+
+
+
+echo '>>> install elasticsearch'
+# install opendistro elasticsearch, following instructions from here
+# https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
+
+wget -qO - https://d3g5vo6xdbdb9a.cloudfront.net/GPG-KEY-opendistroforelasticsearch | sudo apt-key add -
+
+echo "deb https://d3g5vo6xdbdb9a.cloudfront.net/apt stable main" | sudo tee -a   /etc/apt/sources.list.d/opendistroforelasticsearch.list
+
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
+
+sudo dpkg -i elasticsearch-oss-7.10.2-amd64.deb
+
+sudo apt-get update -y -q
+sudo apt install opendistroforelasticsearch -y -q

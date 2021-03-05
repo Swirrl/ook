@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # If you want to update the OMNI version change this SHA
-OMNI_SHA=d3a621e2784f9f0a4843dbeecee8af4f88cbfa86
+OMNI_SHA=7fec1dab0929b4f284c11156a9794fb5d5600a3a
 
 OMNI_DEPS="{:deps,{swirrl/omni,{:git/url,\"git@github.com:Swirrl/omni.git\",:sha,\"$OMNI_SHA\"}}}"
 

@@ -8,17 +8,11 @@ export KMS_LOCATION
 export KMS_KEYRING
 export KMS_KEY
 
-echo '>>> making dirs'
-sudo mkdir -p /opt/elasticsearch
-sudo mkdir -p /opt/ook
-
-echo ">>> Adding users user..."
-sudo adduser --system --home=/opt/elasticsearch elasticsearch
+echo ">>> adding user"
 sudo adduser --system --home=/opt/ook ook
 
-echo ">>> installing server and dependencies"
-sudo -E java -jar $OMNI_JAR install $OOK_PACKAGE_NAME -p $TEMPLATE_NAME -c $BOOTSTRAP_DIR/config/config.edn --environment prod --transitive
-
 echo '>>> setting ownership'
-sudo chown -R elasticsearch /opt/elasticsearch/
 sudo chown -R ook /opt/ook/
+
+echo ">>> installing server"
+sudo -E java -jar $OMNI_JAR install $OOK_PACKAGE_NAME -c $BOOTSTRAP_DIR/config/config.edn --environment prod --transitive
