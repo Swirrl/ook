@@ -206,7 +206,7 @@
      {:profiles ["drafter-client.edn"
                  "cogs-staging.edn"
                  "elasticsearch-development.edn"
-                 ;;"all-data.edn"
+                 "load-data.edn"
                  "trade-data.edn"
                  ]}))
 
