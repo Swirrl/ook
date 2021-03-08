@@ -1,0 +1,116 @@
+- name: Create OOK Host
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    project: "{{ settings[profile].project | default('swirrl-staging-servers') }}"
+    auth_kind: serviceaccount
+    scopes:
+      - https://www.googleapis.com/auth/compute
+    zone: "{{ settings[profile].zone }}"
+    source_image: "{{ settings[profile].source_image }}"
+    temporary: False
+
+  vars_files:
+    - profile_settings.yml
+
+  tasks:
+    - set_fact:
+        server_name: "instance-{{ 9999999999999999999999 | random | to_uuid }}"
+      run_once: yes
+      when: server_name is undefined
+    - name: create boot disk
+      gcp_compute_disk:
+        name: "boot-disk-{{ server_name }}"
+        size_gb: "{{ settings[profile].boot_disk_size }}"
+        source_image: "https://www.googleapis.com/compute/v1/projects/swirrl-staging-servers/global/images/{{source_image}}"
+        type: pd-ssd
+        zone: "{{ zone }}"
+        project: "{{ project }}"
+        auth_kind: "{{ auth_kind }}"
+        service_account_file: "{{ service_account_file }}"
+        scopes:
+          - https://www.googleapis.com/auth/compute
+        state: present
+      register: boot_disk
+    - name: create elasticsearch data disk
+      gcp_compute_disk:
+        name: "elasticsearch-{{server_name}}"
+        size_gb: "{{ settings[profile].elasticsearch_disk_size }}"
+        zone: "{{ zone }}"
+        type: pd-ssd
+        project: "{{ project }}"
+        auth_kind: "{{ auth_kind }}"
+        service_account_file: "{{ service_account_file }}"
+        scopes:
+          - https://www.googleapis.com/auth/compute
+        state: present
+      register: elasticsearch_disk
+    - name: create instance
+      gcp_compute_instance:
+        state: present
+        name: "{{server_name}}"
+        machine_type: "custom-{{settings[profile].cpus}}-{{settings[profile].memory * 1024}}"
+        tags:
+          items:
+            - http-server
+            - https-server
+        disks:
+          - auto_delete: "{{temporary}}"
+            boot: true
+            source: "{{ boot_disk }}"
+          - auto_delete: "{{temporary}}"
+            boot: false
+            source: "{{ elasticsearch_disk }}"
+            device_name: "elasticsearch_data"
+        network_interfaces:
+          - access_configs:
+              - name: "External NAT"
+                type: 'ONE_TO_ONE_NAT'
+        zone: "{{ zone }}"
+        project: "{{ project }}"
+        auth_kind: "{{ auth_kind }}"
+        service_account_file: "{{ service_account_file }}"
+        scopes:
+          - https://www.googleapis.com/auth/compute
+      register: instance
+
+    - debug:
+        msg: Created {{instance.name}}
+
+    # Note: ideally this would be in the datadog role but storing the GPC instance data with the provisioning host is a pain
+    - name: Add datadog label
+      gce_labels:
+        project_id: "{{project}}"
+        credentials_file: "{{ service_account_file }}"
+        labels:
+          datadog: monitor
+        resource_type: instances
+        resource_name: "{{instance.name}}"
+        resource_location: "{{zone}}"
+        state: present
+      when: settings[profile].install_datadog | default(False)
+
+    - name: Wait for SSH to come up
+      wait_for: host={{ instance.networkInterfaces[0].accessConfigs[0].natIP }} port=22 delay=10 timeout=60
+
+    - name: Add host to groupname
+      add_host: hostname={{ instance.networkInterfaces[0].accessConfigs[0].natIP }} groupname=new_instances
+
+- name: Provision instance
+  hosts: new_instances
+  connection: ssh
+  become: yes
+  become_method: sudo
+  vars_files:
+    - profile_settings.yml
+  tasks:
+    - name: Format volumes
+      script: ./scripts/volumes.sh
+    - name: Configure services
+      script: ./scripts/install.sh
+    - name: Install swap
+      script: ./scripts/swap.sh
+    - include_role:
+        name: datadog
+      when: settings[profile].install_datadog | default(False)

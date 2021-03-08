@@ -84,3 +84,26 @@ packer build \
   template.json
 ```
 ```
+
+## 2. Deploying a server with ansible
+
+```#
+cd ansible
+
+env ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook server.yml \
+  --extra-vars "profile=<profile> \
+                service_account_file=/path/to/gcloud-account-file \
+                source_image=<source-image> \
+                server_name=<server-name>"
+```
+
+e.g
+```#
+cd ansible
+
+env ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook server.yml \
+  --extra-vars "profile=ook_staging \
+                service_account_file=/Users/kmclean/code/swirrl/swirrl-staging-servers-db87289685aa.json \
+                source_image=ook-staging-1614974526  \
+                server_name=ook-staging-1599210947"
+```
