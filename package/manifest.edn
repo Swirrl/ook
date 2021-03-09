@@ -21,9 +21,9 @@
                              :env-var PORT
                              :default 3010}
 
-             :ook/log-file-name {:doc "Location of the ook log file"
-                                 :default "logs/ook.log"
-                                 :optional false}}
+             :ook/logs-dir {:doc "Location of the ook logs"
+                            :default "/var/log/ook"
+                            :optional false}}
 
  :omni/metadata {:omni/repository-uri "https://github.com/swirrl/ook"}
 
