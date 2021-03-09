@@ -4,10 +4,8 @@ echo '>> VOLUMES'
 
 echo '>>> making dirs'
 sudo mkdir -p /var/lib/elasticsearch
-sudo chown elasticsearch:elasticsearch /var/lib/elasticsearch
 
 echo '>>> formatting volumes, if required...'
-
 if sudo file -sL /dev/disk/by-id/google-elasticsearch_data | grep ext4
 then
   echo ">>>> WARNING: elasticsearch disk already formatted ext4. Not formatting."
@@ -21,3 +19,6 @@ echo "/dev/disk/by-id/google-elasticsearch_data      /var/lib/elasticsearch     
 
 echo '>>>> running mount'
 sudo mount -a
+
+echo '>>>> giving ES ownership of /var/lib/elasticsearch'
+sudo chown elasticsearch:elasticsearch /var/lib/elasticsearch
