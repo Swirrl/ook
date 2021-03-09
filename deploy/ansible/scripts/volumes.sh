@@ -4,6 +4,7 @@ echo '>> VOLUMES'
 
 echo '>>> making dirs'
 sudo mkdir -p /var/lib/elasticsearch
+sudo chown elasticsearch:elasticsearch /var/lib/elasticsearch
 
 echo '>>> formatting volumes, if required...'
 
