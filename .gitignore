@@ -15,3 +15,5 @@ node_modules
 logs/*
 resources/secrets/*.gpg
 resources/elasticsearch/backup
+deploy/secret.env.gpg
+deploy/secret.env
