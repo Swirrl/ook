@@ -1,4 +1,4 @@
 {:ook/install-dir "/opt/ook"
  :ook/package-version #env OOK_PACKAGE_VERSION
  :ook/http-port 3010
- :ook/logs-dir #path "/var/lib/ook/logs"}
+ :ook/logs-dir #path "/var/log/ook"}
