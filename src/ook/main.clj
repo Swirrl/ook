@@ -26,7 +26,7 @@
     (log/info "Config prepped for profiles " profiles)
     system))
 
-(def core-profiles (map io/resource ["base.edn" "app.edn"]))
+(def core-profiles (map io/resource ["base.edn" "app.edn" ]))
 
 (defn exec-config [opts]
   (-> (prep-config opts)
