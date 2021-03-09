@@ -48,7 +48,10 @@
                                   'resource io/resource}})))
 
 (defn config [profiles]
-  (apply mm/meta-merge (map load-config profiles)))
+  (->> profiles
+       (remove nil?)
+       (map load-config)
+       (apply mm/meta-merge)))
 
 (defn exec-config [{:keys [profiles] :as opts}]
   (ig/init (doto (config profiles) (ig/load-namespaces))))
