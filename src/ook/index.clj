@@ -10,8 +10,9 @@
 (defn connect [endpoint]
   (es/connect endpoint {:content-type :json}))
 
+
 (defn create-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-  (esi/create (connect endpoint) index (-> mapping-file io/reader json/read)))
+  (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")}))
 
 (defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
   (esi/delete (connect endpoint) index))
@@ -19,10 +20,15 @@
 (defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
   (esi/update-settings (connect endpoint) index settings))
 
+(defn get-mapping [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
+  (esi/get-mapping (connect endpoint) index))
+
+
 (defn each-index [f]
   (let [indicies ["dataset" "component" "code" "observation"]]
     (zipmap (map keyword indicies)
             (map f indicies))))
+
 
 (defn create-indicies [system]
   (log/info "Creating indicies")
@@ -31,6 +37,7 @@
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
   (each-index (partial delete-index system)))
+
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")

@@ -1,7 +1,7 @@
 {
     "mappings": {
         "properties": {
-            "@type": { "type": "constant_keyword", "value": "qb:Observation" }
+            "@type": { "type": "keyword" }
         },
         "dynamic_templates": [
             {

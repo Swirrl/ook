@@ -121,6 +121,13 @@
 
 (def batch-size 10000)
 
+(defn- first-error [result]
+  (->> result
+       :items
+       (map (comp :error :index))
+       (remove nil?)
+       first))
+
 (defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
@@ -128,7 +135,10 @@
         batches (partition-all batch-size docs)]
     (doall
      (for [batch batches]
-       (esb/bulk-with-index conn index (esb/bulk-index batch))))))
+       (let [result (esb/bulk-with-index conn index (esb/bulk-index batch))]
+         (if (:errors result)
+           (throw (ex-info "Error loading documents" (first-error result))))
+         result)))))
 
 
 ;; Pipeline
@@ -196,7 +206,7 @@
      {:profiles ["drafter-client.edn"
                  "cogs-staging.edn"
                  "elasticsearch-development.edn"
-                 ;;"all-data.edn"
+                 "load-data.edn"
                  "trade-data.edn"
                  ]}))
 
