@@ -26,8 +26,7 @@
                             :optional false}
 
              :ook/domain {:doc "Domain hosting ook"
-                          :env-var HOSTNAME
-                          :default "search.gss-data.org.uk"
+                          :default "_"
                           :optional false}}
 
  :omni/metadata {:omni/repository-uri "https://github.com/swirrl/ook"}
