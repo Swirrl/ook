@@ -38,9 +38,11 @@ An example for encrypting secrets and loading them automatically with [direnv](h
 
 ## 1. Building the images with packer
 
-### 1.1 Base image
+The production server will be provisioning from a disk image built by packer.
 
-This is only necessary if we want to change anything in the base image.
+### 1.1 Build a base image
+
+The base image include the OS and ES and shouldn't change often.
 
 ```#
 cd packer
@@ -59,9 +61,17 @@ packer build -var gcloud_project=swirrl-staging-servers \
   base.json
 ```
 
-### 1.2 Build project-specific image with packer
+You might like to update the base image name in [pack_image.sh](./pack-image.sh) (for the ook-specific image in the next step) if you change it.
 
-This includes a specific version of ook.
+
+### 1.2 Build an ook image
+
+This extends the base image with a specific version of ook.
+
+There's a script to automate this in [pack_image.sh](./pack-image.sh).
+You'll need to provide an omni package version (e.g. from CI, see example below).
+
+The remainder of this section explains the packer command.
 
 ```#
 cd packer
@@ -95,7 +105,17 @@ packer build \
   template.json
 ```
 
+Note the image name (used in the next step).
+
 ## 2. Deploying a server with ansible
+
+We use ansible to provision the server.
+
+There's a script to automate this in [deploy_image.sh](./deploy-image.sh).
+You'll need to provide an image name (from the last step).
+You can keep the default server name (unique by datetime).
+
+The remainder of this section explains the ansible command.
 
 ```#
 cd ansible
