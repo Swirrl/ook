@@ -21,7 +21,7 @@ sudo ln -s /etc/systemd/system/ook.service /etc/systemd/system/multi-user.target
 echo '>>> starting ook service'
 sudo systemctl start ook
 
-wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 localhost:3010 2>&1 > /dev/null | uniq
+wget -nv -O - --retry-connrefused --tries 60 --waitretry=2 localhost:3010 2>&1 > /dev/null | uniq
 
 echo '>>> NGINX'
 
