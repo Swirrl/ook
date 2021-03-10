@@ -4,11 +4,12 @@ set -e #exit on error
 
 echo '>> INSTALL PACKAGES'
 
-# # install basics
-sudo apt-get update -y -q
-sudo apt-get upgrade -y -q
+# install basics
 
-sudo apt-get install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
+sudo apt update -y -q
+sudo apt upgrade -y -q
+
+sudo apt install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
 
 # timezone and ntp
 sudo timedatectl set-timezone UTC
