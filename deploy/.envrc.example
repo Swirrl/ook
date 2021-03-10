@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# An example .env file for setting environment variables with https://direnv.net/
+#
+# Create a secret.env file that exports env-vars, e.g:
+#
+#     echo "export PASSWORD=opensesame" > secret.env
+#
+# Encrypt it:
+#
+#     gpg -e -r YOUR_PGP_ID secret.env
+#
+# This creates secret.env.gpg. You can then delete the plain text original:
+#
+#     rm secret.env
+
+$(gpg --decrypt secret.env.gpg)

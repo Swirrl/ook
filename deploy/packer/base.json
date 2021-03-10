@@ -1,0 +1,40 @@
+{
+  "variables": {
+    "gcloud_project": "",
+    "gcloud_account_file": "",
+    "output_image_name": ""
+  },
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "{{user `gcloud_account_file`}}",
+      "project_id": "{{user `gcloud_project`}}",
+      "source_image": "ubuntu-1804-bionic-v20210224",
+      "image_name": "{{user `output_image_name`}}-{{timestamp}}",
+      "zone": "europe-west1-b",
+      "ssh_username": "packer"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "../server",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "./base/install-packages.sh"
+      ],
+      "environment_vars": [
+        "FILES_DIR=/tmp/server/files"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -r /tmp/server"
+      ]
+    }
+  ]
+}

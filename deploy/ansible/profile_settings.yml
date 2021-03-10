@@ -1,0 +1,9 @@
+settings:
+  ook_staging:
+    project: swirrl-staging-servers
+    zone: europe-west2-b
+    cpus: 4
+    memory: 16
+    boot_disk_size: 50
+    elasticsearch_disk_size: 100
+    install_datadog: no

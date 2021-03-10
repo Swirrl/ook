@@ -1,0 +1,89 @@
+{:omni/package-format "1"
+ :omni/package-name "ook"
+ :omni/package-version #join [#env BRANCH_ESCAPED "-" #env BUILD_NUMBER]
+ :omni/dependencies {}
+ :omni/defs {:zip-name "ook.zip"}
+
+ :omni/keys {:ook/project-jar {:doc "Name of the project jar"
+                               :default "ook.jar"}
+
+             :ook/jmx-port {:doc "port to use for jmx"
+                            :env-var JMX_PORT
+                            :default 9010}
+
+             :ook/nginx-logs-dir {:doc "Logs directory for nginx on the server"
+                                  :default "/var/log/nginx"}
+
+             :ook/nginx-pid-file {:doc "Location of the PID file for nginx"
+                                  :default "/run/nginx.pid"}
+
+             :ook/http-port {:doc "HTTP port to listen on"
+                             :env-var PORT
+                             :default 3010}
+
+             :ook/logs-dir {:doc "Location of the ook logs"
+                            :default "/var/log/ook"
+                            :optional false}
+
+             :ook/domain {:doc "Domain hosting ook"
+                          :default "_"
+                          :optional false}}
+
+ :omni/metadata {:omni/repository-uri "https://github.com/swirrl/ook"}
+
+ :omni/facets {:install [{:type :zip
+                          :path #ref [:omni/defs :zip-name]
+                          :dest-path #ref [:omni/defs :zip-name]
+                          :extract-dir "."}
+
+                         {:type :selmer/template
+                          :path "ook-start.sh.template"
+                          :dest-path "ook-start.sh"
+                          :mode "755"}
+
+                         {:type :selmer/template
+                          :path "log4j2.xml.template"
+                          :dest-path "log4j2.xml"
+                          :keys [:ook/logs-dir]}
+
+                         {:type :selmer/template
+                          :path "ook-env.list.template"
+                          :dest-path "ook-env.list"
+                          :mode "660"
+                          :facet :systemd
+                          :keys [:ook/auth0-secret
+                                 :ook/http-port]}]
+
+               :systemd [{:type :selmer/template
+                          :path "ook.service.template"
+                          :dest-path "ook.service"
+                          :keys [:omni/install-dir]}]
+
+               :nginx [{:type :selmer/template
+                        :path "nginx.conf.template"
+                        :dest-path "nginx.conf"
+                        :keys [:ook/nginx-pid-file
+                               :ook/nginx-logs-dir]}
+
+                       {:type :selmer/template
+                        :path "sites-available/ook"
+                        :dest-path "sites-available/ook"
+                        :keys [:ook/domain]}
+
+                       ;; just copy this without changing it.
+                       "sites-available/monitoring-status"
+
+                       ;; symlinks
+
+                       {:type :symlink
+                        :dest-path "sites-enabled/monitoring-status"
+                        :target "sites-available/monitoring-status"}
+
+                       {:type :symlink
+                        :dest-path "sites-enabled/ook"
+                        :target "sites-available/ook"}]
+
+               :logrotate [{:type :selmer/template
+                            :path "nginx.template"
+                            :dest-path "nginx"
+                            :keys [:ook/nginx-logs-dir]}]}}

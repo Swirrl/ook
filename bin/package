@@ -1,0 +1,68 @@
+# #!/bin/bash
+
+# set -o errexit
+
+if [[ -z "${BRANCH_ESCAPED}" ]]; then
+    BRANCH_ESCAPED=local-branch--`git rev-parse --abbrev-ref HEAD | sed 's/\//-/g'`
+    echo WARNING: Building locally defaulting BRANCH_ESCAPED to $BRANCH_ESCAPED
+fi
+
+if [[ -z "${BUILD_NUMBER}" ]]; then
+    BUILD_NUMBER=1
+    echo WARNING: defaulting BUILD_NUMBER to $BUILD_NUMBER
+    echo
+fi
+
+echo Building cljs
+yarn release
+
+PROJECT_ROOT=`pwd`
+
+PACKAGING_BASE_DIR=$PROJECT_ROOT/target/packaging
+
+PACKING_DIR=$PACKAGING_BASE_DIR/packing
+
+echo Packing skinny app in $PACKING_DIR
+mkdir -p $PACKING_DIR
+
+# packing step is where we prep zip contents
+# zip root will essentially become $PACKING_DIR
+#
+# Call pack.alpha.skinny to assemble deps in ./lib with an app jar
+# e.g ./ook.jar
+clojure -M:pack \
+        -m mach.pack.alpha.skinny \
+        -A:prod \
+        --project-path $PACKING_DIR/ook.jar \
+        --lib-dir $PACKING_DIR/lib
+
+echo Prepared packing in $PACKING_DIR
+
+# change into $PACKING_DIR and build zip so it's rooted correctly
+#
+# Put zip in e.g. target/packaging/ook.zip
+pushd $PACKING_DIR > /dev/null
+
+cp -rf $PROJECT_ROOT/package/* $PACKING_DIR
+echo Copied /package template into $PACKING_DIR
+
+TARGET_ZIP=$PACKING_DIR/install/ook.zip
+SOURCES="*.jar lib"
+zip -Z store -r $TARGET_ZIP $SOURCES -q
+echo Created zip $TARGET_ZIP
+rm -rf $SOURCES       # Tidy up skinny app output prior to packaging for omni
+
+popd > /dev/null
+
+OMNI_PACKAGES_DIR=$PACKAGING_BASE_DIR/omni-packages
+mkdir -p $OMNI_PACKAGES_DIR
+
+cd $PROJECT_ROOT
+
+env BRANCH_ESCAPED=$BRANCH_ESCAPED \
+    BUILD_NUMBER=$BUILD_NUMBER \
+    ./bin/omni package \
+               -m $PACKING_DIR/manifest.edn \
+               -o $OMNI_PACKAGES_DIR
+
+echo Created omni package in $OMNI_PACKAGES_DIR

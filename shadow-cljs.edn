@@ -17,7 +17,7 @@
 
         ;; prod config
         :release {:compiler-options {:optimizations :advanced}
-                  :output-dir "target/prod/resources/public/js"}
+                  :output-dir "target/prod/cljs/public/js"}
 
         :modules
         {:main {:entries [ook.main]

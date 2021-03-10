@@ -1,0 +1,2 @@
+AUTH0_SECRET={{ook/auth0-secret}}
+PORT={{ook/http-port}}

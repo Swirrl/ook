@@ -1,0 +1,13 @@
+[Unit]
+Description=Job that runs the ook service
+After=network.target
+Wants=elasticsearch.service
+
+[Service]
+Type=simple
+UMask=077
+User=ook
+EnvironmentFile={{omni/install-dir}}/ook-env.list
+ExecStart={{omni/install-dir}}/ook-start.sh
+
+Restart=on-failure
