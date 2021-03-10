@@ -73,6 +73,7 @@
             :exec-args {:profiles ["drafter-client.edn"
                                    "cogs-staging.edn"
                                    "elasticsearch-development.edn"
+                                   "load-data.edn"
                                    "fixture-data.edn"]}}
 
            :prod {:extra-paths ["env/prod/resources"

@@ -1,7 +1,7 @@
 {
     "mappings": {
         "properties": {
-            "@type": { "type": "constant_keyword", "value": "skos:Concept" },
+            "@type": { "type": "keyword" },
             "label": { "type": "text" },
             "scheme": { "type": "keyword" },
             "notation": { "type": "keyword" },
