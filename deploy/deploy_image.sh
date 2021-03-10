@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 echo "Provisioning a GCP virtual machine with ansible"
 echo
 read -p "Ook image name (e.g. from pack_image.sh): " -e source_image
