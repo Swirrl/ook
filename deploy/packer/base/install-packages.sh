@@ -22,16 +22,19 @@ sudo chmod 644 /var/log/nginx/*.log
 
 
 echo '>>> install elasticsearch'
-# install opendistro elasticsearch, following instructions from here
-# https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
 
-wget -qO - https://d3g5vo6xdbdb9a.cloudfront.net/GPG-KEY-opendistroforelasticsearch | sudo apt-key add -
-
-echo "deb https://d3g5vo6xdbdb9a.cloudfront.net/apt stable main" | sudo tee -a   /etc/apt/sources.list.d/opendistroforelasticsearch.list
-
+# install elasticsearch open-source
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
 
 sudo dpkg -i elasticsearch-oss-7.10.2-amd64.deb
 
-sudo apt-get update -y -q
-sudo apt install opendistroforelasticsearch -y -q
+# add opendistro for elasticsearch plug-ins
+# https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
+
+#wget -qO - https://d3g5vo6xdbdb9a.cloudfront.net/GPG-KEY-opendistroforelasticsearch | sudo apt-key add -
+
+#echo "deb https://d3g5vo6xdbdb9a.cloudfront.net/apt stable main" | sudo tee -a   /etc/apt/sources.list.d/opendistroforelasticsearch.list
+
+#sudo apt-get update -y -q
+
+#sudo apt install opendistroforelasticsearch -y -q
