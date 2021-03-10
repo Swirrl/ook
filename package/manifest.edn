@@ -23,7 +23,12 @@
 
              :ook/logs-dir {:doc "Location of the ook logs"
                             :default "/var/log/ook"
-                            :optional false}}
+                            :optional false}
+
+             :ook/domain {:doc "Domain hosting ook"
+                          :env-var HOSTNAME
+                          :default "search.gss-data.org.uk"
+                          :optional false}}
 
  :omni/metadata {:omni/repository-uri "https://github.com/swirrl/ook"}
 
