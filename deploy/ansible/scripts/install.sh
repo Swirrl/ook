@@ -26,4 +26,5 @@ wget -nv -O - --retry-connrefused --tries 60 --waitretry=2 localhost:3010 2>&1 >
 echo '>>> NGINX'
 
 echo '>>> restarting nginx'
+sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
