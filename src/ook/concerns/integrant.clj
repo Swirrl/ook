@@ -35,7 +35,11 @@
   "Attempts to find a value in an environmental variable, an encrypted file, or a resorts to a default.
    The encrypted file should be a resource named e.g. secrets/MY_VAR.gpg"
   (or (System/getenv variable)
-      (when-let [r (str (io/file (io/resource (str "secrets/" variable ".gpg"))))] (decrypt r))
+      (try
+        (when-let [filename (io/file (io/resource (str "secrets/" variable ".gpg")))]
+          (decrypt (str filename)))
+        (catch Throwable e
+          (log/warn "Failed to decrypt" variable "because" (.getMessage e))))
       (if (nil? default)
         (throw (Throwable. (str "Couldn't find configuration for " variable)))
         default)))
