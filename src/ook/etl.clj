@@ -40,7 +40,7 @@
   {:pre [(string? query-string) (int? limit) (int? offset)]}
   (str query-string "\nLIMIT " limit " OFFSET " offset))
 
-(def page-length 50000)
+(def page-length 30000)
 
 (defn select-paged
   "Executes a select query one page at a time returning a lazy seq of pages.
@@ -145,7 +145,7 @@
 
 (defn pipeline-fn [page-query construct-query jsonld-frame index]
   (fn [system]
-    (log/info (str "Pipeline Started:" index))
+    (log/info (str "Pipeline Started: " index))
     (doseq [[var-name & uris] (subject-pages system page-query)]
       (log/info "Processing page")
       (if uris
