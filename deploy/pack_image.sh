@@ -2,7 +2,7 @@
 
 echo "Building a GCP image for ook with Packer"
 echo
-read -p "Base image name: " -e -i "ook-base-1615315417" base_image_name
+read -p "Base image name: " -e -i "ook-base-1615389319" base_image_name
 read -p "Ook omni-package version (e.g. from https://app.circleci.com/pipelines/github/Swirrl/ook): " -e ook_package_version
 echo
 

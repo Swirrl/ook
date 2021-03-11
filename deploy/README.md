@@ -44,6 +44,8 @@ The production server will be provisioning from a disk image built by packer.
 
 The base image include the OS and ES and shouldn't change often.
 
+There's a script to automate this in [pack_base.sh](./pack_base.sh).
+
 ```#
 cd packer
 packer build -var gcloud_project=<project-name> \
@@ -61,14 +63,14 @@ packer build -var gcloud_project=swirrl-staging-servers \
   base.json
 ```
 
-You might like to update the base image name in [pack_image.sh](./pack-image.sh) (for the ook-specific image in the next step) if you change it.
+You might like to update the base image name in [pack_image.sh](./pack_image.sh) (for the ook-specific image in the next step) if you change it.
 
 
 ### 1.2 Build an ook image
 
 This extends the base image with a specific version of ook.
 
-There's a script to automate this in [pack_image.sh](./pack-image.sh).
+There's a script to automate this in [pack_image.sh](./pack_image.sh).
 You'll need to provide an omni package version (e.g. from CI, see example below).
 
 The remainder of this section explains the packer command.
@@ -111,7 +113,7 @@ Note the image name (used in the next step).
 
 We use ansible to provision the server.
 
-There's a script to automate this in [deploy_image.sh](./deploy-image.sh).
+There's a script to automate this in [deploy_image.sh](./deploy_image.sh).
 You'll need to provide an image name (from the last step).
 You can keep the default server name (unique by datetime).
 
