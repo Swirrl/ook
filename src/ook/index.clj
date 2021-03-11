@@ -4,6 +4,7 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [integrant.core :as ig]
+            [ook.concerns.integrant :as i]
             [ook.etl :as etl]
             [clojure.tools.logging :as log]))
 
@@ -57,3 +58,17 @@
   (let [result (etl/pipeline system)]
     (normal-mode system)
     result))
+
+(defn -main
+  "CLI Entry point for populating the index
+  The targeting may be overriden by passing integrant profiles
+  (specified as resource filename(s))"
+  [& args]
+  (let [loader ["drafter-client.edn"
+                "elasticsearch-prod.edn"
+                "load-data.edn"]
+        target (or args ["trade-data.edn"
+                         "cogs-staging.edn"])
+        profiles (concat loader target)]
+    (println "Starting index loader with profiles: " profiles)
+    (i/exec-config {:profiles profiles})))
