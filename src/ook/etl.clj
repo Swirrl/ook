@@ -23,7 +23,7 @@
   ([client query & opts]
    (let [args (concat [client query] opts);
          response (apply dci/post-query-live args)]
-     (:body response))))
+     (:body (doall response)))))
 
 (defn insert-values-clause
   "Adds a VALUES clause to a sparql query string with the URIs provided"
@@ -53,6 +53,7 @@
    (let [client (interceptors/accept client "text/csv")
          query-page (append-limit-offset query-string page-size offset)
          results (s/split-lines (slurp (io/reader (query client query-page))))]
+     (log/info "Fetching subject page at offset:" offset)
      (if (< (dec (count results)) page-size)
        (list results)
        (cons results
@@ -71,7 +72,6 @@
    followed by the URIs. NB: Only expecting a single variable to be bound in the results.
    See `insert-values-clause`."
   [{:keys [drafter-client/client ook.etl/target-datasets] :as system} subject-query]
-  (log/info "Fetching subjects")
   (let [subject-query (if target-datasets
                         (insert-values-clause subject-query "dataset" target-datasets)
                         subject-query)]
