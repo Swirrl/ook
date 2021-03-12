@@ -40,7 +40,7 @@
   {:pre [(string? query-string) (int? limit) (int? offset)]}
   (str query-string "\nLIMIT " limit " OFFSET " offset))
 
-(def page-length 30000)
+(def page-length 20000)
 
 (defn select-paged
   "Executes a select query one page at a time returning a lazy seq of pages.
