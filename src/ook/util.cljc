@@ -8,3 +8,9 @@
 
 (defn box [v]
   (if (coll? v) v [v]))
+
+(defn mjoin
+  "Merge 2 sequences of hash-maps, joined by a shared key"
+  [s1 s2 k]
+  (map #(apply merge %)
+       (vals (group-by k (concat s1 s2)))))

@@ -4,19 +4,14 @@
    [clojure.walk :as walk]
    [clojurewerkz.elastisch.query :as q]
    [clojurewerkz.elastisch.rest.document :as esd]
-   [ook.search.elastic.util :as u]))
-
-(defn- workaround-hack
-  "This is a temporary workaround to move forward with a snapshot db
-  that has some issues with the data"
-  [id]
-  (str/replace id "dimension:" "def/dimension/"))
+   [ook.search.elastic.util :as esu]
+   [ook.util :as u]))
 
 (defn- index-by-codelist [results]
   (->> results
        (mapcat (fn [hit]
                  (let [scheme (-> hit :_source :codelist)
-                       dimension (-> hit :_id workaround-hack)]
+                       dimension (-> hit :_id)]
                    (if (coll? scheme)
                      ;; right now some component ids correspond to multiple codelists -- is this actually allowed?
                      (map #(vector % dimension) scheme)
@@ -36,25 +31,6 @@
        (map #(vector (-> dimensions (get (:scheme %)) (str ".@id")) (:id %)))
        (into {})))
 
-(defn- get-datasets [conn codes dimensions]
-  (->> (get-query-terms codes dimensions)
-       (map (fn [[k v]]
-              (->> (esd/search conn "observation" "_doc"
-                               {:size 0
-                                :query {:term {k v}}
-                                :aggregations {:observation-count {:terms {:field "qb:dataSet.@id"}}}}))))
-       (mapcat (fn [result]
-                 (-> result :aggregations :observation-count :buckets)))
-       (map (fn [{:keys [key doc_count]}]
-              {:id key :matching-observations doc_count}))))
-
-
-(defn apply-filter [codes {:keys [elastic/endpoint]}]
-  (let [conn (u/get-connection endpoint)
-        dimensions (get-dimensions conn codes)]
-    (if (seq dimensions)
-      (get-datasets conn codes dimensions)
-      [])))
 
 (defn- normalize-keys [m]
   (let [remove-at (fn [[k v]]
@@ -70,15 +46,43 @@
       (assoc :description (-> m :dcterms:description :value))
       (dissoc :dcterms:description)))
 
+(defn- clean-datasets-result [result]
+  (->> result :hits :hits
+       (map :_source)
+       (map normalize-keys)
+       (map flatten-description-lang-strings)))
+
+(defn- cubes->datasets [conn cubes]
+  (-> conn
+      (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
+      clean-datasets-result))
+
+(defn- get-datasets [conn codes dimensions]
+  (let [matches (->> (get-query-terms codes dimensions)
+                     (map (fn [[k v]]
+                            (->> (esd/search conn "observation" "_doc"
+                                             {:size 0
+                                              :query {:term {k v}}
+                                              :aggregations {:observation-count {:terms {:field "qb:dataSet.@id"}}}}))))
+                     (mapcat (fn [result]
+                               (-> result :aggregations :observation-count :buckets)))
+                     (map (fn [{:keys [key doc_count]}]
+                            {:cube key :matching-observations doc_count})))
+        more-ds-info (cubes->datasets conn (map :cube matches))]
+    (u/mjoin matches more-ds-info :cube)))
+
+(defn apply-filter [codes {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)
+        dimensions (get-dimensions conn codes)]
+    (if (seq dimensions)
+      (get-datasets conn codes dimensions)
+      [])))
+
 (defn all [{:keys [elastic/endpoint]}]
-  (let [conn (u/get-connection endpoint)
-        result (esd/search conn "dataset" "_doc" {:query (q/match-all)})]
-    (->> result :hits :hits
-         (map :_source)
-         (map normalize-keys)
-         (map flatten-description-lang-strings))))
+  (-> (esu/get-connection endpoint)
+      (esd/search "dataset" "_doc" {:query (q/match-all)})
+      clean-datasets-result))
 
 (comment
-  (def conn (u/get-connection "http://localhost:9200"))
-
+  (def conn (esu/get-connection "http://localhost:9200"))
   )
