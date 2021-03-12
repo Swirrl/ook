@@ -26,10 +26,10 @@
     (es-search query opts))
 
   (get-datasets [_ filters]
-    (ds/filter filters opts))
+    (ds/apply-filter filters opts))
 
   (all-datasets [_]
-    (ds/all)))
+    (ds/all opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))

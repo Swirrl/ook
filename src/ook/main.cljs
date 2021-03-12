@@ -16,7 +16,6 @@
   (rdom/render [views/main] (.getElementById js/document "app")))
 
 (defn ^:export init []
-  (rf/dispatch-sync [:init/initialize-db])
   (router/init!)
   (render))
 

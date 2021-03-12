@@ -1,10 +1,10 @@
 (ns ook.search.elastic.datasets
-  (:refer-clojure :exclude [filter])
   (:require
-   [clojurewerkz.elastisch.rest.document :as esd]
+   [clojure.string :as str]
+   [clojure.walk :as walk]
    [clojurewerkz.elastisch.query :as q]
-   [ook.search.elastic.util :as u]
-   [clojure.string :as str]))
+   [clojurewerkz.elastisch.rest.document :as esd]
+   [ook.search.elastic.util :as u]))
 
 (defn- workaround-hack
   "This is a temporary workaround to move forward with a snapshot db
@@ -46,20 +46,37 @@
        (mapcat (fn [result]
                  (-> result :aggregations :observation-count :buckets)))
        (map (fn [{:keys [key doc_count]}]
-              {:dataset key :matching-observations doc_count}))))
+              {:id key :matching-observations doc_count}))))
 
 
-(defn filter [codes {:keys [elastic/endpoint]}]
+(defn apply-filter [codes {:keys [elastic/endpoint]}]
   (let [conn (u/get-connection endpoint)
         dimensions (get-dimensions conn codes)]
     (if (seq dimensions)
       (get-datasets conn codes dimensions)
       [])))
 
+(defn- normalize-keys [m]
+  (let [remove-at (fn [[k v]]
+                    (if (str/includes? (str k) "@")
+                      [(keyword (str/replace k ":@" "")) v]
+                      [k v]))]
+    ;; only apply to maps
+    (walk/postwalk (fn [x] (if (map? x) (into {} (map remove-at x)) x))
+                   m)))
+
+(defn- flatten-description-lang-strings [m]
+  (-> m
+      (assoc :description (-> m :dcterms:description :value))
+      (dissoc :dcterms:description)))
+
 (defn all [{:keys [elastic/endpoint]}]
-  (let [conn (u/get-connection endpoint)]
-    (esd/search conn "dataset" "_doc"
-                {:query (q/match-all)})))
+  (let [conn (u/get-connection endpoint)
+        result (esd/search conn "dataset" "_doc" {:query (q/match-all)})]
+    (->> result :hits :hits
+         (map :_source)
+         (map normalize-keys)
+         (map flatten-description-lang-strings))))
 
 (comment
   (def conn (u/get-connection "http://localhost:9200"))

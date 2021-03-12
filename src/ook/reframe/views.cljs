@@ -6,7 +6,9 @@
    [ook.reframe.views.datasets :as datasets]))
 
 (defn home []
-  (search/create-filter-card))
+  [:<>
+   (search/create-filter-card)
+   (datasets/results)])
 
 (defn results []
   [:<>

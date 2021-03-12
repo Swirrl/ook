@@ -11,20 +11,24 @@
         obs (total-observations data)]
     (when data
       [:<>
-       [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
-        [:strong obs (u/pluralize " observation" obs)]]
+       (when (pos? obs)
+         [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
+          [:strong obs (u/pluralize " observation" obs)]])
        (when (seq data)
-         [:table.table
+         [:table.table.my-4
           [:thead
            [:tr
-            [:th {:scope "col"} "Dataset Id"]
-            [:th {:scopt "col"}]]]
+            [:th {:scope "col"} "Title / Description"]
+            [:th {:scope "col"}]]]
           [:tbody
-           (for [{:keys [dataset matching-observations]} data]
-             ^{:key dataset}
+           (for [{:keys [label comment id matching-observations]} data]
+             ^{:key id}
              [:tr
-              [:th {:scope "row"} dataset]
               [:td
-               [:small (str "Found " matching-observations " matching observations")]
-               [:div
-                [:a.btn.btn-secondary.btn-sm {:href "#"} "View Data"]]]])]])])))
+               [:strong label]
+               [:p comment]]
+              (when matching-observations
+                [:td
+                 [:small (str "Found " matching-observations " matching observations")]
+                 [:div
+                  [:a.btn.btn-secondary.btn-sm {:href "#"} "View Data"]]])])]])])))

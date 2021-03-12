@@ -6,9 +6,12 @@
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
-(rf/reg-event-db
- :init/initialize-db
- (fn [_ _] db/initial-state))
+(rf/reg-event-fx :init/initialize-db (fn [_ _]
+                                       {:http-xhrio {:method :get
+                                                     :uri "/datasets"
+                                                     :response-format (ajax/transit-response-format)
+                                                     :on-success [:results.datasets.request/success]
+                                                     :on-error [:results.datasets.request/error]}}))
 
 ;;;;; UI STATE MANAGEMENT
 
