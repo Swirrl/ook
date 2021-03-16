@@ -60,12 +60,12 @@
             (is (= (:body response) "[]"))))
 
         (testing "/apply-filters can parse a single code param"
-          (let [response (request-transit "apply-filters?code=a-code,scheme-1")]
+          (let [response (request-transit "apply-filters?code=scheme-1,a-code")]
             (is (= 200 (:status response)))
             (is (str/includes? (:body response) "valid response 1"))))
 
         (testing "/apply-filters can parse multiple code params"
-          (let [response (request-transit "apply-filters?code=a-code,scheme-1&code=another-code,scheme-2")]
+          (let [response (request-transit "apply-filters?code=scheme-1,a-code&code=scheme-2,another-code")]
             (is (= 200 (:status response)))
             (is (str/includes? (:body response) "valid response 2"))))
 
