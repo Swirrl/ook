@@ -4,7 +4,8 @@
     "watch": "shadow-cljs watch ook",
     "watch-all": "shadow-cljs watch ook cards",
     "release": "shadow-cljs release ook",
-    "clean": "rm -rf target"
+    "clean": "rm -rf target",
+    "build-ci": "shadow-cljs compile ci"
   },
   "devDependencies": {
     "highlight.js": "^10.1.2",

@@ -81,8 +81,8 @@ jobs:
       - run:
           name: Run cljs tests
           command: |
-            shadow-cljs compile ci
-            karma start --single-run
+            yarn build-ci
+            node_modules/karma/bin/karma start --single-run
 
   build_and_publish:
     executor: main
