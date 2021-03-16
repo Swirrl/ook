@@ -27,7 +27,7 @@
           [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Apply selection"])
         (doall
          (for [{:keys [id label scheme]} codes
-               :let [value (str id "," scheme)]]
+               :let [value (str scheme "," id)]]
            ^{:key id} [:div.form-check.mb-3.bg-light
                        [:div.p-2
                         [:input.form-check-input
