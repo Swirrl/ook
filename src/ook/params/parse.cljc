@@ -7,9 +7,9 @@
   (get query-params "q"))
 
 (defn parse-filters [{:keys [query-params]}]
-  (let [code-param (get query-params "code")]
-    (when (seq code-param)
-      (some->> code-param
+  (let [param (get query-params "facet")]
+    (when (seq param)
+      (some->> param
                u/box
                (map #(str/split % #","))
                (map (fn [[dim val]] {:value val :dimension dim}))))))

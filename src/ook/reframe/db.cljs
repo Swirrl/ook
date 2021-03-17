@@ -9,4 +9,4 @@
 
 (defn ->query-params [db]
   (cond-> {:q (:ui.codes/query db)}
-    (seq (:ui.codes/selection db)) (merge {:code (code-selection->list db)})))
+    (seq (:ui.codes/selection db)) (merge {:facet (code-selection->list db)})))

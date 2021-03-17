@@ -13,14 +13,14 @@
 
    ["/search" {:name :ook.route/search
                :view views/results
-               :parameters {:query {:q string? :code [string?]}}
+               :parameters {:query {:q string? :facet [string?]}}
                :controllers [{:start (fn [params]
                                        (let [query (-> params :query :q)
-                                             codes (-> params :query :code)]
+                                             facets (-> params :query :facet)]
                                          (rf/dispatch [:codes/submit-search query])
-                                         (when codes
-                                           (rf/dispatch [:filters/apply-code-selection codes]))))
-                              :parameters {:query [:q :code]}}]}]])
+                                         (when facets
+                                           (rf/dispatch [:filters/apply-code-selection facets]))))
+                              :parameters {:query [:q :facet]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

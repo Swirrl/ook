@@ -7,8 +7,8 @@
    [ook.search.elastic.util :as esu]
    [ook.util :as u]))
 
-(defn- get-query-terms [codes]
-  (->> codes
+(defn- get-query-terms [facets]
+  (->> facets
        (map (fn [{:keys [dimension value]}]
               [(str dimension ".@id") value]))
        (into {})))
@@ -53,9 +53,9 @@
         more-ds-info (cubes->datasets conn (map :cube matches))]
     (u/mjoin matches more-ds-info :cube)))
 
-(defn apply-filter [codes {:keys [elastic/endpoint]}]
+(defn apply-filter [facets {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
-        query-terms (get-query-terms codes)]
+        query-terms (get-query-terms facets)]
     (get-datasets conn query-terms)))
 
 (defn all [{:keys [elastic/endpoint]}]
