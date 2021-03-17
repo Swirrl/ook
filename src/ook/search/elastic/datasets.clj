@@ -45,7 +45,9 @@
                             (->> (esd/search conn "observation" "_doc"
                                              {:size 0
                                               :query {:term {k v}}
-                                              :aggregations {:observation-count {:terms {:field "qb:dataSet.@id"}}}}))))
+                                              :aggregations {:observation-count
+                                                             {:terms
+                                                              {:field "qb:dataSet.@id"}}}}))))
                      (mapcat (fn [result]
                                (-> result :aggregations :observation-count :buckets)))
                      (map (fn [{:keys [key doc_count]}]

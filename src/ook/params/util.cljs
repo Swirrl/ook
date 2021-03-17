@@ -6,15 +6,14 @@
 
 (def base-uri "http://gss-data.org.uk/")
 
-
 (defn encode-filter-facets [selection]
   (->> selection
        keys
        (map #(str/split % #","))
-       (map (fn [[scheme id]]
-              (str (url/url-encode (str base-uri scheme))
+       (map (fn [[dim val]]
+              (str (url/url-encode (str base-uri dim))
                    ","
-                   (url/url-encode (str base-uri id)))))))
+                   (url/url-encode (str base-uri val)))))))
 
 (defn link-to-pmd-dataset [id selection]
   (let [query-string (str (ri/query-string {:uri (str base-uri id)
