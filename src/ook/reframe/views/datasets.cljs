@@ -1,6 +1,7 @@
 (ns ook.reframe.views.datasets
   (:require [re-frame.core :as rf]
-            [ook.util :as u]))
+            [ook.util :as u]
+            [ook.params.util :as pu]))
 
 (defn- total-observations [data]
   (reduce + (map :matching-observations data)))
@@ -20,15 +21,18 @@
            [:tr
             [:th {:scope "col"} "Title / Description"]
             [:th {:scope "col"}]]]
-          [:tbody
-           (for [{:keys [label comment id matching-observations]} data]
-             ^{:key id}
-             [:tr
-              [:td
-               [:strong label]
-               [:p comment]]
-              (when matching-observations
-                [:td
-                 [:small (str "Found " matching-observations " matching observations")]
-                 [:div
-                  [:a.btn.btn-secondary.btn-sm {:href "#"} "View Data"]]])])]])])))
+          (let [selection @(rf/subscribe [:ui.codes/selection])]
+            [:tbody
+             (doall
+               (for [{:keys [label comment id matching-observations] :as ds} data]
+                 ^{:key id}
+                 [:tr
+                  [:td
+                   [:strong label]
+                   [:p comment]]
+                  (when matching-observations
+                    [:td
+                     [:small (str "Found " matching-observations " matching observations")]
+                     [:div
+                      [:a.btn.btn-secondary.btn-sm
+                       {:href (pu/link-to-pmd-dataset id selection)} "View Data"]]])]))])])])))

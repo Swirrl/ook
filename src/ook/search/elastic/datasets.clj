@@ -7,28 +7,10 @@
    [ook.search.elastic.util :as esu]
    [ook.util :as u]))
 
-(defn- index-by-codelist [results]
-  (->> results
-       (mapcat (fn [hit]
-                 (let [scheme (-> hit :_source :codelist)
-                       dimension (-> hit :_id)]
-                   (if (coll? scheme)
-                     ;; right now some component ids correspond to multiple codelists -- is this actually allowed?
-                     (map #(vector % dimension) scheme)
-                     [[scheme dimension]]))))
-       (into {})))
-
-(defn- get-dimensions [conn codes]
-  (when (seq codes)
-    (let [schemes (->> codes (map :scheme) distinct)]
-      (->> (esd/search conn "component" "_doc"
-                       {:query {:terms {:codelist schemes}}})
-           :hits :hits
-           index-by-codelist))))
-
-(defn- get-query-terms [codes dimensions]
+(defn- get-query-terms [codes]
   (->> codes
-       (map #(vector (-> dimensions (get (:scheme %)) (str ".@id")) (:id %)))
+       (map (fn [{:keys [dimension value]}]
+              [(str dimension ".@id") value]))
        (into {})))
 
 
@@ -57,8 +39,8 @@
       (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
       clean-datasets-result))
 
-(defn- get-datasets [conn codes dimensions]
-  (let [matches (->> (get-query-terms codes dimensions)
+(defn- get-datasets [conn query-terms]
+  (let [matches (->> query-terms
                      (map (fn [[k v]]
                             (->> (esd/search conn "observation" "_doc"
                                              {:size 0
@@ -73,10 +55,8 @@
 
 (defn apply-filter [codes {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
-        dimensions (get-dimensions conn codes)]
-    (if (seq dimensions)
-      (get-datasets conn codes dimensions)
-      [])))
+        query-terms (get-query-terms codes)]
+    (get-datasets conn query-terms)))
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)

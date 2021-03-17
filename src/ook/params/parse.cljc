@@ -12,4 +12,4 @@
       (some->> code-param
                u/box
                (map #(str/split % #","))
-               (map (fn [[scheme id]] {:id id :scheme scheme}))))))
+               (map (fn [[dim val]] {:value val :dimension dim}))))))

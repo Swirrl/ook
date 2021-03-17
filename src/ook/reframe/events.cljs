@@ -11,7 +11,8 @@
                                                      :uri "/datasets"
                                                      :response-format (ajax/transit-response-format)
                                                      :on-success [:results.datasets.request/success]
-                                                     :on-error [:results.datasets.request/error]}}))
+                                                     :on-error [:results.datasets.request/error]}
+                                        :dispatch [:ui.codes/query-change ""]}))
 
 ;;;;; UI STATE MANAGEMENT
 
