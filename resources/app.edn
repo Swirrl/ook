@@ -6,6 +6,7 @@
                                ;; internal API routes
                                ["/get-codes" {:get {:handler #ig/ref :ook.handler/get-codes}}]
                                ["/apply-filters" {:get {:handler #ig/ref :ook.handler/apply-filters}}]
+                               ["/datasets" {:get {:handler #ig/ref :ook.handler/datasets}}]
 
                                ;; assets
                                ["/assets/*" #ig/ref :ook.concerns.reitit/resource-handler]]}
@@ -13,4 +14,5 @@
  :ook.handler/main          {}
  :ook.handler/get-codes     {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/apply-filters {:search/db #ig/ref :ook.search.elastic/db}
+ :ook.handler/datasets      {:search/db #ig/ref :ook.search.elastic/db}
  :ook.search.elastic/db     {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint}}

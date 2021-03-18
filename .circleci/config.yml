@@ -6,7 +6,7 @@ version: 2.1
 executors:
   main:
     docker:
-      - image: circleci/clojure:openjdk-11-tools-deps-node
+      - image: circleci/clojure:openjdk-11-tools-deps-node-browsers
       - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
         environment:
           discovery.type: single-node
@@ -76,8 +76,13 @@ jobs:
       - fetch_deps
       - save_caches
       - run:
-          name: Run tests
+          name: Run clj tests
           command: clojure -M:ci:dev:test
+      - run:
+          name: Run cljs tests
+          command: |
+            yarn build-ci
+            node_modules/karma/bin/karma start --single-run
 
   build_and_publish:
     executor: main

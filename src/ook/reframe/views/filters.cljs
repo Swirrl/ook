@@ -26,18 +26,18 @@
         (when (seq codes)
           [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Apply selection"])
         (doall
-         (for [{:keys [id label scheme]} codes
-               :let [value (str id "," scheme)]]
-           ^{:key id} [:div.form-check.mb-3.bg-light
+         (for [{code-id :code/id dim-id :dim/id label :code/label} codes
+               :let [value (str dim-id "," code-id)]]
+           ^{:key code-id} [:div.form-check.mb-3.bg-light
                        [:div.p-2
                         [:input.form-check-input
                          {:type "checkbox"
                           :name "code"
                           :value value
                           :checked (-> @(rf/subscribe [:ui.codes/selection]) (get value))
-                          :id id
+                          :id code-id
                           :on-change #(rf/dispatch [:ui.codes/toggle-selection
                                                     (-> % .-target .-value)])}]
-                        [:label.form-check-label {:for id}
+                        [:label.form-check-label {:for code-id}
                          [:strong (single-label label)]
-                         [:p.m-0 "id: " [:code id]]]]]))]))))
+                         [:p.m-0 "id: " [:code code-id]]]]]))]))))

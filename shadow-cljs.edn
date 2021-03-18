@@ -50,4 +50,9 @@
 
           :compiler-options {:devcards true}
           :build-options {:ns-aliases {devcards-marked cljsjs.marked
-                                       devcards-syntax-highlighter cljsjs.highlight}}}}}
+                                       devcards-syntax-highlighter cljsjs.highlight}}}
+
+  :ci {:target :karma
+       :output-to "target/test/cljs/ci/tests.js"
+       :ns-regexp "-test$"}
+  }}

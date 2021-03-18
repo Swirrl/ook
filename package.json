@@ -4,10 +4,14 @@
     "watch": "shadow-cljs watch ook",
     "watch-all": "shadow-cljs watch ook cards",
     "release": "shadow-cljs release ook",
-    "clean": "rm -rf target"
+    "clean": "rm -rf target",
+    "build-ci": "shadow-cljs compile ci"
   },
   "devDependencies": {
     "highlight.js": "^10.1.2",
+    "karma": "^6.2.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-cljs-test": "^0.1.0",
     "marked": "^1.1.1",
     "shadow-cljs": "2.11.18"
   },

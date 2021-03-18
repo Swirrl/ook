@@ -1,6 +1,7 @@
 (ns ook.reframe.views.datasets
   (:require [re-frame.core :as rf]
-            [ook.util :as u]))
+            [ook.util :as u]
+            [ook.params.util :as pu]))
 
 (defn- total-observations [data]
   (reduce + (map :matching-observations data)))
@@ -11,20 +12,27 @@
         obs (total-observations data)]
     (when data
       [:<>
-       [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
-        [:strong obs (u/pluralize " observation" obs)]]
+       (when (pos? obs)
+         [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
+          [:strong obs (u/pluralize " observation" obs)]])
        (when (seq data)
-         [:table.table
+         [:table.table.my-4
           [:thead
            [:tr
-            [:th {:scope "col"} "Dataset Id"]
-            [:th {:scopt "col"}]]]
-          [:tbody
-           (for [{:keys [dataset matching-observations]} data]
-             ^{:key dataset}
-             [:tr
-              [:th {:scope "row"} dataset]
-              [:td
-               [:small (str "Found " matching-observations " matching observations")]
-               [:div
-                [:a.btn.btn-secondary.btn-sm {:href "#"} "View Data"]]]])]])])))
+            [:th {:scope "col"} "Title / Description"]
+            [:th {:scope "col"}]]]
+          (let [selection @(rf/subscribe [:ui.codes/selection])]
+            [:tbody
+             (doall
+               (for [{:keys [label comment id matching-observations] :as ds} data]
+                 ^{:key id}
+                 [:tr
+                  [:td
+                   [:strong label]
+                   [:p comment]]
+                  (when matching-observations
+                    [:td
+                     [:small (str "Found " matching-observations " matching observations")]
+                     [:div
+                      [:a.btn.btn-secondary.btn-sm
+                       {:href (pu/link-to-pmd-dataset id selection)} "View Data"]]])]))])])])))

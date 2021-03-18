@@ -6,9 +6,13 @@
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
-(rf/reg-event-db
- :init/initialize-db
- (fn [_ _] db/initial-state))
+(rf/reg-event-fx :init/initialize-db (fn [_ _]
+                                       {:http-xhrio {:method :get
+                                                     :uri "/datasets"
+                                                     :response-format (ajax/transit-response-format)
+                                                     :on-success [:results.datasets.request/success]
+                                                     :on-error [:results.datasets.request/error]}
+                                        :dispatch [:ui.codes/query-change ""]}))
 
 ;;;;; UI STATE MANAGEMENT
 
@@ -55,14 +59,14 @@
                                          :fx [[:dispatch [:ui.codes/query-change query]]
                                               [:dispatch [:results.datasets/reset]]]}))
 
-(rf/reg-event-fx :filters/apply-code-selection (fn [{:keys [db]} [_ codes]]
+(rf/reg-event-fx :filters/apply-code-selection (fn [_ [_ facets]]
                                                  {:http-xhrio {:method :get
                                                                :uri "/apply-filters"
-                                                               :params {:code codes}
+                                                               :params {:facet facets}
                                                                :response-format (ajax/transit-response-format)
                                                                :on-success [:results.datasets.request/success]
                                                                :on-error [:results.datasets.request/errror]}
-                                                  :dispatch [:ui.codes/set-selection (zipmap (u/box codes) (repeat true))]}))
+                                                  :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 ;;;; NAVIGATION
 
