@@ -21,8 +21,16 @@
 (derive :drafter/endpoint-url :ook/const)
 (derive :ook.concerns.elastic/endpoint :ook/const)
 
-(defn env [[env-var default]]
-  (or (System/getenv env-var) default))
+(defn env
+  "Reader to lookup an env-var. If the default is an integer, the env-var's value
+  will be coerced."
+  [[env-var default]]
+  (let [e (System/getenv env-var)]
+    (if e
+      (if (int? default)
+        (Integer/parseInt e)
+        e)
+      default)))
 
 (defn decrypt [filename]
   "Decrypts a file and returns a string with the contents (or nil on failure)"
