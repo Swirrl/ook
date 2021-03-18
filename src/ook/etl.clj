@@ -23,7 +23,7 @@
   ([client query & opts]
    (let [args (concat [client query] opts);
          response (apply dci/post-query-live args)]
-     (:body response))))
+     (:body (doall response)))))
 
 (defn insert-values-clause
   "Adds a VALUES clause to a sparql query string with the URIs provided"
@@ -40,19 +40,18 @@
   {:pre [(string? query-string) (int? limit) (int? offset)]}
   (str query-string "\nLIMIT " limit " OFFSET " offset))
 
-(def page-length 50000)
-
 (defn select-paged
   "Executes a select query one page at a time returning a lazy seq of pages.
    Pages are vectors - the variable name followed by the values."
   ([client query-string]
-   (select-paged client query-string page-length))
+   (select-paged client query-string 50000))
   ([client query-string page-size]
    (select-paged client query-string page-size 0))
   ([client query-string page-size offset]
    (let [client (interceptors/accept client "text/csv")
          query-page (append-limit-offset query-string page-size offset)
          results (s/split-lines (slurp (io/reader (query client query-page))))]
+     (log/info "Fetching subject page at offset:" offset)
      (if (< (dec (count results)) page-size)
        (list results)
        (cons results
@@ -70,12 +69,11 @@
    inserting into another query. Each page is a vector beginning with the var name
    followed by the URIs. NB: Only expecting a single variable to be bound in the results.
    See `insert-values-clause`."
-  [{:keys [drafter-client/client ook.etl/target-datasets] :as system} subject-query]
-  (log/info "Fetching subjects")
+  [{:keys [drafter-client/client ook.etl/target-datasets ook.etl/select-page-size] :as system} subject-query]
   (let [subject-query (if target-datasets
                         (insert-values-clause subject-query "dataset" target-datasets)
                         subject-query)]
-    (select-paged client subject-query)))
+    (select-paged client subject-query select-page-size)))
 
 (defn extract
   "Executes the construct query binding in values from page"
@@ -119,8 +117,6 @@
 (defn add-id [object]
   (assoc (into {} object) :_id (get object "@id")))
 
-(def batch-size 10000)
-
 (defn- first-error [result]
   (->> result
        :items
@@ -128,11 +124,11 @@
        (remove nil?)
        first))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
+(defn load-documents [{:keys [:ook.concerns.elastic/endpoint :ook.etl/load-page-size] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
         docs (map add-id (get jsonld "@graph"))
-        batches (partition-all batch-size docs)]
+        batches (partition-all (or load-page-size 10000) docs)]
     (doall
      (for [batch batches]
        (let [result (esb/bulk-with-index conn index (esb/bulk-index batch))]
@@ -145,7 +141,7 @@
 
 (defn pipeline-fn [page-query construct-query jsonld-frame index]
   (fn [system]
-    (log/info (str "Pipeline Started:" index))
+    (log/info (str "Pipeline Started: " index))
     (doseq [[var-name & uris] (subject-pages system page-query)]
       (log/info "Processing page")
       (if uris

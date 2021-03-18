@@ -13,7 +13,7 @@
 node_modules
 .shadow-cljs
 logs/*
-resources/secrets/*.gpg
+env/dev/resources/secrets/*.gpg
 resources/elasticsearch/backup
 deploy/secret.env.gpg
 deploy/secret.env

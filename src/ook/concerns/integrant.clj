@@ -21,8 +21,16 @@
 (derive :drafter/endpoint-url :ook/const)
 (derive :ook.concerns.elastic/endpoint :ook/const)
 
-(defn env [[env-var default]]
-  (or (System/getenv env-var) default))
+(defn env
+  "Reader to lookup an env-var. If the default is an integer, the env-var's value
+  will be coerced."
+  [[env-var default]]
+  (let [e (System/getenv env-var)]
+    (if e
+      (if (int? default)
+        (Integer/parseInt e)
+        e)
+      default)))
 
 (defn decrypt [filename]
   "Decrypts a file and returns a string with the contents (or nil on failure)"
@@ -35,7 +43,11 @@
   "Attempts to find a value in an environmental variable, an encrypted file, or a resorts to a default.
    The encrypted file should be a resource named e.g. secrets/MY_VAR.gpg"
   (or (System/getenv variable)
-      (when-let [r (str (io/file (io/resource (str "secrets/" variable ".gpg"))))] (decrypt r))
+      (try
+        (when-let [filename (io/file (io/resource (str "secrets/" variable ".gpg")))]
+          (decrypt (str filename)))
+        (catch Throwable e
+          (log/warn "Failed to decrypt" variable "because" (.getMessage e))))
       (if (nil? default)
         (throw (Throwable. (str "Couldn't find configuration for " variable)))
         default)))
