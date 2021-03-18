@@ -40,13 +40,11 @@
   {:pre [(string? query-string) (int? limit) (int? offset)]}
   (str query-string "\nLIMIT " limit " OFFSET " offset))
 
-(def page-length 20000)
-
 (defn select-paged
   "Executes a select query one page at a time returning a lazy seq of pages.
    Pages are vectors - the variable name followed by the values."
   ([client query-string]
-   (select-paged client query-string page-length))
+   (select-paged client query-string 50000))
   ([client query-string page-size]
    (select-paged client query-string page-size 0))
   ([client query-string page-size offset]
@@ -71,11 +69,11 @@
    inserting into another query. Each page is a vector beginning with the var name
    followed by the URIs. NB: Only expecting a single variable to be bound in the results.
    See `insert-values-clause`."
-  [{:keys [drafter-client/client ook.etl/target-datasets] :as system} subject-query]
+  [{:keys [drafter-client/client ook.etl/target-datasets ook.etl/select-page-size] :as system} subject-query]
   (let [subject-query (if target-datasets
                         (insert-values-clause subject-query "dataset" target-datasets)
                         subject-query)]
-    (select-paged client subject-query)))
+    (select-paged client subject-query select-page-size)))
 
 (defn extract
   "Executes the construct query binding in values from page"
@@ -119,8 +117,6 @@
 (defn add-id [object]
   (assoc (into {} object) :_id (get object "@id")))
 
-(def batch-size 10000)
-
 (defn- first-error [result]
   (->> result
        :items
@@ -128,11 +124,11 @@
        (remove nil?)
        first))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint] :as system} index jsonld]
+(defn load-documents [{:keys [:ook.concerns.elastic/endpoint :ook.etl/load-page-size] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
         docs (map add-id (get jsonld "@graph"))
-        batches (partition-all batch-size docs)]
+        batches (partition-all (or load-page-size 10000) docs)]
     (doall
      (for [batch batches]
        (let [result (esb/bulk-with-index conn index (esb/bulk-index batch))]
