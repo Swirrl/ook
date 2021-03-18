@@ -14,9 +14,9 @@
     (condp = filters
       nil []
 
-      [{:id "a-code" :scheme "scheme-1"}] "valid response 1"
+      [{:value "a-code" :dimension "scheme-1"}] "valid response 1"
 
-      [{:id "a-code", :scheme "scheme-1"} {:id "another-code", :scheme "scheme-2"}]
+      [{:value "a-code", :dimension "scheme-1"} {:value "another-code", :dimension "scheme-2"}]
       "valid response 2"))
 
   (all-datasets [_]

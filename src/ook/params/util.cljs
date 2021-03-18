@@ -5,6 +5,7 @@
             [clojure.string :as str]))
 
 (def base-uri "http://gss-data.org.uk/")
+(def pmd-uri "https://staging.gss-data.org.uk/")
 
 (defn encode-filter-facets [selection]
   (->> selection
@@ -19,4 +20,4 @@
   (let [query-string (str (ri/query-string {:uri (str base-uri id)
                                             :filters-drawer "open"
                                             :filter-facets (encode-filter-facets selection)}))]
-    (str "https://staging.gss-data.org.uk/cube/explore?" query-string)))
+    (str pmd-uri "cube/explore?" query-string)))
