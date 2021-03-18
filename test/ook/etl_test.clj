@@ -1,30 +1,19 @@
 (ns ook.etl-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [ook.concerns.integrant :as i]
+            [ook.test.util.setup :as setup :refer [with-system]]
             [ook.index :as idx]
-            [vcr-clj.clj-http :refer [with-cassette]]
             [ook.etl :as sut]))
-
-(def example-cubes
-  ["http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-production#dataset"
-   "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-duty-receipts#dataset"
-   "http://gss-data.org.uk/data/gss_data/trade/HMRC-alcohol-bulletin/alcohol-bulletin-clearances#dataset"])
-
-(defn example-datasets [system]
-  (with-cassette :extract-datasets
-    (let [query (slurp (io/resource "etl/dataset-construct.sparql"))]
-      (sut/extract system query "qb" example-cubes))))
 
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
-    (i/with-system [system ["drafter-client.edn", "cogs-staging.edn"]]
-      (is (= 33 (count (example-datasets system)))))))
+    (with-system [system ["drafter-client.edn", "cogs-staging.edn"]]
+      (is (= 33 (count (setup/example-datasets system)))))))
 
 (deftest transform-test
   (testing "Transform triples into json-ld"
-    (i/with-system [system ["drafter-client.edn", "cogs-staging.edn"]]
-      (let [datasets (example-datasets system)
+    (with-system [system ["drafter-client.edn", "cogs-staging.edn"]]
+      (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (sut/transform frame datasets)]
         (is (= "Alcohol Bulletin - Clearances"
@@ -32,8 +21,8 @@
 
 (deftest load-test
   (testing "Load json-ld into database"
-    (i/with-system [system ["drafter-client.edn" "cogs-staging.edn" "elasticsearch-test.edn"]]
-      (let [datasets (example-datasets system)
+    (with-system [system ["drafter-client.edn" "cogs-staging.edn" "elasticsearch-test.edn"]]
+      (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (sut/transform frame datasets)
             result (sut/load-documents system "dataset" jsonld)]
