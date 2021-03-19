@@ -1,4 +1,3 @@
 {:ook.etl/target-datasets
  ["http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production-catalog-entry"
-  "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
-  "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-clearances-catalog-entry"]}
+  "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"]}
