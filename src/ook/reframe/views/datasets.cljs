@@ -21,18 +21,16 @@
            [:tr
             [:th {:scope "col"} "Title / Description"]
             [:th {:scope "col"}]]]
-          (let [selection @(rf/subscribe [:ui.codes/selection])]
-            [:tbody
-             (doall
-               (for [{:keys [label comment id matching-observations] :as ds} data]
-                 ^{:key id}
-                 [:tr
-                  [:td
-                   [:strong label]
-                   [:p comment]]
-                  (when matching-observations
-                    [:td
-                     [:small (str "Found " matching-observations " matching observations")]
-                     [:div
-                      [:a.btn.btn-secondary.btn-sm
-                       {:href (pu/link-to-pmd-dataset id selection)} "View Data"]]])]))])])])))
+          [:tbody
+           (for [{:keys [label comment id matching-observations filter-facets] :as ds} data]
+             ^{:key id}
+             [:tr
+              [:td
+               [:strong label]
+               [:p comment]]
+              (when matching-observations
+                [:td
+                 [:small (str "Found " matching-observations " matching observations")]
+                 [:div
+                  [:a.btn.btn-secondary.btn-sm
+                   {:href (pu/link-to-pmd-dataset ds filter-facets)} "View Data"]]])])]])])))
