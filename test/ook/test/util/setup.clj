@@ -20,8 +20,6 @@
      (try
        ~@body
        (finally
-         (when (:ook.concerns.elastic/endpoint ~sym)
-           (ook.index/delete-indicies ~sym))
          (stop-system! ~sym)))))
 
 (def example-cubes
