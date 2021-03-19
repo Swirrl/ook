@@ -109,11 +109,13 @@ packer build \
 
 Note the image name (used in the next step).
 
-## 2. Deploying a server with ansible
+## 2. Deploying with ansible
+
+### 2.1 Provisioning a server from scratch
 
 We use ansible to provision the server.
 
-There's a script to automate this in [deploy_image.sh](./deploy_image.sh).
+There's a script to automate this in [provision_image.sh](./provision_image.sh).
 You'll need to provide an image name (from the last step).
 You can keep the default server name (unique by datetime).
 
@@ -139,3 +141,9 @@ env ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook server.yml \
                 source_image=ook-staging-1614974526  \
                 server_name=ook-staging-1599210947"
 ```
+
+### 2.2 Deploying a build to an existing server
+
+We can also update ook on an already provisioned server using ansible.
+
+The [deploy_build.sh](./deploy_build.sh) script uses omni to install a given build (package version).

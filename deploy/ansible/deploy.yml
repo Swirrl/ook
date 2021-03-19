@@ -1,0 +1,21 @@
+- name: Install ook from omni package
+  hosts: all
+  gather_facts: no
+
+  vars:
+    omni_jar: "/opt/omni/omni.jar"
+    ook_package_config: "/etc/opt/ook/config.edn"
+    ook_package_name: ook
+
+  tasks:
+    - name: Install OOK package
+      become: yes
+      become_method: sudo
+      shell: "java -jar {{ omni_jar }} install {{ ook_package_name }} -c {{ ook_package_config }} --environment prod --transitive"
+      environment:
+        OOK_PACKAGE_VERSION: "{{ ook_package_version }}"
+        AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+        AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+      register: shell_result
+    - debug:
+        var: shell_result.stdout_lines

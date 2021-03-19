@@ -1,0 +1,11 @@
+plugin: gcp_compute
+zones:
+  - europe-west1-b
+projects:
+  - swirrl-staging-servers
+filters:
+  - labels.application=ook
+scopes:
+  - https://www.googleapis.com/auth/compute
+auth_kind: serviceaccount
+#service_account_file: filepath taken from the GCP_SERVICE_ACCOUNT_FILE env var
