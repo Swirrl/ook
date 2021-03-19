@@ -1,6 +1,7 @@
 (ns ook.test.util.setup
   (:require [clojure.java.io :as io]
             [ook.etl :as etl]
+            [ook.index :as idx]
             [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [vcr-clj.clj-http :refer [with-cassette]]
@@ -37,3 +38,14 @@
         frame (slurp (io/resource "etl/dataset-frame.json"))
         jsonld (etl/transform frame datasets)]
     (etl/load-documents system "dataset" jsonld)))
+
+(defn not-localhost? [req & _]
+  (not (= (:server-name req)
+          "localhost")))
+
+(defn load-fixtures! [system]
+  (idx/delete-indicies system)
+  (idx/create-indicies system)
+
+  (with-cassette {:name :fixtures :recordable? not-localhost?}
+    (etl/pipeline system)))
