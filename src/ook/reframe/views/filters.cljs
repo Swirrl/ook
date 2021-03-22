@@ -43,26 +43,34 @@
 ;;                          [:p.m-0 "id: " [:code code-id]]]]]))]))))
 
 (defn configured-facets [facets]
-  [:div.card
-   [:div.card-body
-    [:h2.h5.card-title.me-2.d-inline "Find data"]
-    [:span.text-muted "Add a filter"]
-    [:div.mt-3
-     (for [{:keys [name] :as facet} facets]
-       ^{:key name} [:button.btn.btn-secondary.me-2
-                     {:type "button" :on-click #(rf/dispatch [:ui.facets/set-current facet])}
-                     name])]
-    [:form.mt-3
-     (let [{:keys [dimensions parent-dimension]} @(rf/subscribe [:ui.facets/current])]
-       (doall
-         (for [dim (or dimensions [parent-dimension])]
-          ^{:key dim} [:div.form-check.mb-3.bg-light
-                       [:div.p-2
-                        [:input.form-check-input
-                         {:type "checkbox"
-                          :name "dimension"
-                          :value dim
-                          :id dim
-                          :default-checked true}]
-                        [:label.form-check-label {:for dim}
-                         dim]]])))]]])
+  (let [selected-facet @(rf/subscribe [:ui.facets/current])]
+    [:div.card
+     [:div.card-body
+      [:h2.h5.card-title.me-2.d-inline "Find data"]
+      [:span.text-muted "Add a filter"]
+      [:div.mt-3.d-flex.align-items-center.justify-content-between
+       [:div
+        (for [{:keys [name] :as facet} facets]
+          ^{:key name} [:button.btn.me-2
+                        {:type "button"
+                         :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
+                         :on-click #(rf/dispatch [:ui.facets/set-current facet])}
+                        name])]
+       [:button.btn-close.border.border-dark
+        {:type "button"
+         :aria-label "Close filter selection"
+         :on-click #(rf/dispatch [:ui.facets/set-current nil])}]]
+      (when selected-facet
+        (let [{:keys [dimensions parent-dimension]} selected-facet]
+          [:form.mt-3
+           (for [dim (or dimensions [parent-dimension])]
+             ^{:key dim} [:div.form-check.mb-3.bg-light
+                          [:div.p-2
+                           [:input.form-check-input
+                            {:type "checkbox"
+                             :name "dimension"
+                             :value dim
+                             :id dim
+                             :default-checked true}]
+                           [:label.form-check-label {:for dim}
+                            dim]]])]))]]))
