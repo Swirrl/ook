@@ -76,16 +76,6 @@ jobs:
       - fetch_deps
       - save_caches
       - run:
-          name: Install Docker Compose
-          command: |
-            curl -L https://github.com/docker/compose/releases/download/1.25.3/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
-            chmod +x ~/docker-compose
-            sudo mv ~/docker-compose /usr/local/bin/docker-compose
-      - setup_remote_docker
-      - run:
-          name: Start test elasticsearch
-          command: docker-compose up -d elasticsearch-test
-      - run:
           name: Run clj tests
           command: clojure -M:ci:dev:test
       - run:

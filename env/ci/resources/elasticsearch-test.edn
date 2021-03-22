@@ -1,1 +1,1 @@
-{:ook.concerns.elastic/endpoint "http://localhost:9201"}
+{:ook.concerns.elastic/endpoint "http://localhost:9200"}
