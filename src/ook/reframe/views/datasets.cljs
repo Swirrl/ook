@@ -33,4 +33,4 @@
                  [:small (str "Found " matching-observations " matching observations")]
                  [:div
                   [:a.btn.btn-secondary.btn-sm
-                   {:href (pu/link-to-pmd-dataset ds filter-facets)} "View Data"]]])])]])])))
+                   {:href (pu/link-to-pmd-dataset id filter-facets)} "View Data"]]])])]])])))
