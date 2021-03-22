@@ -1,6 +1,5 @@
 (ns dev
   (:require [ook.main :as main]
-            [ook.concerns.integrant :refer [with-system]]
             [integrant.repl :as igr :refer [go reset halt]]
             [integrant.repl.state :refer [system config]]
             [clojure.java.io :as io]))

@@ -73,7 +73,7 @@
   (let [subject-query (if target-datasets
                         (insert-values-clause subject-query "dataset" target-datasets)
                         subject-query)]
-    (select-paged client subject-query select-page-size)))
+    (select-paged client subject-query (or select-page-size 50000))))
 
 (defn extract
   "Executes the construct query binding in values from page"

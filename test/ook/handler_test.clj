@@ -1,15 +1,12 @@
 (ns ook.handler-test
   (:require [clojure.test :refer [deftest testing is]]
-            [ook.test.util.setup :as setup]
+            [ook.test.util.setup :as setup :refer [with-system]]
             [ring.mock.request :as req]
             [ook.test.util.misc :as misc]
-            [ook.concerns.integrant :as i]
             [clojure.string :as str]))
 
 (deftest handler-test
-  (i/with-system [system setup/test-profiles]
-    system
-
+  (with-system [system setup/test-profiles]
     (let [handler (:ook.concerns.reitit/ring-handler system)
           make-request (fn [path content-type] (-> (req/request :get (misc/with-test-host path))
                                                    (assoc-in [:headers "accept"] content-type)
@@ -42,6 +39,7 @@
         (testing "/get-codes returns data when transit is requested"
           (let [response (request-transit "get-codes?q=test")]
             (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
             (is (str/includes? (:body response) "\"~:label\",\"This is a test label\""))))
 
         (testing "/get-codes can handle empty query"
@@ -57,6 +55,7 @@
         (testing "/apply-filters can parse no param"
           (let [response (request-transit "apply-filters?code=")]
             (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
             (is (= (:body response) "[]"))))
 
         (testing "/apply-filters can parse a single code param"
@@ -77,4 +76,5 @@
         (testing "/datasets works"
           (let [response (request-transit "datasets")]
             (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
             (is (str/includes? (:body response) "datasets"))))))))

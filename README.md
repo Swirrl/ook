@@ -92,7 +92,7 @@ Alternatively you can create an integrant profile with the `:ook.index/data` com
 Run the tests with the alias:
 
 ```bash
-clojure -A:test
+clojure -M:dev:test
 ```
 
 ## License
