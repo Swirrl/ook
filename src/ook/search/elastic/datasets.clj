@@ -2,17 +2,12 @@
   (:require
    [clojure.string :as str]
    [clojure.walk :as walk]
+   [clojure.set :as set]
+   [meta-merge.core :as mm]
    [clojurewerkz.elastisch.query :as q]
    [clojurewerkz.elastisch.rest.document :as esd]
    [ook.search.elastic.util :as esu]
    [ook.util :as u]))
-
-(defn- get-query-terms [facets]
-  (->> facets
-       (map (fn [{:keys [dimension value]}]
-              [(str dimension ".@id") value]))
-       (into {})))
-
 
 (defn- normalize-keys [m]
   (let [remove-at (fn [[k v]]
@@ -39,26 +34,32 @@
       (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
       clean-datasets-result))
 
-(defn- get-datasets [conn query-terms]
-  (let [matches (->> query-terms
-                     (map (fn [[k v]]
-                            (->> (esd/search conn "observation" "_doc"
-                                             {:size 0
-                                              :query {:term {k v}}
-                                              :aggregations {:observation-count
-                                                             {:terms
-                                                              {:field "qb:dataSet.@id"}}}}))))
-                     (mapcat (fn [result]
-                               (-> result :aggregations :observation-count :buckets)))
-                     (map (fn [{:keys [key doc_count]}]
-                            {:cube key :matching-observations doc_count})))
+(defn- datasets-for-facet [conn {:keys [dimension value] :as facet}]
+  (->> (esd/search conn "observation" "_doc"
+                   {:size 0
+                    :query {:term {(str dimension ".@id") value}}
+                    :aggregations {:observation-count
+                                   {:terms
+                                    {:field "qb:dataSet.@id"}}}})
+       :aggregations :observation-count :buckets
+       (map #(set/rename-keys % {:key :cube
+                                 :doc_count :matching-observations}))
+       (map #(assoc % :filter-facets [facet]))))
+
+(defn- get-datasets [conn facets]
+  (let [matches (->> facets
+                     ;; get all datasets that match a given facet
+                     (mapcat (partial datasets-for-facet conn))
+                     (group-by :cube)
+                     ;; group all filter facets that found this dataset into one list
+                     (map (fn [[_ datasets]] (reduce mm/meta-merge datasets))))
+
         more-ds-info (cubes->datasets conn (map :cube matches))]
     (u/mjoin matches more-ds-info :cube)))
 
 (defn apply-filter [facets {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        query-terms (get-query-terms facets)]
-    (get-datasets conn query-terms)))
+  (let [conn (esu/get-connection endpoint)]
+    (get-datasets conn facets)))
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
@@ -67,4 +68,4 @@
 
 (comment
   (def conn (esu/get-connection "http://localhost:9200"))
-  )
+)
