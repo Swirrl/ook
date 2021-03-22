@@ -8,9 +8,9 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ _]
+(defmethod ig/init-key :ook.handler/main [_ {:keys [search/facets]}]
   (fn [_request]
-    (resp/response (layout/->html (layout/main)))))
+    (resp/response (layout/->html (layout/main facets)))))
 
 ;;; Internal transit API
 

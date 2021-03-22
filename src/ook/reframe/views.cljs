@@ -5,15 +5,16 @@
    [ook.reframe.views.filters :as filters]
    [ook.reframe.views.datasets :as datasets]))
 
-(defn home []
+(defn home [facets]
   [:<>
-   (search/create-filter-card)
+   ;; (search/create-filter-card)
+   (filters/configured-facets facets)
    (datasets/results)])
 
 (defn results []
   [:<>
-   (search/create-filter-card
-     (filters/filters))
+   ;; (search/create-filter-card
+   ;;   (filters/filters))
    (datasets/results)])
 
 (defn main []

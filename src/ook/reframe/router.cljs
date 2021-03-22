@@ -9,7 +9,8 @@
 (def ^:private routes
   [["/" {:name :ook.route/home
          :view views/home
-         :controllers [{:start #(rf/dispatch [:init/initialize-db])}]}]
+         ;; :controllers [{:start #(rf/dispatch [:init/initialize-db])}]
+         }]
 
    ["/search" {:name :ook.route/search
                :view views/results

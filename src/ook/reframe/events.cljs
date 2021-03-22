@@ -6,13 +6,18 @@
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
-(rf/reg-event-fx :init/initialize-db (fn [_ _]
+;;;;;; INITIALIZATION
+
+(rf/reg-event-db :init/set-facets (fn [db [_ facets]]
+                                    (assoc db :facets/config facets)))
+
+(rf/reg-event-fx :init/initialize-db (fn [_ [_ facets]]
                                        {:http-xhrio {:method :get
                                                      :uri "/datasets"
                                                      :response-format (ajax/transit-response-format)
                                                      :on-success [:results.datasets.request/success]
                                                      :on-error [:results.datasets.request/error]}
-                                        :dispatch [:ui.codes/query-change ""]}))
+                                        :dispatch [:init/set-facets facets]}))
 
 ;;;;; UI STATE MANAGEMENT
 
