@@ -48,8 +48,21 @@
     [:h2.h5.card-title.me-2.d-inline "Find data"]
     [:span.text-muted "Add a filter"]
     [:div.mt-3
-     (for [{:keys [name dimensions parent-dimension]} facets]
-       [:button.btn.btn-primary.me-2
-        {:type "button" ;; :on-click #(rf/dispatch [:facets/add-new name])
-         }
-        name])]]])
+     (for [{:keys [name] :as facet} facets]
+       ^{:key name} [:button.btn.btn-secondary.me-2
+                     {:type "button" :on-click #(rf/dispatch [:ui.facets/set-current facet])}
+                     name])]
+    [:form.mt-3
+     (let [{:keys [dimensions parent-dimension]} @(rf/subscribe [:ui.facets/current])]
+       (doall
+         (for [dim (or dimensions [parent-dimension])]
+          ^{:key dim} [:div.form-check.mb-3.bg-light
+                       [:div.p-2
+                        [:input.form-check-input
+                         {:type "checkbox"
+                          :name "dimension"
+                          :value dim
+                          :id dim
+                          :default-checked true}]
+                        [:label.form-check-label {:for dim}
+                         dim]]])))]]])
