@@ -1,9 +1,7 @@
 (ns ook.index-test
   (:require [ook.index :as sut]
             [clojure.test :refer :all]
-            [ook.concerns.integrant :refer [with-system]]
-            [integrant.core :as ig]
-            [drafter-client.client.impl :as i]))
+            [ook.test.util.setup :refer [with-system]]))
 
 (defn acknowledged? [response]
   (true? (:acknowledged response)))

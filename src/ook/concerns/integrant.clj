@@ -67,17 +67,3 @@
 
 (defn exec-config [{:keys [profiles] :as opts}]
   (ig/init (doto (config profiles) (ig/load-namespaces))))
-
-(defn start-system! [profiles]
-  (exec-config {:profiles profiles}))
-
-(def stop-system! ig/halt!)
-
-(defmacro with-system
-  "Start a system with the given profiles"
-  [[sym profiles] & body]
-  `(let [~sym (start-system! ~profiles)]
-     (try
-       ~@body
-       (finally
-         (stop-system! ~sym)))))
