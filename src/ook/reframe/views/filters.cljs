@@ -43,4 +43,13 @@
 ;;                          [:p.m-0 "id: " [:code code-id]]]]]))]))))
 
 (defn configured-facets [facets]
-  [:div "configured facets go here..."])
+  [:div.card
+   [:div.card-body
+    [:h2.h5.card-title.me-2.d-inline "Find data"]
+    [:span.text-muted "Add a filter"]
+    [:div.mt-3
+     (for [{:keys [name dimensions parent-dimension]} facets]
+       [:button.btn.btn-primary.me-2
+        {:type "button" ;; :on-click #(rf/dispatch [:facets/add-new name])
+         }
+        name])]]])
