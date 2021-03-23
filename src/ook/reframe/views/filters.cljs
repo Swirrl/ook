@@ -63,20 +63,26 @@
       (when selected-facet
         [:<>
          [:button.btn.btn-primary.mt-3
-          {:type "button"}
+          {:type "button" :disabled (not (seq (:codelists selected-facet)))}
           "Apply filter"]
-         (let [{:keys [dimensions parent-dimension]} selected-facet]
-           [:form.mt-3
-            (for [dim (or dimensions [parent-dimension])]
-              ^{:key dim}
-              [:div.form-check.mb-3.bg-light
-               [:div.p-2
-                [:input.form-check-input
-                 {:type "checkbox"
-                  :name "dimension"
-                  :value dim
-                  :id dim
-                  :checked (-> @(rf/subscribe [:ui.facets/current]) :selection (get dim) boolean)
-                  :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
-                [:label.form-check-label {:for dim}
-                 dim]]])])])]]))
+         (let [{:keys [codelists]} selected-facet]
+           (if (seq codelists)
+             [:form.mt-3
+              (for [cl codelists]
+                ^{:key cl}
+                [:div.form-check.mb-3.bg-light
+                 [:div.p-2
+                  [:input.form-check-input
+                   {:type "checkbox"
+                    :name "codelist"
+                    :value cl
+                    :id cl
+                    :checked (-> @(rf/subscribe [:ui.facets/current]) :selection (get cl) boolean)
+                    :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
+                  [:label.form-check-label {:for cl}
+                   cl]]])]
+             [:<>
+              [:p.mt-3 [:strong "No codelists for dimensions: "]]
+              [:ul
+               (for [dim (:dimensions selected-facet)]
+                 [:li dim])]]))])]]))

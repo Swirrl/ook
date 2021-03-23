@@ -21,11 +21,12 @@
 
 ;;;;;; FACETS
 
-(rf/reg-event-db :ui.facets/set-current (fn [db [_ {:keys [dimensions parent-dimension] :as facet}]]
+(rf/reg-event-db :ui.facets/set-current (fn [db [_ {:keys [codelists] :as facet}]]
                                       ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
-                                          (let [with-selection (assoc facet :selection
-                                                                      (set (or dimensions [parent-dimension])))]
-                                            (assoc db :ui.facets/current with-selection))))
+                                          (if facet
+                                            (let [with-selection (assoc facet :selection (set codelists))]
+                                              (assoc db :ui.facets/current with-selection))
+                                            (dissoc db :ui.facets/current))))
 
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
