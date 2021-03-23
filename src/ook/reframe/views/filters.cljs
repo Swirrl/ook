@@ -61,16 +61,22 @@
          :aria-label "Close filter selection"
          :on-click #(rf/dispatch [:ui.facets/set-current nil])}]]
       (when selected-facet
-        (let [{:keys [dimensions parent-dimension]} selected-facet]
-          [:form.mt-3
-           (for [dim (or dimensions [parent-dimension])]
-             ^{:key dim} [:div.form-check.mb-3.bg-light
-                          [:div.p-2
-                           [:input.form-check-input
-                            {:type "checkbox"
-                             :name "dimension"
-                             :value dim
-                             :id dim
-                             :default-checked true}]
-                           [:label.form-check-label {:for dim}
-                            dim]]])]))]]))
+        [:<>
+         [:button.btn.btn-primary.mt-3
+          {:type "button"}
+          "Apply filter"]
+         (let [{:keys [dimensions parent-dimension]} selected-facet]
+           [:form.mt-3
+            (for [dim (or dimensions [parent-dimension])]
+              ^{:key dim}
+              [:div.form-check.mb-3.bg-light
+               [:div.p-2
+                [:input.form-check-input
+                 {:type "checkbox"
+                  :name "dimension"
+                  :value dim
+                  :id dim
+                  :checked (-> @(rf/subscribe [:ui.facets/current]) :selection (get dim) boolean)
+                  :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
+                [:label.form-check-label {:for dim}
+                 dim]]])])])]]))

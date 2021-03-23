@@ -21,9 +21,18 @@
 
 ;;;;;; FACETS
 
-(rf/reg-event-db :ui.facets/set-current (fn [db [_ facet]]
+(rf/reg-event-db :ui.facets/set-current (fn [db [_ {:keys [dimensions parent-dimension] :as facet}]]
                                       ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
-                                          (assoc db :ui.facets/current facet)))
+                                          (let [with-selection (assoc facet :selection
+                                                                      (set (or dimensions [parent-dimension])))]
+                                            (assoc db :ui.facets/current with-selection))))
+
+(rf/reg-event-db
+ :ui.facets.current/toggle-selection
+ (fn [db [_ val]]
+   (let [selected? (-> db :ui.facets/current :selection (get val))
+         update-fn (if selected? disj conj)]
+     (update-in db [:ui.facets/current :selection] update-fn val))))
 
 ;;;;; UI STATE MANAGEMENT
 
