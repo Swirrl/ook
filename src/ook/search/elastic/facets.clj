@@ -17,6 +17,6 @@
 
 (defn get-facets
   "Resolves a facet configuration by looking up sub-properties"
-  [facets {:keys [elastic/endpoint]}]
+  [{:keys [ook/facets elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
     (map (partial replace-parent-dimension-with-children conn) facets)))

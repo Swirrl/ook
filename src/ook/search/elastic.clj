@@ -31,8 +31,8 @@
   (all-datasets [_]
     (ds/all opts))
 
-  (get-facets [_ facets]
-    (facets/get-facets facets opts)))
+  (get-facets [_]
+    (facets/get-facets opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))

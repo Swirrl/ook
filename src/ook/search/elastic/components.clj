@@ -12,4 +12,7 @@
          :hits :hits (map :_source))))
 
 (defn components->codelists [uris opts]
-  (->> opts (get-components uris) (map :codelist) (remove nil?)))
+  (->> opts
+       (get-components uris)
+       (map #(select-keys % [:codelist :label]))
+       (remove #(nil? (:codelist %)))))

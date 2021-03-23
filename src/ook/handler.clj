@@ -8,9 +8,9 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ {:keys [ook/facets search/db]}]
+(defmethod ig/init-key :ook.handler/main [_ {:keys [search/db]}]
   (fn [_request]
-    (let [facets-with-codelists (->> (db/get-facets db facets)
+    (let [facets-with-codelists (->> (db/get-facets db)
                                      (map (fn [facet]
                                             (assoc facet :codelists
                                                    (db/components->codelists

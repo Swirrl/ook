@@ -22,5 +22,5 @@
   (all-datasets [db]
     "Return all datasets")
 
-  (get-facets [db facets]
+  (get-facets [db]
     "Resolve facets from configuration and database"))
