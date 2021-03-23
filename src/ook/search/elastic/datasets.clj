@@ -7,7 +7,9 @@
    [clojurewerkz.elastisch.query :as q]
    [clojurewerkz.elastisch.rest.document :as esd]
    [ook.search.elastic.util :as esu]
-   [ook.util :as u]))
+   [ook.util :as u]
+   [ook.search.elastic.facets :as facets]
+   [ook.search.elastic.components :as components]))
 
 (defn- normalize-keys [m]
   (let [remove-at (fn [[k v]]
@@ -68,4 +70,33 @@
 
 (comment
   (def conn (esu/get-connection "http://localhost:9200"))
-)
+  )
+
+(defn for-components [components {:keys [elastic/endpoint] :as opts}]
+  (let [conn (esu/get-connection endpoint)]
+    (->> (esd/search conn "dataset" "_doc"
+                    {:query {:terms {:component components}}})
+         :hits :hits (map :_source))))
+
+(defn for-facets [facet-settings {:keys [elastic/endpoint] :as opts}]
+  (let [conn (esu/get-connection endpoint)
+        facets (->> (facets/get-facets opts) ;; pass db instead of opts here?
+                    ;; get only those facets that've been set
+                    (filter #((-> facet-settings keys set) (:name %))))
+        facet-dimensions (distinct (mapcat :dimensions facets)) ;; for filtering
+        components (components/get-components facet-dimensions opts)
+        datasets (for-components facet-dimensions opts)]
+    (reduce (fn [datasets facet]
+              (let [all-dimensions (:dimensions facet)]
+                (map (fn [dataset]
+                       (let [dataset-dimensions (:component dataset)
+                             matched-dimensions (set/intersection (set all-dimensions)
+                                                                  (set dataset-dimensions))
+                             codelists (->> components
+                                            (filter #(matched-dimensions ((keyword "@id") %)))
+                                            (map :codelist)
+                                            distinct)]
+                         (assoc-in dataset [:facet (:name facet)] codelists)))
+                     datasets)))
+            datasets
+            facets)))

@@ -7,7 +7,10 @@
             [vcr-clj.clj-http :refer [with-cassette]]
             [ook.main :as main]))
 
-(def test-profiles (concat main/core-profiles [(io/resource "test.edn")]))
+(def test-profiles
+  (concat main/core-profiles
+          [(io/resource "test.edn")
+           (io/resource "fixture-facets.edn")]))
 
 (defn start-system! [profiles]
   (i/exec-config {:profiles profiles}))
@@ -43,9 +46,12 @@
   (not (= (:server-name req)
           "localhost")))
 
-(defn load-fixtures! [system]
+(defn reset-indicies! [system]
   (idx/delete-indicies system)
-  (idx/create-indicies system)
+  (idx/create-indicies system))
+
+(defn load-fixtures! [system]
+  (reset-indicies! system)
 
   (with-cassette {:name :fixtures :recordable? not-localhost?}
     (etl/pipeline system)))

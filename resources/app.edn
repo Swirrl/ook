@@ -15,4 +15,5 @@
  :ook.handler/get-codes     {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/apply-filters {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/datasets      {:search/db #ig/ref :ook.search.elastic/db}
- :ook.search.elastic/db     {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint}}
+ :ook.search.elastic/db     {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
+                             :ook/facets #ig/ref :ook.search/facets}}
