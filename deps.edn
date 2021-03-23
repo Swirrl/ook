@@ -78,6 +78,13 @@
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
                                    "fixture-data.edn"]}}
+           :ook.etl/trade
+           {:exec-fn ook.concerns.integrant/exec-config
+            :exec-args {:profiles ["drafter-client.edn"
+                                   "cogs-staging.edn"
+                                   "elasticsearch-development.edn"
+                                   "load-data.edn"
+                                   "trade-data.edn"]}}
 
            :prod {:extra-paths ["env/prod/resources"
                                 "target/prod/cljs"]}
