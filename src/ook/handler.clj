@@ -8,9 +8,15 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ {:keys [search/facets]}]
+(defmethod ig/init-key :ook.handler/main [_ {:keys [ook/facets search/db]}]
   (fn [_request]
-    (resp/response (layout/->html (layout/main facets)))))
+    (let [facets-with-codelists (->> (db/get-facets db facets)
+                                     (map (fn [facet]
+                                            (assoc facet :codelists
+                                                   (db/components->codelists
+                                                    db
+                                                    (:dimensions facet))))))]
+      (resp/response (layout/->html (layout/main facets-with-codelists))))))
 
 ;;; Internal transit API
 

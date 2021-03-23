@@ -16,6 +16,9 @@
   (get-components [_ uris]
     (components/get-components uris opts))
 
+  (components->codelists [_ component-uris]
+    (components/components->codelists component-uris opts))
+
   (get-datasets [_ filters]
     (ds/apply-filter filters opts))
 
@@ -28,8 +31,8 @@
   (all-datasets [_]
     (ds/all opts))
 
-  (get-facets [_]
-    (facets/get-facets opts)))
+  (get-facets [_ facets]
+    (facets/get-facets facets opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))

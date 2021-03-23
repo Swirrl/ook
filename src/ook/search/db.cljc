@@ -7,6 +7,9 @@
   (get-components [db uris]
     "Retrieve components by URI")
 
+  (components->codelists [db component-uris]
+    ("Retrieve codelist URIs from component URIs"))
+
   (get-datasets [db codes]
     "Return a search result with all datasets that have the given codes")
 
@@ -19,5 +22,5 @@
   (all-datasets [db]
     "Return all datasets")
 
-  (get-facets [db]
+  (get-facets [db facets]
     "Resolve facets from configuration and database"))
