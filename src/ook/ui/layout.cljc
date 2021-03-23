@@ -1,7 +1,8 @@
 (ns ook.ui.layout
   (:require [hiccup2.core :as h]
             [hiccup.util :as h.u]
-            #?@(:cljs [[reitit.frontend.easy :as rfe]])))
+            #?@(:cljs [[reitit.frontend.easy :as rfe]])
+            [ook.concerns.transit :as t]))
 
 ;; Hiccup2 doesn't include versions of the hiccup.page/html5 macro & doesn't
 ;; work with them. The latter issue seems more of an oversight.
@@ -47,7 +48,7 @@
    [:script {:src "/assets/js/main.js" :type "text/javascript"}]
    [:script "ook.main.init()"]))
 
-(defn- body []
+(defn- body [facets]
   [:body.d-flex.flex-column.h-100
    (header)
    [:main.flex-shrink-0
@@ -58,14 +59,14 @@
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 
-     [:div {:id "app"}]]]
+     [:div {:id "app" :data-init (t/write-string facets)}]]]
    (footer)
    (scripts)])
 
-(defn main []
+(defn main [facets]
   (page
    (head)
-   (body)))
+   (body facets)))
 
 (defn ->html [contents]
   (-> contents h/html str))

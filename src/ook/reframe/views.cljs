@@ -6,14 +6,15 @@
    [ook.reframe.views.datasets :as datasets]))
 
 (defn home []
-  [:<>
-   (search/create-filter-card)
-   (datasets/results)])
+  (let [facets @(rf/subscribe [:facets/config])]
+    [:<>
+     (filters/configured-facets facets)
+     (datasets/results)]))
 
 (defn results []
   [:<>
-   (search/create-filter-card
-     (filters/filters))
+   ;; (search/create-filter-card
+   ;;   (filters/filters))
    (datasets/results)])
 
 (defn main []
