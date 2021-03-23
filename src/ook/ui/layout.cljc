@@ -28,14 +28,19 @@
   [:header
    [:nav.navbar.navbar-light.bg-light.mb-3
     [:div.container
-     [:span.navbar-brand.mb-0.h1
-      [:a #?(:clj {:href "/"}
-             :cljs {:href (rfe/href :ook.route/home)})
-       "ONS Trade Search"]]]]])
+     [:h1
+      [:a.navbar-brand #?(:clj {:href "/"}
+                          :cljs {:href (rfe/href :ook.route/home)})
+       "Trade Data Search"]]
+     [:span.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]])
 
 (defn- footer []
   [:footer.footer.bg-light.p-3.mt-auto
-   [:div.container "by Swirrl"]])
+   [:div.container
+    [:p
+     "Created by Swirrl and the ONS in collaboration with DIT as part of the "
+     [:a {:href "https://staging.gss-data.org.uk/"} "Integrated Data Programme"]
+     "."]]])
 
 (defn- scripts []
   (list
@@ -45,9 +50,11 @@
 (defn- body []
   [:body.d-flex.flex-column.h-100
    (header)
-   [:main.flex-shrink-0.mb-4
+   [:main.flex-shrink-0
     [:div.container
-     [:h1.my-4 "Structural Search"]
+     [:h1.display-4 "Structural Search"]
+     [:p.lead "Find the right trade data for your purpose"]
+     [:p "Search for observations within datasets based upon the dimensions and concepts they involve."]
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 
