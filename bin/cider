@@ -6,5 +6,5 @@
 
 docker-compose up -d elasticsearch-test
 docker-compose up -d elasticsearch-development
-clojure -A:dev:test:cider
+clojure -M:dev:test:cider
 docker-compose down
