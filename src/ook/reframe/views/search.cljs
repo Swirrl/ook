@@ -22,7 +22,7 @@
 (defn create-filter-card [& children]
   [:div.card
    [:div.card-header
-    [:h2.d-inline.h5.me-2 "Create a custom filter"]
+    [:h2.d-inline.h5.me-2 "Filter datasets"]
     [:span.text-muted "search for a code"]
     (search-form)]
    (when (seq children)

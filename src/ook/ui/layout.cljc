@@ -54,7 +54,7 @@
     [:div.container
      [:h1.display-4 "Structural Search"]
      [:p.lead "Find the right trade data for your purpose"]
-     [:p "Search for observations within datasets based upon the dimensions and concepts they involve."]
+     [:p "Search for observations within datasets based upon the dimensions and classification codes they involve."]
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 

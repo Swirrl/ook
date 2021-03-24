@@ -20,11 +20,11 @@
     (when codes
       (list
        ^{:key "answer"}
-       [:p.m-0 "Found " [:strong cnt (u/pluralize " code" cnt)] " matching " [:strong "\"" query "\""]]
+       [:p "Found " [:strong cnt (u/pluralize " code" cnt)] " matching " [:strong "\"" query "\"."]]
+       (when (seq codes)
+         [:p "Select all the codes that you're interested in."])
        ^{:key "data"}
        [:form {:id "codes" :on-submit apply-code-selection}
-        (when (seq codes)
-          [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Apply selection"])
         (doall
          (for [{code-id :code/id dim-id :dim/id label :code/label} codes
                :let [value (str dim-id "," code-id)]]
@@ -40,4 +40,6 @@
                                                     (-> % .-target .-value)])}]
                         [:label.form-check-label {:for code-id}
                          [:strong (single-label label)]
-                         [:p.m-0 "id: " [:code code-id]]]]]))]))))
+                         [:p.m-0 "id: " [:code code-id]]]]]))
+        (when (seq codes)
+          [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Find datasets that use these codes"])]))))
