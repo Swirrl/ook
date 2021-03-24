@@ -89,6 +89,17 @@
 ;;                                                                :on-error [:results.datasets.request/errror]}
 ;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
+(rf/reg-event-fx
+  :filters/add-filter-facet
+  (fn [{db :db} [_ facet]]
+    {:http-xhrio {:method :get
+                  :uri "/apply-filters"
+                  :params {:named-facet (:name facet)}
+                  :response-format (ajax/transit-response-format)
+                  :on-success [:results.datasets.request/success]
+                  :on-error [:results.datasets.request/error]}
+     :db (dissoc db :ui.facets/current)}))
+
 ;;;; NAVIGATION
 
 (rf/reg-event-db :app/navigated (fn [db [_ new-match]]

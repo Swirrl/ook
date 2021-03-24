@@ -52,21 +52,21 @@
             (is (= 406 (:status response)))
             (is (= "Unsupported content type" (:body response)))))
 
-        (testing "/apply-filters can parse no param"
-          (let [response (request-transit "apply-filters?code=")]
-            (is (= 200 (:status response)))
-            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (= (:body response) "[]"))))
+        ;; (testing "/apply-filters can parse no param"
+        ;;   (let [response (request-transit "apply-filters?code=")]
+        ;;     (is (= 200 (:status response)))
+        ;;     (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+        ;;     (is (= (:body response) "[]"))))
 
-        (testing "/apply-filters can parse a single code param"
-          (let [response (request-transit "apply-filters?facet=scheme-1,a-code")]
-            (is (= 200 (:status response)))
-            (is (str/includes? (:body response) "valid response 1"))))
+        ;; (testing "/apply-filters can parse a single code param"
+        ;;   (let [response (request-transit "apply-filters?facet=scheme-1,a-code")]
+        ;;     (is (= 200 (:status response)))
+        ;;     (is (str/includes? (:body response) "valid response 1"))))
 
-        (testing "/apply-filters can parse multiple code params"
-          (let [response (request-transit "apply-filters?facet=scheme-1,a-code&facet=scheme-2,another-code")]
-            (is (= 200 (:status response)))
-            (is (str/includes? (:body response) "valid response 2"))))
+        ;; (testing "/apply-filters can parse multiple code params"
+        ;;   (let [response (request-transit "apply-filters?facet=scheme-1,a-code&facet=scheme-2,another-code")]
+        ;;     (is (= 200 (:status response)))
+        ;;     (is (str/includes? (:body response) "valid response 2"))))
 
         (testing "/datasets rejects html requests"
           (let [response (request-html "datasets")]

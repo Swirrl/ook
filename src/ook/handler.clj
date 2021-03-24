@@ -42,9 +42,16 @@
 (defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      (let [filters (p/parse-filters request)
-            result (db/get-datasets db filters)]
-        (-> (resp/response (t/write-string result))
+      ;; Old implementation that applied a custom code selection.
+      ;; When this comes back, combine it with other filter facets
+      ;; (let [filters (p/parse-filters request)
+      ;;       result (db/get-datasets db filters)]
+      ;;   (-> (resp/response (t/write-string result))
+      ;;       transit-content-type))
+      (let [facet-names (p/parse-named-facets request)]
+        (-> (db/get-datasets-for-facets db facet-names)
+            t/write-string
+            resp/response
             transit-content-type))
       invalid-format-response)))
 

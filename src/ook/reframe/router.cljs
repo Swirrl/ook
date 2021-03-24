@@ -21,7 +21,18 @@
                                          (rf/dispatch [:codes/submit-search query])
                                          (when facets
                                            (rf/dispatch [:filters/apply-code-selection facets]))))
-                              :parameters {:query [:q :facet]}}]}]])
+                              :parameters {:query [:q :facet]}}]}]]
+
+  ;; ["/data" {:name :ook.route/data
+  ;;           :view views/home
+  ;;           :parameters {:facet [string?]}
+  ;;           :controllers [{:start (fn [params]
+  ;;                                   (let [facets (-> params :query :facet)]
+  ;;                                     ;; get facets from checkbox ui (selection) to server
+  ;;                                     (rf/dispatch [:filters/apply-facet])))
+  ;;                          :parameters {:query [:facet]}}]}
+  ;;  ]
+  )
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

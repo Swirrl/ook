@@ -55,7 +55,6 @@
                      (group-by :cube)
                      ;; group all filter facets that found this dataset into one list
                      (map (fn [[_ datasets]] (reduce mm/meta-merge datasets))))
-
         more-ds-info (cubes->datasets conn (map :cube matches))]
     (u/mjoin matches more-ds-info :cube)))
 
@@ -78,25 +77,26 @@
                     {:query {:terms {:component components}}})
          :hits :hits (map :_source))))
 
-(defn for-facets [facet-settings {:keys [elastic/endpoint] :as opts}]
-  (let [conn (esu/get-connection endpoint)
-        facets (->> (facets/get-facets opts) ;; pass db instead of opts here?
+(defn for-facets [facet-names opts]
+  (let [facets (->> (facets/get-facets opts) ;; pass db instead of opts here?
                     ;; get only those facets that've been set
-                    (filter #((-> facet-settings keys set) (:name %))))
+                    (filter #((set facet-names) (:name %))))
         facet-dimensions (distinct (mapcat :dimensions facets)) ;; for filtering
         components (components/get-components facet-dimensions opts)
         datasets (for-components facet-dimensions opts)]
     (reduce (fn [datasets facet]
               (let [all-dimensions (:dimensions facet)]
-                (map (fn [dataset]
-                       (let [dataset-dimensions (:component dataset)
-                             matched-dimensions (set/intersection (set all-dimensions)
-                                                                  (set dataset-dimensions))
-                             codelists (->> components
-                                            (filter #(matched-dimensions ((keyword "@id") %)))
-                                            (map :codelist)
-                                            distinct)]
-                         (assoc-in dataset [:facet (:name facet)] codelists)))
-                     datasets)))
+                (->> datasets
+                     (map (fn [dataset]
+                            (let [dataset-dimensions (:component dataset)
+                                  matched-dimensions (set/intersection (set all-dimensions)
+                                                                       (set dataset-dimensions))
+                                  codelists (->> components
+                                                 (filter #(matched-dimensions ((keyword "@id") %)))
+                                                 (map :codelist)
+                                                 distinct)]
+                              (assoc-in dataset [:facet (:name facet)] codelists))))
+                     (map normalize-keys)
+                     (map flatten-description-lang-strings))))
             datasets
             facets)))

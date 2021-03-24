@@ -29,7 +29,8 @@
 ;; prod is included here so no extra config is necessary to run the app
 ;; in prod mode, but in dev the prod.edn profile is not loaded and nil
 ;; profiles are ignored in `ook.concerns.integrant`
-(def core-profiles (map io/resource ["base.edn" "app.edn" "prod.edn" "fixture-facets.edn"]))
+(def core-profiles (map io/resource ["base.edn" "app.edn" "prod.edn" "fixture-facets.edn"
+                                     ]))
 
 (defn exec-config [opts]
   (-> (prep-config opts)

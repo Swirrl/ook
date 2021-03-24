@@ -13,3 +13,8 @@
                u/box
                (map #(str/split % #","))
                (map (fn [[dim val]] {:value val :dimension dim}))))))
+
+(defn parse-named-facets [{:keys [query-params]}]
+  (let [param (get query-params "named-facet")]
+    (when (seq param)
+      (u/box param))))

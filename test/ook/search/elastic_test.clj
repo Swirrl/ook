@@ -48,8 +48,7 @@
                    (map :label datasets)))))
 
         (testing "get-datasets-for-facets"
-          (let [facets {"Alcohol Type" "def/trade/concept-scheme/alcohol-type"
-                        "Bulletin Type" "def/trade/concept-scheme/bulletin-type"}
+          (let [facets ["Alcohol Type" "Bulletin Type"]
                 response (sut/get-datasets-for-facets db facets)]
             (testing "returns only matching datasets"
                ;; this test is non-effective since the only 2 datasets both match
