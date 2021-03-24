@@ -21,12 +21,14 @@
 
 ;;;;;; FACETS
 
-(rf/reg-event-db :ui.facets/set-current (fn [db [_ {:keys [codelists] :as facet}]]
-                                      ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
-                                          (if facet
-                                            (let [with-selection (assoc facet :selection (set codelists))]
-                                              (assoc db :ui.facets/current with-selection))
-                                            (dissoc db :ui.facets/current))))
+(rf/reg-event-db
+ :ui.facets/set-current
+ (fn [db [_ {:keys [codelists] :as facet}]]
+   ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
+   (if facet
+     (let [with-selection (assoc facet :selection (->> codelists (map :codelist) set))]
+       (assoc db :ui.facets/current with-selection))
+     (dissoc db :ui.facets/current))))
 
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
@@ -90,15 +92,15 @@
 ;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 (rf/reg-event-fx
-  :filters/add-filter-facet
-  (fn [{db :db} [_ facet]]
-    {:http-xhrio {:method :get
-                  :uri "/apply-filters"
-                  :params {:named-facet (:name facet)}
-                  :response-format (ajax/transit-response-format)
-                  :on-success [:results.datasets.request/success]
-                  :on-error [:results.datasets.request/error]}
-     :db (dissoc db :ui.facets/current)}))
+ :filters/add-filter-facet
+ (fn [{db :db} [_ facet-name]]
+   {:http-xhrio {:method :get
+                 :uri "/apply-filters"
+                 :params {:named-facet (:name facet-name)}
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:results.datasets.request/success]
+                 :on-error [:results.datasets.request/error]}
+    :db (dissoc db :ui.facets/current)}))
 
 ;;;; NAVIGATION
 
