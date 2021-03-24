@@ -55,6 +55,8 @@
           items:
             - http-server
             - https-server
+        labels:
+          application: ook
         disks:
           - auto_delete: "{{temporary}}"
             boot: true
