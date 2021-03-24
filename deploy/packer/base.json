@@ -23,6 +23,12 @@
     },
     {
       "type": "shell",
+      "inline": [
+	"/usr/bin/cloud-init status --wait"
+      ]
+    },
+    {
+      "type": "shell",
       "scripts": [
         "./base/install-packages.sh"
       ],
