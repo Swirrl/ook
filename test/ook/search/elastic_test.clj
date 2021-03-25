@@ -48,15 +48,18 @@
                    (map :label datasets)))))
 
         (testing "get-datasets-for-facets"
-          (let [facets ["Alcohol Type" "Bulletin Type"]
-                response (sut/get-datasets-for-facets db facets)]
+          (let [selections {"Alcohol Type" ["def/trade/concept-scheme/alcohol-type"]
+                            "Bulletin Type" ["def/trade/concept-scheme/bulletin-type"]}
+                response (sut/get-datasets-for-facets db selections)]
             (testing "returns only matching datasets"
-               ;; this test is non-effective since the only 2 datasets both match
               (is (= 2 (count response))))
-
             (testing "describes which codelists match for each facet"
-              (let [ds (first response)]
-                (is (= '("def/trade/concept-scheme/alcohol-type")
-                       (get-in ds [:facet "Alcohol Type"])))
-                (is (= '("def/trade/concept-scheme/bulletin-type")
-                       (get-in ds [:facet "Bulletin Type"])))))))))))
+              (let [dataset (first response)
+                    codelist-for-facet (fn [name] (->> (:facets dataset)
+                                                       (filter #(= (:name %) name))
+                                                       (map (comp :codelist first :dimensions))
+                                                       first))]
+                (is (= "def/trade/concept-scheme/alcohol-type"
+                       (codelist-for-facet "Alcohol Type")))
+                (is (= "def/trade/concept-scheme/bulletin-type"
+                       (codelist-for-facet "Bulletin Type")))))))))))
