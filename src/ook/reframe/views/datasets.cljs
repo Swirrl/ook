@@ -7,7 +7,9 @@
   (reduce + (map :matching-observations data)))
 
 (defn- remove-facet-button [facet-name]
-  [:button {:type "button"} "x"])
+  [:button.btn-close.border.btn-sm.ms-2.align-middle
+   {:type "button"
+    :on-click #(rf/dispatch [:filters/remove-facet facet-name])}])
 
 (defn- observation-count [data]
   (let [dataset-count (count data)
@@ -20,36 +22,47 @@
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (map :codelist))]
     (for [cl codelists]
-      ^{:key cl}[:p.badge.bg-secondary cl])))
+      ^{:key cl} [:p.badge.bg-secondary cl])))
+
+(defn- error-message []
+  [:div.alert.alert-danger "Sorry, something went wrong."])
+
+(defn- column-headers [data applied-facets]
+  [:tr
+   [:th "Title / Description"]
+   (for [[facet-name _] applied-facets]
+     ^{:key facet-name} [:th
+                         facet-name (remove-facet-button facet-name)])
+   (when (some :matching-observations data)
+     [:th])])
+
+(defn- dataset-row [{:keys [label comment id matching-observations facets]} applied-facets]
+  ^{:key id}
+  [:tr
+   [:td
+    [:strong label]
+    [:p comment]]
+   (for [[facet-name _] applied-facets]
+     ^{:key [id facet-name]} [:td (codelists-for-facet facet-name facets)])
+   (when matching-observations
+     [:td
+      [:small (str "Found " matching-observations " matching observations")]
+      [:div
+       [:a.btn.btn-secondary.btn-sm
+        {:href (pu/link-to-pmd-dataset id facets)} "View Data"]]])])
+
+(defn- dataset-table [data applied-facets]
+  (when (seq data)
+    [:table.table
+     [:thead (column-headers data applied-facets)]
+     [:tbody (for [ds data]
+               (dataset-row ds applied-facets))]]))
 
 (defn results []
-  (let [data @(rf/subscribe [:results.datasets/data])]
-    (if @(rf/subscribe [:results.datasets/error])
-      [:div.alert.alert-danger "Sorry, something went wrong."]
-      (let [applied-facets @(rf/subscribe [:facets/applied])]
-        [:<>
-         (observation-count data)
-         (when (seq data)
-           [:table.table
-            [:thead
-             [:tr
-              [:th "Title / Description"]
-              (for [[facet-name _] applied-facets]
-                ^{:key facet-name}[:th facet-name (remove-facet-button facet-name)])
-              (when (some :matching-observations data)
-                [:th])]]
-            [:tbody
-             (for [{:keys [label comment id matching-observations facets] :as ds} data]
-               ^{:key id}
-               [:tr
-                [:td
-                 [:strong label]
-                 [:p comment]]
-                (for [[facet-name _] applied-facets]
-                  ^{:key [id facet-name]}[:td (codelists-for-facet facet-name facets)])
-                (when matching-observations
-                  [:td
-                   [:small (str "Found " matching-observations " matching observations")]
-                   [:div
-                    [:a.btn.btn-secondary.btn-sm
-                     {:href (pu/link-to-pmd-dataset id facets)} "View Data"]]])])]])]))))
+  (if @(rf/subscribe [:results.datasets/error])
+    (error-message)
+    (let [data @(rf/subscribe [:results.datasets/data])
+          applied-facets @(rf/subscribe [:facets/applied])]
+      [:<>
+       (observation-count data)
+       (dataset-table data applied-facets)])))

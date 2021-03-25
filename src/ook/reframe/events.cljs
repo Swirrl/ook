@@ -45,6 +45,11 @@
                 [:facets/applied (:name current-facet)]
                 (:selection current-facet)))))
 
+(rf/reg-event-db
+  :filters/remove-facet
+  (fn [db [_ facet-name]]
+    (update db :facets/applied dissoc facet-name)))
+
 ;;;;; UI STATE MANAGEMENT
 
 ;; (rf/reg-event-db :ui.codes/query-change (fn [db [_ new-query]]
