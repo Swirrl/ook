@@ -1,4 +1,5 @@
-(ns ook.reframe.db)
+(ns ook.reframe.db
+  (:require [ook.params.util :as pu]))
 
 ;; (defn code-selection->list [db]
 ;;   (some->> (:ui.codes/selection db)
@@ -10,6 +11,7 @@
 ;;     (seq (:ui.codes/selection db)) (merge {:facet (code-selection->list db)})))
 
 (defn filters->query-params [db]
-  {:facet (map (fn [[name selection]]
-                 (cons name selection))
-               (:facets/applied db))})
+  {:facet (->> (:facets/applied db)
+               (map (fn [[name selection]]
+                      (cons name selection)))
+               (map pu/encode-facet))})

@@ -1,6 +1,7 @@
 (ns ook.params.parse
   (:require
    [ook.util :as u]
+   [cemerick.url :as url]
    [clojure.string :as str]))
 
 (defn get-query [{:keys [query-params]}]
@@ -18,8 +19,10 @@
   "Parse query param facet tuples into a map of facet-name [codelists] for
   use in db queries, referred to as 'selection' elsewhere"
   [{:keys [query-params]}]
-  (let [facets [(get query-params "facet")]]
-    (reduce (fn [result [facet-name & codelists]]
-              (assoc result facet-name codelists))
-            {}
-            facets)))
+  (->> (get query-params "facet")
+       u/box
+       (map #(str/split % #","))
+       (map #(map url/url-decode %))
+       (reduce (fn [result [facet-name & codelists]]
+                 (assoc result facet-name codelists))
+               {})))
