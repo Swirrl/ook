@@ -82,6 +82,20 @@
            (for [dim (:dimensions selected-facet)]
              ^{:key dim} [:li dim])]]))]))
 
+(defn- facet-button [{:keys [name] :as facet} selected-facet]
+  ^{:key name}
+  [:button.btn.me-2
+   {:type "button"
+    :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
+    :on-click #(rf/dispatch [:ui.facets/set-current facet])}
+   name])
+
+(defn- cancel-facet-selection []
+  [:button.btn-close.border.border-dark
+   {:type "button"
+    :aria-label "Close filter selection"
+    :on-click #(rf/dispatch [:ui.facets/set-current nil])}])
+
 (defn configured-facets [facets]
   (let [selected-facet @(rf/subscribe [:ui.facets/current])
         applied-facets @(rf/subscribe [:facets/applied])]
@@ -93,13 +107,7 @@
        [:div
         (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
-            ^{:key name} [:button.btn.me-2
-                          {:type "button"
-                           :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
-                           :on-click #(rf/dispatch [:ui.facets/set-current facet])}
-                          name]))]
-       [:button.btn-close.border.border-dark
-        {:type "button"
-         :aria-label "Close filter selection"
-         :on-click #(rf/dispatch [:ui.facets/set-current nil])}]]
+            (facet-button facet selected-facet)))]
+       (when selected-facet
+         (cancel-facet-selection))]
       (codelist-selection selected-facet)]]))
