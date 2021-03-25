@@ -48,7 +48,7 @@
       ;;       result (db/get-datasets db filters)]
       ;;   (-> (resp/response (t/write-string result))
       ;;       transit-content-type))
-      (let [facets (p/parse-named-facets request)]
+      (let [facets (p/get-facets request)]
         (-> (db/get-datasets-for-facets db facets)
             t/write-string
             resp/response

@@ -46,7 +46,7 @@
 
 (defn- apply-filters []
   (rf/dispatch [:filters/add-current-facet])
-  (rf/dispatch [:filters/apply]))
+  (rf/dispatch [:app/navigate :ook.route/search]))
 
 (defn- codelist-selection [selected-facet]
   (when selected-facet

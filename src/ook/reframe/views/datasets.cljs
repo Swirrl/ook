@@ -6,10 +6,14 @@
 (defn- total-observations [data]
   (reduce + (map :matching-observations data)))
 
+(defn- remove-facet [facet-name]
+  (rf/dispatch [:filters/remove-facet facet-name])
+  (rf/dispatch [:app/navigate :ook.route/search]))
+
 (defn- remove-facet-button [facet-name]
   [:button.btn-close.border.btn-sm.ms-2.align-middle
    {:type "button"
-    :on-click #(rf/dispatch [:filters/remove-facet facet-name])}])
+    :on-click #(remove-facet facet-name)}])
 
 (defn- observation-count [data]
   (let [dataset-count (count data)
@@ -31,8 +35,7 @@
   [:tr
    [:th "Title / Description"]
    (for [[facet-name _] applied-facets]
-     ^{:key facet-name} [:th
-                         facet-name (remove-facet-button facet-name)])
+     ^{:key facet-name} [:th facet-name (remove-facet-button facet-name)])
    (when (some :matching-observations data)
      [:th])])
 

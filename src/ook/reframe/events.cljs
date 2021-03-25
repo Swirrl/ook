@@ -3,21 +3,41 @@
             [ook.reframe.db :as db]
             [ajax.core :as ajax]
             [ook.util :as u]
+            [ook.params.parse :as p]
+            [ook.concerns.transit :as t]
+            [goog.object :as go]
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
 ;;;;;; INITIALIZATION
 
-(rf/reg-event-db :init/set-facets (fn [db [_ facets]]
-                                    (assoc db :facets/config facets)))
+;; (rf/reg-event-db :init/set-facets (fn [db [_ facets]]
+;;                                     (assoc db :facets/config facets)))
 
-(rf/reg-event-fx :init/initialize-db (fn [_ [_ facets]]
-                                       {:http-xhrio {:method :get
-                                                     :uri "/datasets"
-                                                     :response-format (ajax/transit-response-format)
-                                                     :on-success [:results.datasets.request/success]
-                                                     :on-error [:results.datasets.request/error]}
-                                        :dispatch [:init/set-facets facets]}))
+(rf/reg-cofx
+ :app/initial-state
+ (fn [cofx _]
+   (assoc cofx
+          :initial-state
+          (let [el (.getElementById js/document "app")]
+            (-> el
+                (go/get "attributes")
+                (go/get "data-init")
+                (go/get "value")
+                (t/read-string))))))
+
+(rf/reg-event-fx
+ :init/initialize-db
+ [(rf/inject-cofx :app/initial-state)]
+ (fn [{db :db facets :initial-state} _]
+   {:http-xhrio {:method :get
+                 :uri "/datasets"
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:results.datasets.request/success]
+                 :on-error [:results.datasets.request/error]}
+    :db (-> db
+            (assoc :facets/config facets)
+            (dissoc :facets/applied :ui.facets/current))}))
 
 ;;;;;; FACETS
 
@@ -38,17 +58,17 @@
      (update-in db [:ui.facets/current :selection] update-fn val))))
 
 (rf/reg-event-db
-  :filters/add-current-facet
-  (fn [db _]
-    (let [current-facet (:ui.facets/current db)]
-      (assoc-in db
-                [:facets/applied (:name current-facet)]
-                (:selection current-facet)))))
+ :filters/add-current-facet
+ (fn [db _]
+   (let [current-facet (:ui.facets/current db)]
+     (assoc-in db
+               [:facets/applied (:name current-facet)]
+               (:selection current-facet)))))
 
 (rf/reg-event-db
-  :filters/remove-facet
-  (fn [db [_ facet-name]]
-    (update db :facets/applied dissoc facet-name)))
+ :filters/remove-facet
+ (fn [db [_ facet-name]]
+   (update db :facets/applied dissoc facet-name)))
 
 ;;;;; UI STATE MANAGEMENT
 
@@ -108,14 +128,16 @@
 
 (rf/reg-event-fx
  :filters/apply
- (fn [{db :db} _]
+ (fn [{db :db} [_ facets]]
    {:http-xhrio {:method :get
                  :uri "/apply-filters"
-                 :params (db/filters->query-params db)
+                 :params {:facet facets}
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-failure [:results.datasets.request/error]}
-    :db (dissoc db :ui.facets/current)}))
+    :db (-> db
+            (assoc :facets/applied (p/parse-named-facets facets))
+            (dissoc :ui.facets/current))}))
 
 ;;;; NAVIGATION
 

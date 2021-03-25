@@ -15,14 +15,17 @@
 ;;                (map #(str/split % #","))
 ;;                (map (fn [[dim val]] {:value val :dimension dim}))))))
 
-(defn parse-named-facets
-  "Parse query param facet tuples into a map of facet-name [codelists] for
-  use in db queries, referred to as 'selection' elsewhere"
-  [{:keys [query-params]}]
-  (->> (get query-params "facet")
+(defn parse-named-facets [facets]
+  (->> facets
        u/box
        (map #(str/split % #","))
        (map #(map url/url-decode %))
        (reduce (fn [result [facet-name & codelists]]
                  (assoc result facet-name codelists))
                {})))
+
+(defn get-facets
+  "Parse query param facet tuples into a map of facet-name [codelists] for
+  use in db queries, referred to as 'selection' elsewhere"
+  [{:keys [query-params]}]
+  (-> query-params (get "facet") parse-named-facets))

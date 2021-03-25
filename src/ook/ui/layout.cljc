@@ -1,7 +1,7 @@
 (ns ook.ui.layout
   (:require [hiccup2.core :as h]
             [hiccup.util :as h.u]
-            #?@(:cljs [[reitit.frontend.easy :as rfe]])
+            #?@(:cljs [[reframe.core :as rf]])
             [ook.concerns.transit :as t]))
 
 ;; Hiccup2 doesn't include versions of the hiccup.page/html5 macro & doesn't
@@ -31,7 +31,7 @@
     [:div.container
      [:h1
       [:a.navbar-brand #?(:clj {:href "/"}
-                          :cljs {:href (rfe/href :ook.route/home)})
+                          :cljs {:on-click (rf/dispatch [:app/navigate :ook.route/home])})
        "Trade Data Search"]]
      [:span.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]])
 

@@ -4,6 +4,6 @@
 
 (deftest parse-named-facets-test
   (testing "it converts query params to a selection properly formatted"
-    (let [req {:query-params {"facet" ["facet name" "codelist1" "codelist2"]}}
-          result (sut/parse-named-facets req)]
-      (is (= result {"facet name" ["codelist1" "codelist2"]})))))
+    (let [req {:query-params {"facet" ["facetname,codelist1,codelist2" ]}}
+          result (sut/get-facets req)]
+      (is (= result {"facetname" ["codelist1" "codelist2"]})))))

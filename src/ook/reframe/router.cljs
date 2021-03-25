@@ -8,31 +8,29 @@
 
 (def ^:private routes
   [["/" {:name :ook.route/home
-         :view views/home
-         ;; :controllers [{:start #(rf/dispatch [:init/initialize-db])}]
-         }]
+         :view views/search
+         :controllers [{:start #(rf/dispatch [:init/initialize-db])}]}]
+
+   ;; ["/search" {:name :ook.route/search
+   ;;             :view views/results
+   ;;             :parameters {:query {:q string? :facet [string?]}}
+   ;;             :controllers [{:start (fn [params]
+   ;;                                     (let [query (-> params :query :q)
+   ;;                                           facets (-> params :query :facet)]
+   ;;                                       (rf/dispatch [:codes/submit-search query])
+   ;;                                       (when facets
+   ;;                                         (rf/dispatch [:filters/apply-code-selection facets]))))
+   ;;                            :parameters {:query [:q :facet]}}]}]
 
    ["/search" {:name :ook.route/search
-               :view views/results
-               :parameters {:query {:q string? :facet [string?]}}
+               :view views/search
+               :parameters {:query {:facet [string?]}}
                :controllers [{:start (fn [params]
-                                       (let [query (-> params :query :q)
-                                             facets (-> params :query :facet)]
-                                         (rf/dispatch [:codes/submit-search query])
-                                         (when facets
-                                           (rf/dispatch [:filters/apply-code-selection facets]))))
-                              :parameters {:query [:q :facet]}}]}]]
-
-  ;; ["/data" {:name :ook.route/data
-  ;;           :view views/home
-  ;;           :parameters {:facet [string?]}
-  ;;           :controllers [{:start (fn [params]
-  ;;                                   (let [facets (-> params :query :facet)]
-  ;;                                     ;; get facets from checkbox ui (selection) to server
-  ;;                                     (rf/dispatch [:filters/apply-facet])))
-  ;;                          :parameters {:query [:facet]}}]}
-  ;;  ]
-  )
+                                       (let [facets (-> params :query :facet)]
+                                         (if facets
+                                           (rf/dispatch [:filters/apply facets])
+                                           (rf/dispatch [:init/initialize-db]))))
+                              :parameters {:query [:facet]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]
