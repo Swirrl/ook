@@ -67,10 +67,6 @@
       (esd/search "dataset" "_doc" {:query (q/match-all)})
       clean-datasets-result))
 
-(comment
-  (def conn (esu/get-connection "http://localhost:9200"))
-  )
-
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "dataset" "_doc"
@@ -86,3 +82,6 @@
      (facets/apply-facets datasets components facets selections)
      (map normalize-keys)
      (map flatten-description-lang-strings))))
+
+(comment
+  (def conn (esu/get-connection "http://localhost:9200")))

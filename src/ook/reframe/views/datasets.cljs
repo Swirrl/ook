@@ -10,7 +10,8 @@
   (let [data @(rf/subscribe [:results.datasets/data])
         dataset-count (count data)
         obs (total-observations data)]
-    (when data
+    (if @(rf/subscribe [:results.datasets/error])
+      [:div.alert.alert-danger.my-4 "Sorry, something went wrong."]
       [:<>
        (when (pos? obs)
          [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "

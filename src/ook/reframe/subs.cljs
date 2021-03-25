@@ -30,6 +30,9 @@
 (rf/reg-sub :results.datasets/data (fn [db _]
                                      (:results.datasets/data db)))
 
+(rf/reg-sub :results.datasets/error (fn [db _]
+                                      (:results.datasets/error db)))
+
 ;;;;;; NAVIGATION
 
 (rf/reg-sub :app/current-route (fn [db _]

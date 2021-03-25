@@ -65,7 +65,9 @@
                                                 (assoc db :results.codes/error error)))
 
 (rf/reg-event-db :results.datasets.request/success (fn [db [_ result]]
-                                                     (assoc db :results.datasets/data result)))
+                                                     (-> db
+                                                         (dissoc :results.codes/error)
+                                                         (assoc :results.datasets/data result))))
 
 (rf/reg-event-db :results.datasets.request/error (fn [db [_ result]]
                                                    (assoc db :results.datasets/error result)))
@@ -78,7 +80,7 @@
 ;;                                                       :params {:q query}
 ;;                                                       :response-format (ajax/transit-response-format)
 ;;                                                       :on-success [:results.codes.request/success query]
-;;                                                       :on-error [:results.codes.request/errror]}
+;;                                                       :on-failure [:results.codes.request/errror]}
 ;;                                          :fx [[:dispatch [:ui.codes/query-change query]]
 ;;                                               [:dispatch [:results.datasets/reset]]]}))
 
@@ -88,18 +90,18 @@
 ;;                                                                :params {:facet facets}
 ;;                                                                :response-format (ajax/transit-response-format)
 ;;                                                                :on-success [:results.datasets.request/success]
-;;                                                                :on-error [:results.datasets.request/errror]}
+;;                                                                :on-failure [:results.datasets.request/errror]}
 ;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 (rf/reg-event-fx
  :filters/add-filter-facet
- (fn [{db :db} [_ facet-name]]
+ (fn [{db :db} [_ facet]]
    {:http-xhrio {:method :get
                  :uri "/apply-filters"
-                 :params {:named-facet (:name facet-name)}
+                 :params {:facet (cons (:name facet) (:selection facet))}
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
-                 :on-error [:results.datasets.request/error]}
+                 :on-failure [:results.datasets.request/error]}
     :db (dissoc db :ui.facets/current)}))
 
 ;;;; NAVIGATION
