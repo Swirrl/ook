@@ -37,6 +37,14 @@
          update-fn (if selected? disj conj)]
      (update-in db [:ui.facets/current :selection] update-fn val))))
 
+(rf/reg-event-db
+  :filters/add-current-facet
+  (fn [db _]
+    (let [current-facet (:ui.facets/current db)]
+      (assoc-in db
+                [:facets/applied (:name current-facet)]
+                (:selection current-facet)))))
+
 ;;;;; UI STATE MANAGEMENT
 
 ;; (rf/reg-event-db :ui.codes/query-change (fn [db [_ new-query]]
@@ -54,15 +62,15 @@
 ;; (rf/reg-event-db :results.datasets/reset (fn [db _]
 ;;                                            (dissoc db :results.datasets/data :ui.codes/selection)))
 
-;;; HTTP RESPONSES
+;;; HTTP REQUESTS/RESPONSES
 
-(rf/reg-event-db :results.codes.request/success (fn [db [_ query result]]
-                                                  (assoc db
-                                                         :results.codes/data result
-                                                         :results.codes/query query)))
+;; (rf/reg-event-db :results.codes.request/success (fn [db [_ query result]]
+;;                                                   (assoc db
+;;                                                          :results.codes/data result
+;;                                                          :results.codes/query query)))
 
-(rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
-                                                (assoc db :results.codes/error error)))
+;; (rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
+;;                                                 (assoc db :results.codes/error error)))
 
 (rf/reg-event-db :results.datasets.request/success (fn [db [_ result]]
                                                      (-> db
@@ -94,11 +102,11 @@
 ;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 (rf/reg-event-fx
- :filters/add-filter-facet
- (fn [{db :db} [_ facet]]
+ :filters/apply
+ (fn [{db :db} _]
    {:http-xhrio {:method :get
                  :uri "/apply-filters"
-                 :params {:facet (cons (:name facet) (:selection facet))}
+                 :params (db/filters->query-params db)
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-failure [:results.datasets.request/error]}
@@ -110,7 +118,7 @@
                                   (assoc db :app/current-route new-match)))
 
 (rf/reg-event-fx :app/navigate (fn [{:keys [db]} [_ route]]
-                                 (let [query-params (db/->query-params db)]
+                                 (let [query-params (db/filters->query-params db)]
                                    {:app/navigate! (cond-> {:route route}
                                                      (= :ook.route/search route) (merge {:query query-params}))})))
 

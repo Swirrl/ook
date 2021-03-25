@@ -44,13 +44,17 @@
         (when (seq codes)
           [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Find datasets that use these codes"])]))))
 
+(defn- apply-filters []
+  (rf/dispatch [:filters/add-current-facet])
+  (rf/dispatch [:filters/apply]))
+
 (defn- codelist-selection [selected-facet]
   (when selected-facet
     [:<>
      [:button.btn.btn-primary.mt-3
       {:type "button"
        :disabled (not (seq (:codelists selected-facet)))
-       :on-click #(rf/dispatch [:filters/add-filter-facet selected-facet])}
+       :on-click apply-filters}
       "Apply filter"]
      (let [{:keys [codelists]} selected-facet]
        (if (seq codelists)
@@ -79,22 +83,23 @@
              ^{:key dim} [:li dim])]]))]))
 
 (defn configured-facets [facets]
-  (let [selected-facet @(rf/subscribe [:ui.facets/current])]
-    [:div.card
+  (let [selected-facet @(rf/subscribe [:ui.facets/current])
+        applied-facets @(rf/subscribe [:facets/applied])]
+    [:div.card.my-4
      [:div.card-body
       [:h2.h5.card-title.me-2.d-inline "Find data"]
       [:span.text-muted "Add a filter"]
       [:div.mt-3.d-flex.align-items-center.justify-content-between
        [:div
         (for [{:keys [name] :as facet} facets]
-          ^{:key name} [:button.btn.me-2
-                        {:type "button"
-                         :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
-                         :on-click #(rf/dispatch [:ui.facets/set-current facet])}
-                        name])]
+          (when-not (get applied-facets name)
+            ^{:key name} [:button.btn.me-2
+                          {:type "button"
+                           :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
+                           :on-click #(rf/dispatch [:ui.facets/set-current facet])}
+                          name]))]
        [:button.btn-close.border.border-dark
         {:type "button"
          :aria-label "Close filter selection"
          :on-click #(rf/dispatch [:ui.facets/set-current nil])}]]
       (codelist-selection selected-facet)]]))
-

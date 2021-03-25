@@ -19,8 +19,8 @@
   (components->codelists [_ component-uris]
     (components/components->codelists component-uris opts))
 
-  (get-datasets [_ filters]
-    (ds/apply-filter filters opts))
+  ;; (get-datasets [_ filters]
+  ;;   (ds/apply-filter filters opts))
 
   (get-datasets-for-facets [_ facets]
     (ds/for-facets facets opts))

@@ -25,6 +25,11 @@
 ;; (rf/reg-sub :results.codes/query (fn [db _]
 ;;                                    (:results.codes/query db)))
 
+;;;;;; FACETS
+
+(rf/reg-sub :facets/applied (fn [db _]
+                              (:facets/applied db)))
+
 ;;;;;; DATASETS
 
 (rf/reg-sub :results.datasets/data (fn [db _]

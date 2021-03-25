@@ -31,36 +31,36 @@
        (map normalize-keys)
        (map flatten-description-lang-strings)))
 
-(defn- cubes->datasets [conn cubes]
-  (-> conn
-      (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
-      clean-datasets-result))
+;; (defn- cubes->datasets [conn cubes]
+;;   (-> conn
+;;       (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
+;;       clean-datasets-result))
 
-(defn- datasets-for-facet [conn {:keys [dimension value] :as facet}]
-  (->> (esd/search conn "observation" "_doc"
-                   {:size 0
-                    :query {:term {(str dimension ".@id") value}}
-                    :aggregations {:observation-count
-                                   {:terms
-                                    {:field "qb:dataSet.@id"}}}})
-       :aggregations :observation-count :buckets
-       (map #(set/rename-keys % {:key :cube
-                                 :doc_count :matching-observations}))
-       (map #(assoc % :filter-facets [facet]))))
+;; (defn- datasets-for-facet [conn {:keys [dimension value] :as facet}]
+;;   (->> (esd/search conn "observation" "_doc"
+;;                    {:size 0
+;;                     :query {:term {(str dimension ".@id") value}}
+;;                     :aggregations {:observation-count
+;;                                    {:terms
+;;                                     {:field "qb:dataSet.@id"}}}})
+;;        :aggregations :observation-count :buckets
+;;        (map #(set/rename-keys % {:key :cube
+;;                                  :doc_count :matching-observations}))
+;;        (map #(assoc % :filter-facets [facet]))))
 
-(defn- get-datasets [conn facets]
-  (let [matches (->> facets
-                     ;; get all datasets that match a given facet
-                     (mapcat (partial datasets-for-facet conn))
-                     (group-by :cube)
-                     ;; group all filter facets that found this dataset into one list
-                     (map (fn [[_ datasets]] (reduce mm/meta-merge datasets))))
-        more-ds-info (cubes->datasets conn (map :cube matches))]
-    (u/mjoin matches more-ds-info :cube)))
+;; (defn- get-datasets [conn facets]
+;;   (let [matches (->> facets
+;;                      ;; get all datasets that match a given facet
+;;                      (mapcat (partial datasets-for-facet conn))
+;;                      (group-by :cube)
+;;                      ;; group all filter facets that found this dataset into one list
+;;                      (map (fn [[_ datasets]] (reduce mm/meta-merge datasets))))
+;;         more-ds-info (cubes->datasets conn (map :cube matches))]
+;;     (u/mjoin matches more-ds-info :cube)))
 
-(defn apply-filter [facets {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (get-datasets conn facets)))
+;; (defn apply-filter [facets {:keys [elastic/endpoint]}]
+;;   (let [conn (esu/get-connection endpoint)]
+;;     (get-datasets conn facets)))
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
