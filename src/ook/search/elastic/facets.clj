@@ -25,6 +25,9 @@
 (defn apply-selections
   "Applies components (replacing ids with docs) and selections (by filtering) to configured facets"
   [facets components selections]
+  {:post [(do
+            "Facet selection has no dimensions"
+            (not (empty? (mapcat :dimensions %))))]}
   (let [->component (util/id-lookup components)
         matches-codelists? (fn [codelists]
                              (fn [c]
