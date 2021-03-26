@@ -1,5 +1,7 @@
 (ns dev
   (:require [ook.main :as main]
+            [integrant.core :as ig]
+            [ook.concerns.integrant :as i]
             [integrant.repl :as igr :refer [go reset halt]]
             [integrant.repl.state :refer [system config]]
             [clojure.tools.namespace.repl :as tns]
@@ -26,3 +28,19 @@
      ;; notice this uses the main meta-config, but we just rely
      ;; on the right configs being on the resource path for the alias
      (main/prep-config {:profiles profiles})))
+
+
+
+(defn start-system! [profiles]
+  (i/exec-config {:profiles profiles}))
+
+(def stop-system! ig/halt!)
+
+(defmacro with-system
+  "Start a system with the given profiles"
+  [[sym profiles] & body]
+  `(let [~sym (start-system! ~profiles)]
+     (try
+       ~@body
+       (finally
+         (stop-system! ~sym)))))
