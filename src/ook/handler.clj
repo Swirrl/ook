@@ -12,7 +12,8 @@
   (fn [_request]
     (let [facets-with-codelists (->> (db/get-facets db)
                                      (map (fn [facet]
-                                            (assoc facet :codelists
+                                            (assoc facet
+                                                   :codelists
                                                    (db/components->codelists
                                                     db
                                                     (:dimensions facet))))))]
@@ -25,7 +26,7 @@
     (= "application/transit+json" accept)))
 
 (def invalid-format-response
-  {:status  406 :headers {} :body "Unsupported content type"})
+  {:status 406 :headers {} :body "Unsupported content type"})
 
 (defn- transit-content-type [response]
   (-> response (resp/header "Content-Type" "application/transit+json")))

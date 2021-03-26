@@ -9,9 +9,25 @@
 
 ;;;;;; EPHEMERAL UI STATE
 
-(rf/reg-sub :ui.facets/current (fn [db _]
-                                 (:ui.facets/current db)))
+(rf/reg-sub
+ :ui.facets/current
+ (fn [db _]
+   (:ui.facets/current db)))
 
+(rf/reg-sub
+ :ui.facets/current-codelists
+ (fn [db _]
+   (-> db :ui.facets/current :codelists)))
+
+(rf/reg-sub
+ :ui.facets/current-selection
+ (fn [db _]
+   (-> db :ui.facets/current :selection)))
+
+(rf/reg-sub
+  :ui.facets.current/codelist-selected?
+  (fn [db [_ codelist]]
+    (-> db :ui.facets/current :selection (get codelist) boolean)))
 
 ;; (rf/reg-sub :ui.codes/query (fn [db _]
 ;;                               (:ui.codes/query db)))

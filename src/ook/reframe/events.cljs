@@ -46,7 +46,8 @@
  (fn [db [_ {:keys [codelists] :as facet}]]
    ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
    (if facet
-     (let [with-selection (assoc facet :selection (->> codelists (map :codelist) set))]
+     (let [with-selection (assoc facet :selection (->> codelists ;; (map :codelist)
+                                                       set))]
        (assoc db :ui.facets/current with-selection))
      (dissoc db :ui.facets/current))))
 

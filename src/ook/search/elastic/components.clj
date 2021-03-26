@@ -15,7 +15,10 @@
          :hits :hits (map :_source))))
 
 (defn components->codelists [uris opts]
-  (->> opts
-       (get-components uris)
-       (map #(select-keys % [:codelist :label]))
-       (remove #(nil? (:codelist %)))))
+  (let [codelists (->> opts
+                       (get-components uris)
+                       (map #(select-keys % [:codelist]))
+                       (remove #(nil? (:codelist %))))
+        ;; merge with codelist labels once we get those in the db
+        ]
+    (->> codelists (map :codelist) distinct)))

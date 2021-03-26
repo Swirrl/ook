@@ -24,7 +24,7 @@
 
 (defn- codelists-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
-        codelists (->> facet :dimensions (map :codelist))]
+        codelists (->> facet :dimensions (map :codelist) distinct)]
     (for [cl codelists]
       ^{:key cl} [:p.badge.bg-secondary cl])))
 
