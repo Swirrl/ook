@@ -1,19 +1,19 @@
 {:ook.search/facets
  [{:name "Product"
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/product"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/product"}
   {:name "Industry" ;; should this be further down the list?
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/industry"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/industry"}
   {:name "Reporter Geography" ;; should this be joined with http://gss-data.org.uk/def/trade/property/dimension/geography or sdmxd:refArea
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/reporter-geography"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/reporter-geography"}
   {:name "Partner Geography"
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/partner-geography"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/partner-geography"}
   {:name "Flow"
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/flow-directions"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/flow-directions"}
   {:name "Date"
-   :parent_dimension "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod"}
+   :parent-dimension "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod"}
   {:name "Measure"
-   :parent_dimension "http://purl.org/linked-data/cube#measureType"}
+   :parent-dimension "http://purl.org/linked-data/cube#measureType"}
   {:name "Basis"
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/international-trade-basis"}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/international-trade-basis"}
   {:name "Seasonality"
-   :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/seasonal-adjustments"}]}
+   :parent-dimension "http://gss-data.org.uk/def/trade/property/dimension/seasonal-adjustments"}]}
