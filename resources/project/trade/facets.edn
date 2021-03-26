@@ -1,4 +1,4 @@
-{:ook.search.facets
+{:ook.search/facets
  [{:name "Product"
    :parent_dimension "http://gss-data.org.uk/def/trade/property/dimension/product"}
   {:name "Industry" ;; should this be further down the list?
