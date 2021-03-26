@@ -30,9 +30,9 @@
 
         (testing "get-facets"
           (let [facets (sut/get-facets db)]
-            (testing "Resolves parent-dimension to its sub-properties"
+            (testing "Resolves parent-dimension to include itself and sub-properties"
               (let [date (first (filter #(= "Date" (:name %)) facets))]
-                (is (= 2 (count (:dimensions date))))
+                (is (= 3 (count (:dimensions date))))
                 (is (not (contains? date :parent-dimension)))))))
 
         (testing "get-components"
