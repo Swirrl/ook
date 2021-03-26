@@ -33,8 +33,8 @@
   (map io/resource ["base.edn"
                     "app.edn"
                     "prod.edn"
-                    "project/fixture/facets.edn"
-                    ;;"project/trade/facets-draft.edn"
+                    ;;"project/fixture/facets.edn"
+                    "project/trade/facets-draft.edn"
                     ]))
 
 (defn exec-config [opts]
