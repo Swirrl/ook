@@ -10,7 +10,7 @@
 (def test-profiles
   (concat main/core-profiles
           [(io/resource "test.edn")
-           (io/resource "fixture-facets.edn")]))
+           (io/resource "project/fixture/facets.edn")]))
 
 (defn start-system! [profiles]
   (i/exec-config {:profiles profiles}))

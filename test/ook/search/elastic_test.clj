@@ -14,8 +14,8 @@
     (with-system [system ["drafter-client.edn"
                           "cogs-staging.edn"
                           "elasticsearch-test.edn"
-                          "fixture-data.edn"
-                          "fixture-facets.edn"]]
+                          "project/fixture/data.edn"
+                          "project/fixture/facets.edn"]]
       (setup/load-fixtures! system)
 
       (let [db (get-db system)]

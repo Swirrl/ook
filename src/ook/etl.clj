@@ -203,7 +203,7 @@
                  "cogs-staging.edn"
                  "elasticsearch-development.edn"
                  "load-data.edn"
-                 "trade-data.edn"
+                 "project/trade/data.edn"
                  ]}))
 
   )
