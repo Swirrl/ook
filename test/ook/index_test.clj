@@ -8,6 +8,7 @@
 
 (deftest create-and-delete-index-test
   (with-system [system ["elasticsearch-test.edn"]]
+    (sut/delete-indicies system)
     (let [responses (sut/create-indicies system)]
       (testing "Can create indicies"
         (is (every? acknowledged? (vals responses))))
