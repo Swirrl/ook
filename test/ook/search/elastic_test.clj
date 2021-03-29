@@ -1,13 +1,9 @@
 (ns ook.search.elastic-test
   (:require [clojure.test :refer [deftest testing is]]
-            [ook.test.util.setup :as setup :refer [with-system]]
-            [ook.search.elastic :as es]
+            [ook.test.util.setup :as setup :refer [with-system get-db]]
             [ook.search.db :as sut]))
 
-(defn get-db [system]
-  (es/->Elasticsearch
-   {:elastic/endpoint (:ook.concerns.elastic/endpoint system)
-    :ook/facets (:ook.search/facets system)}))
+
 
 (deftest database-test
   (testing "Extracting resources from the index"

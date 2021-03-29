@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [ook.etl :as etl]
             [ook.index :as idx]
+            [ook.search.elastic :as es]
             [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [vcr-clj.clj-http :refer [with-cassette]]
@@ -55,3 +56,8 @@
 
   (with-cassette {:name :fixtures :recordable? not-localhost?}
     (etl/pipeline system)))
+
+(defn get-db [system]
+  (es/->Elasticsearch
+   {:elastic/endpoint (:ook.concerns.elastic/endpoint system)
+    :ook/facets (:ook.search/facets system)}))
