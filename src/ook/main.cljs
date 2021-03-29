@@ -4,8 +4,6 @@
    [ook.reframe.router :as router]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
-   [ook.concerns.transit :as t]
-   [goog.object :as go]
    [re-frame.core :as rf]
    [reagent.dom :as rdom]))
 
@@ -19,13 +17,7 @@
 
 (defn ^:export init []
   (router/init!)
-  (let [el (.getElementById js/document "app")
-        initial-state (-> el
-                          (go/get "attributes")
-                          (go/get "data-init")
-                          (go/get "value")
-                          (t/read-string))]
-    (rf/dispatch-sync [:init/initialize-db initial-state])
+  (let [el (.getElementById js/document "app")]
     (render el)))
 
 (defn ^:dev/after-load clear-cache-and-render!
