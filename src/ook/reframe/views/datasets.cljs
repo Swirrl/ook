@@ -60,14 +60,14 @@
      [:table.table
       [:thead (column-headers data applied-facets)]
       [:tbody (for [ds data]
-                (dataset-row ds applied-facets))]]
-     [:div.d-flex.align-items-center
-      [:strong "No datasets matched the applied filters."]
-      [:button.btn.btn-link.mx-1.p-0
-       {:type "button"
-        :on-click #(rf/dispatch [:init/initialize-db])}
-       "Clear filters"]
-      [:span "to reset and make a new selection."]]]))
+                (dataset-row ds applied-facets))]]]
+    [:div.d-flex.align-items-center
+     [:strong "No datasets matched the applied filters."]
+     [:button.btn.btn-link.mx-1.p-0
+      {:type "button"
+       :on-click #(rf/dispatch [:init/initialize-db])}
+      "Clear filters"]
+     [:span "to reset and make a new selection."]]))
 
 (defn results []
   (if @(rf/subscribe [:results.datasets/error])

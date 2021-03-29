@@ -6,10 +6,13 @@
    [reitit.frontend.easy :as rtfe]
    [reitit.frontend :as rt]))
 
+(def home-route-data
+  {:name :ook.route/home
+   :view views/search
+   :controllers [{:start #(rf/dispatch [:init/initialize-db])}]})
+
 (def ^:private routes
-  [["/" {:name :ook.route/home
-         :view views/search
-         :controllers [{:start #(rf/dispatch [:init/initialize-db])}]}]
+  [["/" home-route-data]
 
    ;; ["/search" {:name :ook.route/search
    ;;             :view views/results

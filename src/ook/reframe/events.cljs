@@ -3,11 +3,24 @@
             [ook.reframe.db :as db]
             [ajax.core :as ajax]
             [ook.util :as u]
+            [clojure.spec.alpha :as s]
             [ook.params.parse :as p]
             [ook.concerns.transit :as t]
             [goog.object :as go]
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
+
+;;;;;; VALIDATION
+
+(defn- validate
+  "Throws an exception (in development only) if `db` does not match the given spec"
+  [spec db]
+  (when ^boolean goog/DEBUG
+    (when-let [error (s/explain-data spec db)]
+      (throw (ex-info  (str "db spec validation failed: " (s/explain-str spec db))
+                       error)))))
+
+(def validation-interceptor (rf/after (partial validate :ook/db)))
 
 ;;;;;; INITIALIZATION
 
@@ -28,14 +41,15 @@
 
 (rf/reg-event-fx
  :init/initialize-db
- [(rf/inject-cofx :app/initial-state)]
- (fn [{db :db facets :initial-state} _]
+ [(rf/inject-cofx :app/initial-state)
+  validation-interceptor]
+ (fn [{facets :initial-state} _]
    {:http-xhrio {:method :get
                  :uri "/datasets"
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-error [:results.datasets.request/error]}
-    :db (-> db
+    :db (-> db/initial-db
             (assoc :facets/config facets)
             (dissoc :facets/applied :ui.facets/current))}))
 
@@ -43,6 +57,7 @@
 
 (rf/reg-event-db
  :ui.facets/set-current
+ [validation-interceptor]
  (fn [db [_ {:keys [codelists] :as facet}]]
    ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
    (if facet
@@ -53,6 +68,7 @@
 
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
+ [validation-interceptor]
  (fn [db [_ val]]
    (let [selected? (-> db :ui.facets/current :selection (get val))
          update-fn (if selected? disj conj)]
@@ -60,6 +76,7 @@
 
 (rf/reg-event-db
  :filters/add-current-facet
+ [validation-interceptor]
  (fn [db _]
    (let [current-facet (:ui.facets/current db)]
      (assoc-in db
@@ -68,6 +85,7 @@
 
 (rf/reg-event-db
  :filters/remove-facet
+ [validation-interceptor]
  (fn [db [_ facet-name]]
    (update db :facets/applied dissoc facet-name)))
 
@@ -98,13 +116,19 @@
 ;; (rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
 ;;                                                 (assoc db :results.codes/error error)))
 
-(rf/reg-event-db :results.datasets.request/success (fn [db [_ result]]
-                                                     (-> db
-                                                         (dissoc :results.codes/error)
-                                                         (assoc :results.datasets/data result))))
+(rf/reg-event-db
+ :results.datasets.request/success
+ [validation-interceptor]
+ (fn [db [_ result]]
+   (-> db
+       (dissoc :results.codes/error)
+       (assoc :results.datasets/data result))))
 
-(rf/reg-event-db :results.datasets.request/error (fn [db [_ result]]
-                                                   (assoc db :results.datasets/error result)))
+(rf/reg-event-db
+ :results.datasets.request/error
+ [validation-interceptor]
+ (fn [db [_ result]]
+   (assoc db :results.datasets/error result)))
 
 ;;;;; HTTP REQUESTS
 
@@ -129,6 +153,7 @@
 
 (rf/reg-event-fx
  :filters/apply
+ [validation-interceptor]
  (fn [{db :db} [_ facets]]
    {:http-xhrio {:method :get
                  :uri "/apply-filters"
@@ -142,13 +167,21 @@
 
 ;;;; NAVIGATION
 
-(rf/reg-event-db :app/navigated (fn [db [_ new-match]]
-                                  (assoc db :app/current-route new-match)))
+(rf/reg-event-db
+ :app/navigated
+ [validation-interceptor]
+ (fn [db [_ new-match]]
+   (assoc db :app/current-route new-match)))
 
-(rf/reg-event-fx :app/navigate (fn [{:keys [db]} [_ route]]
-                                 (let [query-params (db/filters->query-params db)]
-                                   {:app/navigate! (cond-> {:route route}
-                                                     (= :ook.route/search route) (merge {:query query-params}))})))
+(rf/reg-event-fx
+ :app/navigate
+ [validation-interceptor]
+ (fn [{:keys [db]} [_ route]]
+   (let [query-params (db/filters->query-params db)]
+     {:app/navigate! (cond-> {:route route}
+                       (= :ook.route/search route) (merge {:query query-params}))})))
 
-(rf/reg-fx :app/navigate! (fn [{:keys [route query]}]
-                            (rtfe/push-state route {} query)))
+(rf/reg-fx
+ :app/navigate!
+ (fn [{:keys [route query]}]
+   (rtfe/push-state route {} query)))
