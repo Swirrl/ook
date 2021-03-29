@@ -18,7 +18,6 @@
 
         ;; ETL
         clj-http/clj-http {:mvn/version "3.10.0"}
-        com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
         com.github.jsonld-java/jsonld-java {:mvn/version "0.13.2"}
 
         org.clojure/tools.logging {:mvn/version "1.1.0"}
@@ -65,7 +64,8 @@
            :test {:extra-paths ["test"]
                   :extra-deps {com.cognitect/test-runner
                                {:git/url "https://github.com/cognitect-labs/test-runner"
-                                :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
+                                :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}
+                               com.gfredericks/vcr-clj {:mvn/version "0.4.19"}}
                   :main-opts ["-m" "cognitect.test-runner"
                               "-d" "test"]}
            :ci {:extra-paths ["env/ci/resources"]}
