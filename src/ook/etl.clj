@@ -124,17 +124,22 @@
        (remove nil?)
        first))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint :ook.etl/load-page-size] :as system} index jsonld]
+(defn load-documents [{:keys [:ook.concerns.elastic/endpoint
+                              :ook.etl/load-page-size
+                              :ook.etl/load-synchronously] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
         docs (map add-id (get jsonld "@graph"))
-        batches (partition-all (or load-page-size 10000) docs)]
+        batches (partition-all (or load-page-size 10000) docs)
+        params (if load-synchronously {:refresh "wait_for"} {})]
     (doall
      (for [batch batches]
-       (let [result (esb/bulk-with-index conn index (esb/bulk-index batch))]
+       (let [result (esb/bulk-with-index conn index (esb/bulk-index batch) params)]
          (if (:errors result)
            (throw (ex-info "Error loading documents" (first-error result))))
          result)))))
+
+(derive :ook.etl/load-synchronously :ook/const)
 
 
 ;; Pipeline
