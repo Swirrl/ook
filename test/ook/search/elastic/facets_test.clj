@@ -5,7 +5,7 @@
 
 (deftest apply-selections-test
   (testing "Replaces dimension URIs with their docs"
-    (let [components [{id "fruit" :codelist "fruits"}]
+    (let [components [{id "fruit" :codelist {id "fruits"}}]
           facets [{:name "food" :dimensions ["fruit"]}]
           selections {"food" ["fruits"]}
           selected-facets (sut/apply-selections facets components selections)
@@ -13,8 +13,8 @@
       (is (= '("fruit")
              selected-dimension-ids))))
   (testing "Filters dimensions based upon selections"
-    (let [components [{id "fruit" :codelist "fruits"}
-                      {id "veg" :codelist "vegetables"}]
+    (let [components [{id "fruit" :codelist {id "fruits"}}
+                      {id "veg" :codelist {id "vegetables"}}]
           facets [{:name "food" :dimensions ["fruit" "veg"]}]
           selections {"food" ["vegetables"]}
           selected-facets (sut/apply-selections facets components selections)
@@ -23,9 +23,9 @@
              selected-dimension-ids)))))
 
 (deftest apply-facets-test
-  (let [components [{id "year" :codelist "years"}
-                    {id "quarter" :codelist "quarters"}
-                    {id "area" :codelist "areas"}]
+  (let [components [{id "year" :codelist { id "years" }}
+                    {id "quarter" :codelist { id "quarters"}}
+                    {id "area" :codelist { id "areas"}}]
         datasets [{id "data-by-area" :component ["area"]}
                   {id "data-by-year" :component ["year"]}
                   {id "data-by-year-and-quarter" :component ["year" "quarter"]}]
@@ -43,13 +43,13 @@
         (is (= [{id "data-by-area"
                  :component ["area"]
                  :facets [{:name "location"
-                           :dimensions [{id "area" :codelist "areas"}]}]}]
+                           :dimensions [{id "area" :codelist {id "areas"}}]}]}]
                (search {"location" ["areas"]}))))
       (testing "Filters facet for selections"
         (is (= [{id "data-by-year-and-quarter"
                  :component ["year" "quarter"]
                  :facets [{:name "date"
-                           :dimensions [{id "quarter" :codelist "quarters"}]}]}]
+                           :dimensions [{id "quarter" :codelist {id "quarters"}}]}]}]
                (search {"date" ["quarters"]})))))))
 
 

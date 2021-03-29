@@ -1,9 +1,8 @@
 (ns ook.search.elastic-test
   (:require [clojure.test :refer [deftest testing is]]
             [ook.test.util.setup :as setup :refer [with-system get-db]]
-            [ook.search.db :as sut]))
-
-
+            [ook.search.db :as sut]
+            [ook.util :as util]))
 
 (deftest database-test
   (testing "Extracting resources from the index"
@@ -54,7 +53,9 @@
                     codelist-for-facet (fn [name] (->> (:facets dataset)
                                                        (filter #(= (:name %) name))
                                                        (map (comp :codelist first :dimensions))
-                                                       first))]
+                                                       first
+                                                       :id ;; (would be util/id but keys are normalised)
+                                                       ))]
                 (is (= "def/trade/concept-scheme/alcohol-type"
                        (codelist-for-facet "Alcohol Type")))
                 (is (= "def/trade/concept-scheme/bulletin-type"

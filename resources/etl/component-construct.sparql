@@ -8,6 +8,10 @@ CONSTRUCT {
         qb:codeList ?codelist;
         rdfs:subPropertyOf ?parent_component;
         .
+
+    ?codelist
+        rdfs:label ?codelist_label;
+	.
 } WHERE {
     ?component_property rdfs:subClassOf qb:ComponentProperty .
 
@@ -20,6 +24,11 @@ CONSTRUCT {
     
     OPTIONAL {
         ?component qb:codeList ?codelist;
+
+	OPTIONAL {
+	    ?codelist rdfs:label ?codelist_label_
+	    BIND(STR(?codelist_label_) AS ?codelist_label)
+	}
     }
 
     OPTIONAL {
