@@ -9,7 +9,8 @@
 (def home-route-data
   {:name :ook.route/home
    :view views/search
-   :controllers [{:start #(rf/dispatch [:init/initialize-db])}]})
+   ;; :controllers [{:start #(rf/dispatch [:init/reset-db])}]
+   })
 
 (def ^:private routes
   [["/" home-route-data]

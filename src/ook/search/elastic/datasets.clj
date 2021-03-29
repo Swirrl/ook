@@ -1,7 +1,5 @@
 (ns ook.search.elastic.datasets
   (:require
-   [clojure.string :as str]
-   [clojure.walk :as walk]
    [clojure.set :as set]
    [meta-merge.core :as mm]
    [clojurewerkz.elastisch.query :as q]
@@ -11,15 +9,6 @@
    [ook.search.elastic.facets :as facets]
    [ook.search.elastic.components :as components]))
 
-(defn- normalize-keys [m]
-  (let [remove-at (fn [[k v]]
-                    (if (str/includes? (str k) "@")
-                      [(keyword (str/replace k ":@" "")) v]
-                      [k v]))]
-    ;; only apply to maps
-    (walk/postwalk (fn [x] (if (map? x) (into {} (map remove-at x)) x))
-                   m)))
-
 (defn- flatten-description-lang-strings [m]
   (-> m
       (assoc :description (-> m :dcterms:description :value))
@@ -28,7 +17,7 @@
 (defn- clean-datasets-result [result]
   (->> result :hits :hits
        (map :_source)
-       (map normalize-keys)
+       (map esu/normalize-keys)
        (map flatten-description-lang-strings)))
 
 ;; (defn- cubes->datasets [conn cubes]
@@ -80,7 +69,7 @@
         datasets (for-components faceted-dimensions opts)]
     (->>
      (facets/apply-facets datasets components facets selections)
-     (map normalize-keys)
+     (map esu/normalize-keys)
      (map flatten-description-lang-strings))))
 
 (comment

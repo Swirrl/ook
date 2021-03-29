@@ -25,17 +25,17 @@
 (defn- codelists-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (map :codelist) distinct)]
-    (for [cl codelists]
-      ^{:key cl} [:p.badge.bg-secondary cl])))
+    (for [{:keys [id label]} codelists]
+      ^{:key id} [:p.badge.bg-secondary label])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
 
 (defn- column-headers [data applied-facets]
   [:tr
-   [:th "Title / Description"]
+   [:th.title-column-header "Title / Description"]
    (for [[facet-name _] applied-facets]
-     ^{:key facet-name} [:th facet-name (remove-facet-button facet-name)])
+     ^{:key facet-name} [:th.text-nowrap facet-name (remove-facet-button facet-name)])
    (when (some :matching-observations data)
      [:th])])
 

@@ -62,20 +62,20 @@
           [:p.h6.mt-4 "Codelists"]
           [:form.mt-3
            (doall
-            (for [codelist codelists]
-              ^{:key codelist}
+            (for [{:keys [id label]} codelists]
+              ^{:key id}
               [:div.form-check.mb-3.bg-light
                [:div.p-2
                 [:input.form-check-input
                  {:type "checkbox"
                   :name "codelist"
-                  :value codelist
-                  :id codelist
-                  :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? codelist]))
+                  :value id
+                  :id id
+                  :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? id]))
                   :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
-                [:label.form-check-label {:for codelist}
-                 ;; [:strong label]
-                 [:p.m-0  "id: " [:code codelist]]]]]))]]
+                [:label.form-check-label {:for id}
+                 [:strong label]
+                 [:p.m-0 "id: " [:code id]]]]]))]]
          [:<>
           [:p.h6.mt-4 "No codelists for dimensions: "]
           [:ul

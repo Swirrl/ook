@@ -12,13 +12,13 @@
     (->> (esd/search conn "component" "_doc"
                      {:query (q/ids "_doc" uris)
                       :size max-hits})
-         :hits :hits (map :_source))))
+         :hits :hits
+         (map :_source)
+         (map esu/normalize-keys))))
 
 (defn components->codelists [uris opts]
   (let [codelists (->> opts
                        (get-components uris)
                        (map #(select-keys % [:codelist]))
-                       (remove #(nil? (:codelist %))))
-        ;; merge with codelist labels once we get those in the db
-        ]
+                       (remove #(nil? (:codelist %))))]
     (->> codelists (map :codelist) distinct)))

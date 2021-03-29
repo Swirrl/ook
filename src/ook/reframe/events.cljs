@@ -24,26 +24,10 @@
 
 ;;;;;; INITIALIZATION
 
-;; (rf/reg-event-db :init/set-facets (fn [db [_ facets]]
-;;                                     (assoc db :facets/config facets)))
-
-(rf/reg-cofx
- :app/initial-state
- (fn [cofx _]
-   (assoc cofx
-          :initial-state
-          (let [el (.getElementById js/document "app")]
-            (-> el
-                (go/get "attributes")
-                (go/get "data-init")
-                (go/get "value")
-                (t/read-string))))))
-
 (rf/reg-event-fx
  :init/initialize-db
- [(rf/inject-cofx :app/initial-state)
-  validation-interceptor]
- (fn [{facets :initial-state} _]
+ [validation-interceptor]
+ (fn [_ [_ facets]]
    {:http-xhrio {:method :get
                  :uri "/datasets"
                  :response-format (ajax/transit-response-format)
@@ -61,7 +45,8 @@
  (fn [db [_ {:keys [codelists] :as facet}]]
    ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
    (if facet
-     (let [with-selection (assoc facet :selection (->> codelists ;; (map :codelist)
+     (let [with-selection (assoc facet :selection (->> codelists
+                                                       (map :id)
                                                        set))]
        (assoc db :ui.facets/current with-selection))
      (dissoc db :ui.facets/current))))
@@ -80,8 +65,7 @@
  (fn [db _]
    (let [current-facet (:ui.facets/current db)]
      (assoc-in db
-               [:facets/applied (:name current-facet)]
-               (:selection current-facet)))))
+               [:facets/applied (:name current-facet)] (:selection current-facet)))))
 
 (rf/reg-event-db
  :filters/remove-facet

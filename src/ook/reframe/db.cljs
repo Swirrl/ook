@@ -44,11 +44,11 @@
 (s/def :codelist/id string?)
 (s/def :codelist/label string?)
 
-(s/def :facets/applied (s/map-of string? :ui.facets/current))
+(s/def :facets/applied (s/map-of :facet/name :facet/selection))
 
-(s/def :ui.facets/current (s/and :ook/facet (s/keys :req-un [:facet/selection])))
+(s/def :ui.facets/current (s/nilable (s/and :ook/facet (s/keys :req-un [:facet/selection]))))
 
-(s/def :facet/selection (s/and set? (s/coll-of string?)))
+(s/def :facet/selection (s/coll-of :codelist/id))
 
 ;;;;;;; route
 
@@ -59,4 +59,4 @@
 (s/def :results.datasets/data (s/coll-of :ook/dataset))
 (s/def :ook/dataset map?)
 
-(s/def :results.datasets/error string?)
+(s/def :results.datasets/error map?)

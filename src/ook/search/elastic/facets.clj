@@ -35,7 +35,7 @@
         matches-codelists? (fn [codelists]
                              (fn [c]
                                ((set codelists)
-                                (get-in c [:codelist util/id]))))]
+                                (get-in c [:codelist :id]))))]
     (map (fn [facet]
            (let [selected-codelists (selections (:name facet))]
              (update facet :dimensions
@@ -46,7 +46,7 @@
          facets)))
 
 (defn selections-for-dataset [facet-selections dataset]
-  (let [filter-to-dataset (partial filter (fn [dimension] ((set (:component dataset)) (util/id dimension))))]
+  (let [filter-to-dataset (partial filter (fn [dimension] ((set (:component dataset)) (:id dimension))))]
     (->> facet-selections
          (map (fn [facet] (update facet :dimensions filter-to-dataset)))
          (filter (fn [facet] (not-empty (:dimensions facet) ))))))
