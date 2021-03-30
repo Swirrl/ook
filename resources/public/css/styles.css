@@ -2,10 +2,6 @@
   overflow-x: auto;
 }
 
-.ook-datasets table {
-  table-layout: fixed;
-}
-
 .ook-datasets .vertical-truncate {
   max-height: 100px;
   text-overflow: ellipsis;
@@ -15,8 +11,9 @@
   -webkit-box-orient: vertical;
 }
 
-.title-column-header {
-  min-width: 30rem;
+.title-column {
+  min-width: 35rem;
+  max-width: 35rem;
 }
 
 .btn-xs {
