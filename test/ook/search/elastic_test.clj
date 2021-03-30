@@ -17,7 +17,7 @@
         (testing "all datasets"
           (let [response (sut/all-datasets db)]
             (is (= 2 (count response)))
-            (is (every? true? (map #(every? % [:comment :label :id :cube]) response)))
+            (is (every? true? (map #(every? % [:comment :label :ook/uri :cube]) response)))
             (is (= ["Alcohol Bulletin - Duty Receipts"
                     "Alcohol Bulletin - Production"]
                    (map :label response)))))
@@ -53,8 +53,7 @@
                                                        (filter #(= (:name %) name))
                                                        (map (comp :codelist first :dimensions))
                                                        first
-                                                       :id ;; (would be util/id but keys are normalised)
-                                                       ))]
+                                                       :ook/uri))]
                 (is (= "def/trade/concept-scheme/alcohol-type"
                        (codelist-for-facet "Alcohol Type")))
                 (is (= "def/trade/concept-scheme/bulletin-type"

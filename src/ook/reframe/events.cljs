@@ -35,11 +35,8 @@
  :ui.facets/set-current
  [validation-interceptor]
  (fn [db [_ {:keys [codelists] :as facet}]]
-   ;; (let [next-id (->> db :facets (map :id) (cons 0) (apply max) inc)])
    (if facet
-     (let [with-selection (assoc facet :selection (->> codelists
-                                                       (map :id)
-                                                       set))]
+     (let [with-selection (assoc facet :selection (->> codelists (map :ook/uri) set))]
        (assoc db :ui.facets/current with-selection))
      (dissoc db :ui.facets/current))))
 

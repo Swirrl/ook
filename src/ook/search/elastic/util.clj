@@ -7,10 +7,15 @@
 (defn get-connection [endpoint]
   (esr/connect endpoint {:content-type :json}))
 
+(defn- replace-problematic-char [k]
+  (if (= (keyword "@id") k)
+    :ook/uri
+    (keyword (str/replace k ":@" "ook/"))))
+
 (defn normalize-keys [m]
   (let [remove-at (fn [[k v]]
                     (if (str/includes? (str k) "@")
-                      [(keyword (str/replace k ":@" "")) v]
+                      [(replace-problematic-char k) v]
                       [k v]))]
     ;; only apply to maps
     (walk/postwalk (fn [x] (if (map? x) (into {} (map remove-at x)) x))

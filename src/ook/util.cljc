@@ -16,6 +16,6 @@
        (vals (group-by k (concat s1 s2)))))
 
 (defn id-lookup
-  "Turns a sequence of docs (hashmaps) with :id attributes into a map from :id to the doc"
+  "Turns a sequence of docs (hashmaps) with :ook/uri attributes into a map from :ook/uri to the doc"
   [xs]
-  (into {} (map (fn [x] [(:id x) x]) xs)))
+  (into {} (map (fn [x] [(:ook/uri x) x]) xs)))
