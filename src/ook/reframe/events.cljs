@@ -1,12 +1,13 @@
 (ns ook.reframe.events
-  (:require [re-frame.core :as rf]
-            [ook.reframe.db :as db]
-            [ajax.core :as ajax]
-            [ook.util :as u]
-            [clojure.spec.alpha :as s]
-            [ook.params.parse :as p]
-            [reitit.frontend.easy :as rtfe]
-            [day8.re-frame.http-fx]))
+  (:require
+   [re-frame.core :as rf]
+   [ook.reframe.db :as db]
+   [ajax.core :as ajax]
+   [clojure.spec.alpha :as s]
+   [ook.params.parse :as p]
+   [reitit.frontend.easy :as rtfe]
+   [day8.re-frame.http-fx]
+   [ook.spec]))
 
 ;;;;;; VALIDATION
 
@@ -18,7 +19,7 @@
       (throw (ex-info  (str "db spec validation failed: " (s/explain-str spec db))
                        error)))))
 
-(def validation-interceptor (rf/after (partial validate :ook/db)))
+(def validation-interceptor (rf/after (partial validate :ook.spec/db)))
 
 ;;;;;; INITIALIZATION
 
