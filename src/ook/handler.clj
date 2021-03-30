@@ -40,7 +40,7 @@
             transit-content-type))
       invalid-format-response)))
 
-(defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
+(defmethod ig/init-key :ook.handler/datasets [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
       ;; Old implementation that applied a custom code selection.
@@ -49,18 +49,9 @@
       ;;       result (db/get-datasets db filters)]
       ;;   (-> (resp/response (t/write-string result))
       ;;       transit-content-type))
-      (let [facets (p/get-facets request)]
-        (-> (db/get-datasets-for-facets db facets)
-            t/write-string
-            resp/response
-            transit-content-type))
-      invalid-format-response)))
-
-(defmethod ig/init-key :ook.handler/datasets [_ {:keys [search/db]}]
-  (fn [request]
-    (if (requesting-transit? request)
-      (-> (db/all-datasets db)
-          t/write-string
-          resp/response
-          transit-content-type)
+      (let [facets (p/get-facets request)
+            datasets (if facets
+                       (db/get-datasets-for-facets db facets)
+                       (db/all-datasets db))]
+        (-> datasets t/write-string resp/response transit-content-type))
       invalid-format-response)))

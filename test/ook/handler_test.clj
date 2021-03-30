@@ -73,8 +73,26 @@
             (is (= 406 (:status response)))
             (is (= "Unsupported content type" (:body response)))))
 
-        (testing "/datasets works"
+        (testing "/datasets with no facet params returns all (unfiltered) datasets"
           (let [response (request-transit "datasets")]
             (is (= 200 (:status response)))
             (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "datasets"))))))))
+            (is (str/includes? (:body response) "all datasets..."))))
+
+        (testing "/datasets with one facet works"
+          (let [response (request-transit "datasets?facet=facet1,codelist1")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (str/includes? (:body response) "valid response 1"))))
+
+        (testing "/datasets with one facet works"
+          (let [response (request-transit "datasets?facet=facet1,codelist1,codelist2")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (str/includes? (:body response) "valid response 2"))))
+
+        (testing "/datasets with one facet works"
+          (let [response (request-transit "datasets?facet=facet1,codelist1&facet=facet2,codelist2")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (str/includes? (:body response) "valid response 3"))))))))

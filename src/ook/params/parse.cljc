@@ -28,4 +28,5 @@
   "Parse query param facet tuples into a map of facet-name [codelists] for
   use in db queries, referred to as 'selection' elsewhere"
   [{:keys [query-params]}]
-  (-> query-params (get "facet") parse-named-facets))
+  (when (seq query-params)
+    (-> query-params (get "facet") parse-named-facets)))

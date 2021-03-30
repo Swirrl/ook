@@ -5,8 +5,6 @@
             [ook.util :as u]
             [clojure.spec.alpha :as s]
             [ook.params.parse :as p]
-            [ook.concerns.transit :as t]
-            [goog.object :as go]
             [reitit.frontend.easy :as rtfe]
             [day8.re-frame.http-fx]))
 
@@ -28,11 +26,7 @@
  :init/initialize-db
  [validation-interceptor]
  (fn [_ [_ facets]]
-   {:http-xhrio {:method :get
-                 :uri "/datasets"
-                 :response-format (ajax/transit-response-format)
-                 :on-success [:results.datasets.request/success]
-                 :on-error [:results.datasets.request/error]}
+   {:dispatch [:datasets/fetch-datasets nil]
     :db (-> db/initial-db
             (assoc :facets/config facets)
             (dissoc :facets/applied :ui.facets/current))}))
@@ -136,15 +130,21 @@
 ;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 (rf/reg-event-fx
+ :datasets/fetch-datasets
+ [validation-interceptor]
+ (fn [_ [_ facets]]
+   {:http-xhrio {:method :get
+                 :uri "/datasets"
+                 :params (when facets {:facet facets})
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:results.datasets.request/success]
+                 :on-failure [:results.datasets.request/error]}}))
+
+(rf/reg-event-fx
  :filters/apply
  [validation-interceptor]
  (fn [{db :db} [_ facets]]
-   {:http-xhrio {:method :get
-                 :uri "/apply-filters"
-                 :params {:facet facets}
-                 :response-format (ajax/transit-response-format)
-                 :on-success [:results.datasets.request/success]
-                 :on-failure [:results.datasets.request/error]}
+   {:dispatch [:datasets/fetch-datasets facets]
     :db (-> db
             (assoc :facets/applied (p/parse-named-facets facets))
             (dissoc :ui.facets/current))}))
