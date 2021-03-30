@@ -46,7 +46,7 @@
       (let [db (setup/get-db system)
             doc (first (db/get-components db ["def/trade/property/dimension/alcohol-type"]))]
         (are [key value] (= value (key doc))
-          util/id "def/trade/property/dimension/alcohol-type"
+          :id "def/trade/property/dimension/alcohol-type"
           :label "Alcohol Type"
-          :codelist { util/id "def/trade/concept-scheme/alcohol-type"
+          :codelist {:id "def/trade/concept-scheme/alcohol-type"
                      :label "Alcohol Type"})))))

@@ -1,8 +1,7 @@
 (ns ook.search.elastic-test
   (:require [clojure.test :refer [deftest testing is]]
             [ook.test.util.setup :as setup :refer [with-system get-db]]
-            [ook.search.db :as sut]
-            [ook.util :as util]))
+            [ook.search.db :as sut]))
 
 (deftest database-test
   (testing "Extracting resources from the index"

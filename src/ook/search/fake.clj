@@ -35,7 +35,10 @@
     ["codelist-uri"])
 
   (all-datasets [_]
-    ["all datasets..."]))
+    ["all datasets..."])
+
+  (dataset-count [_]
+    20))
 
 (defmethod ig/init-key :ook.search.fake/db [_ _]
   (->FakeSearch))

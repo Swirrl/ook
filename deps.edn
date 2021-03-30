@@ -48,6 +48,7 @@
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
                               ring/ring-mock {:mvn/version "0.4.0"}
+                              com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS
@@ -64,8 +65,7 @@
            :test {:extra-paths ["test"]
                   :extra-deps {com.cognitect/test-runner
                                {:git/url "https://github.com/cognitect-labs/test-runner"
-                                :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}
-                               com.gfredericks/vcr-clj {:mvn/version "0.4.19"}}
+                                :sha "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
                   :main-opts ["-m" "cognitect.test-runner"
                               "-d" "test"]}
            :ci {:extra-paths ["env/ci/resources"]}
