@@ -8,9 +8,17 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ _]
+(defmethod ig/init-key :ook.handler/main [_ {:keys [search/db]}]
   (fn [_request]
-    (resp/response (layout/->html (layout/main)))))
+    (let [facets-with-codelists (->> (db/get-facets db)
+                                     (map (fn [facet]
+                                            (assoc facet
+                                                   :codelists
+                                                   (db/components->codelists
+                                                    db
+                                                    (:dimensions facet))))))]
+      (resp/response (layout/->html (layout/main {:facets facets-with-codelists
+                                                  :dataset-count (db/dataset-count db)}))))))
 
 ;;; Internal transit API
 
@@ -19,7 +27,7 @@
     (= "application/transit+json" accept)))
 
 (def invalid-format-response
-  {:status  406 :headers {} :body "Unsupported content type"})
+  {:status 406 :headers {} :body "Unsupported content type"})
 
 (defn- transit-content-type [response]
   (-> response (resp/header "Content-Type" "application/transit+json")))
@@ -33,20 +41,18 @@
             transit-content-type))
       invalid-format-response)))
 
-(defmethod ig/init-key :ook.handler/apply-filters [_ {:keys [search/db]}]
-  (fn [request]
-    (if (requesting-transit? request)
-      (let [filters (p/parse-filters request)
-            result (db/get-datasets db filters)]
-        (-> (resp/response (t/write-string result))
-            transit-content-type))
-      invalid-format-response)))
-
 (defmethod ig/init-key :ook.handler/datasets [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      (-> (db/all-datasets db)
-          t/write-string
-          resp/response
-          transit-content-type)
+      ;; Old implementation that applied a custom code selection.
+      ;; When this comes back, combine it with other filter facets
+      ;; (let [filters (p/parse-filters request)
+      ;;       result (db/get-datasets db filters)]
+      ;;   (-> (resp/response (t/write-string result))
+      ;;       transit-content-type))
+      (let [facets (p/get-facets request)
+            datasets (if facets
+                       (db/get-datasets-for-facets db facets)
+                       (db/all-datasets db))]
+        (-> datasets t/write-string resp/response transit-content-type))
       invalid-format-response)))

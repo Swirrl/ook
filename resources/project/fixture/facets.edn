@@ -1,0 +1,7 @@
+{:ook.search/facets
+ [{:name "Alcohol Type"
+   :dimensions ["def/trade/property/dimension/alcohol-type"]}
+  {:name "Bulletin Type"
+   :dimensions ["def/trade/property/dimension/bulletin-type"]}
+  {:name "Date"
+   :parent-dimension "sdmxd:refPeriod"}]}

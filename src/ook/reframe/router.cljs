@@ -6,21 +6,34 @@
    [reitit.frontend.easy :as rtfe]
    [reitit.frontend :as rt]))
 
+(def home-route-data
+  {:name :ook.route/home
+   :view views/search
+   :controllers [{:start #(rf/dispatch [:datasets/fetch-datasets nil])}]})
+
 (def ^:private routes
-  [["/" {:name :ook.route/home
-         :view views/home
-         :controllers [{:start #(rf/dispatch [:init/initialize-db])}]}]
+  [["/" home-route-data]
+
+   ;; ["/search" {:name :ook.route/search
+   ;;             :view views/results
+   ;;             :parameters {:query {:q string? :facet [string?]}}
+   ;;             :controllers [{:start (fn [params]
+   ;;                                     (let [query (-> params :query :q)
+   ;;                                           facets (-> params :query :facet)]
+   ;;                                       (rf/dispatch [:codes/submit-search query])
+   ;;                                       (when facets
+   ;;                                         (rf/dispatch [:filters/apply-code-selection facets]))))
+   ;;                            :parameters {:query [:q :facet]}}]}]
 
    ["/search" {:name :ook.route/search
-               :view views/results
-               :parameters {:query {:q string? :facet [string?]}}
+               :view views/search
+               :parameters {:query {:facet [string?]}}
                :controllers [{:start (fn [params]
-                                       (let [query (-> params :query :q)
-                                             facets (-> params :query :facet)]
-                                         (rf/dispatch [:codes/submit-search query])
-                                         (when facets
-                                           (rf/dispatch [:filters/apply-code-selection facets]))))
-                              :parameters {:query [:q :facet]}}]}]])
+                                       (let [facets (-> params :query :facet)]
+                                         (if facets
+                                           (rf/dispatch [:filters/apply facets])
+                                           (rf/dispatch [:app/navigate :ook.route/home]))))
+                              :parameters {:query [:facet]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

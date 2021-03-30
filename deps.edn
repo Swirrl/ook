@@ -18,7 +18,6 @@
 
         ;; ETL
         clj-http/clj-http {:mvn/version "3.10.0"}
-        com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
         com.github.jsonld-java/jsonld-java {:mvn/version "0.13.2"}
 
         org.clojure/tools.logging {:mvn/version "1.1.0"}
@@ -49,6 +48,7 @@
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
                               ring/ring-mock {:mvn/version "0.4.0"}
+                              com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS
@@ -76,14 +76,14 @@
                                    "cogs-staging.edn"
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
-                                   "fixture-data.edn"]}}
+                                   "project/fixture/data.edn"]}}
            :ook.etl/trade
            {:exec-fn ook.concerns.integrant/exec-config
             :exec-args {:profiles ["drafter-client.edn"
                                    "cogs-staging.edn"
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
-                                   "trade-data.edn"]}}
+                                   "project/trade/data.edn"]}}
 
            :prod {:extra-paths ["env/prod/resources"
                                 "target/prod/cljs"]}

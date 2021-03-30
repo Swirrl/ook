@@ -1,0 +1,35 @@
+{:ook.search/facets
+ [{:name "Product"
+   :dimensions ["def/trade/property/dimension/product"
+                "def/trade/property/dimension/sitc-4"
+                "data/gss_data/trade/ons_pinkbook#dimension/pink-book-services"
+                "data/gss_data/trade/ons_cpa#dimension/cpa-2008"
+                "data/gss_data/trade/ons_mrets#dimension/mrets-product"]}
+  {:name "Industry"
+   :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/industry"
+                "def/trade/property/dimension/industry-section"
+                "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/sector"
+                "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/subsector"
+                "def/trade/property/dimension/sic-2007"
+                "def/trade/property/dimension/ons-functional-category"
+                "data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/service-account"]}
+  {:name "Geography"
+   :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/country"
+                "data/gss_data/trade/ons-uk-sa-trade-in-goods#dimension/ons-partner-geography"
+                "data/gss_data/trade/ons-reuk-service#dimension/nuts-geography"
+                "data/gss_data/trade/ons_cpa#dimension/ons-partner-geography"
+                "def/trade/property/dimension/country-of-ownership"
+                "data/gss_data/trade/ons-quarterly-country-and-regional-gdp#dimension/reference-area"
+                "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
+                "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/uk-region"
+                "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/country"
+                "def/trade/property/dimension/country-area"
+                "data/gss_data/trade/ons_mrets#dimension/trade-area"]}
+  {:name "Flow"
+   :parent-dimension "def/trade/property/dimension/flow-directions"}
+  {:name "Date"
+   :parent-dimension "sdmxd:refPeriod"}
+  {:name "Basis"
+   :parent-dimension "def/trade/property/dimension/international-trade-basis"}
+  {:name "Seasonality"
+   :parent-dimension "def/trade/property/dimension/seasonal-adjustments"}]}
