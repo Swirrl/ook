@@ -17,7 +17,8 @@
                                                    (db/components->codelists
                                                     db
                                                     (:dimensions facet))))))]
-      (resp/response (layout/->html (layout/main facets-with-codelists))))))
+      (resp/response (layout/->html (layout/main {:facets facets-with-codelists
+                                                  :dataset-count (db/dataset-count db)}))))))
 
 ;;; Internal transit API
 

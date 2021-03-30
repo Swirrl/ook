@@ -25,8 +25,9 @@
 (rf/reg-event-db
  :init/initialize-db
  [validation-interceptor]
- (fn [_ [_ facets]]
-   (-> db/initial-db (assoc :facets/config facets))))
+ (fn [_ [_ {:keys [facets dataset-count]}]]
+   (-> db/initial-db (assoc :facets/config facets
+                            :datasets/count dataset-count))))
 
 ;;;;;; FACETS
 

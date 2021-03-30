@@ -15,12 +15,23 @@
    {:type "button"
     :on-click #(remove-facet facet-name)}])
 
-(defn- observation-count [data]
+(defn- dataset-count [data]
   (let [dataset-count (count data)
+        total-dataset-count @(rf/subscribe [:datasets/count])
         obs (total-observations data)]
-    (when (pos? obs)
+    (cond
+      (pos? obs)
       [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
-       [:strong obs (u/pluralize " observation" obs)]])))
+       [:strong obs (u/pluralize " observation" obs)]]
+
+      (= dataset-count total-dataset-count)
+      [:p.my-4 "Showing all datasets"]
+
+      :else
+      [:p.my-4
+       [:strong dataset-count] " of "
+       [:strong total-dataset-count]
+       " datasets match"])))
 
 (defn- codelists-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
@@ -75,5 +86,5 @@
     (let [data @(rf/subscribe [:results.datasets/data])
           applied-facets @(rf/subscribe [:facets/applied])]
       [:<>
-       (observation-count data)
+       (dataset-count data)
        (dataset-table data applied-facets)])))

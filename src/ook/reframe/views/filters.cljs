@@ -50,7 +50,7 @@
 
 (defn- codelist-selection [selected-facet]
   (when selected-facet
-    (let [codelists @(rf/subscribe [:ui.facets/current-codelists])]
+    (let [codelists (:codelists selected-facet)]
       [:<>
        [:button.btn.btn-primary.mt-3
         {:type "button"

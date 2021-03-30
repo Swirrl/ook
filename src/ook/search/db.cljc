@@ -22,5 +22,8 @@
   (all-datasets [db]
     "Return all datasets")
 
+  (dataset-count [db]
+    "Return a single number, the total number of datasets")
+
   (get-facets [db]
     "Resolve facets from configuration and database"))

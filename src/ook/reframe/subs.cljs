@@ -2,10 +2,10 @@
   (:require
    [re-frame.core :as rf]))
 
-;;;;;; INITIALIZATION
+;;;;;; INITIAL, PERMANENT STATE
 
-(rf/reg-sub :facets/config (fn [db _]
-                             (:facets/config db)))
+(rf/reg-sub :facets/config (fn [db _] (:facets/config db)))
+(rf/reg-sub :datasets/count (fn [db _] (:datasets/count db)))
 
 ;;;;;; EPHEMERAL UI STATE
 
@@ -13,16 +13,6 @@
  :ui.facets/current
  (fn [db _]
    (:ui.facets/current db)))
-
-(rf/reg-sub
- :ui.facets/current-codelists
- (fn [db _]
-   (-> db :ui.facets/current :codelists)))
-
-(rf/reg-sub
- :ui.facets/current-selection
- (fn [db _]
-   (-> db :ui.facets/current :selection)))
 
 (rf/reg-sub
   :ui.facets.current/codelist-selected?

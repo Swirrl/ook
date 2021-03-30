@@ -31,6 +31,9 @@
   (all-datasets [_]
     (ds/all opts))
 
+  (dataset-count [_]
+    (ds/total-count opts))
+
   (get-facets [_]
     (facets/get-facets opts)))
 

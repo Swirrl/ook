@@ -73,5 +73,10 @@
      (map esu/normalize-keys)
      (map flatten-description-lang-strings))))
 
+(defn total-count [{:keys [elastic/endpoint]}]
+  (-> (esu/get-connection endpoint)
+      (esd/count "dataset" "_doc")
+      :count))
+
 (comment
   (def conn (esu/get-connection "http://localhost:9200")))
