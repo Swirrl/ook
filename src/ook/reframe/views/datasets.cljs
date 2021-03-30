@@ -11,7 +11,7 @@
   (rf/dispatch [:app/navigate :ook.route/search]))
 
 (defn- remove-facet-button [facet-name]
-  [:button.btn-close.border.btn-sm.ms-2.align-middle
+  [:button.btn-close.border.btn-xs.ms-2.align-middle
    {:type "button"
     :on-click #(remove-facet facet-name)}])
 
@@ -26,7 +26,7 @@
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (map :codelist) distinct)]
     (for [{:keys [id label]} codelists]
-      ^{:key id} [:p.badge.bg-secondary label])))
+      ^{:key id} [:p.badge.bg-secondary.me-1 label])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
