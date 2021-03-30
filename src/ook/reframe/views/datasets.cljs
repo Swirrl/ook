@@ -44,7 +44,7 @@
   [:tr
    [:td
     [:strong label]
-    [:p comment]]
+    [:p.vertical-truncate comment]]
    (for [[facet-name _] applied-facets]
      ^{:key [id facet-name]} [:td (codelists-for-facet facet-name facets)])
    (when matching-observations
