@@ -53,7 +53,8 @@
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
-      (esd/search "dataset" "_doc" {:query (q/match-all)})
+      (esd/search "dataset" "_doc" {:query (q/match-all)
+                                    :size 500})
       clean-datasets-result))
 
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]

@@ -54,7 +54,7 @@
       [:<>
        [:button.btn.btn-primary.mt-3
         {:type "button"
-         :disabled (not (seq codelists))
+         :disabled (or (not (seq codelists)) (not (seq (:selection selected-facet))))
          :on-click apply-filters}
         "Apply filter"]
        (if (seq codelists)

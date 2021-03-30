@@ -44,7 +44,7 @@
 (s/def :codelist/id string?)
 (s/def :codelist/label string?)
 
-(s/def :facets/applied (s/map-of :facet/name :facet/selection))
+(s/def :facets/applied (s/nilable (s/map-of :facet/name :facet/selection)))
 
 (s/def :ui.facets/current (s/nilable (s/and :ook/facet (s/keys :req-un [:facet/selection]))))
 

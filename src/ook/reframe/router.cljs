@@ -9,8 +9,7 @@
 (def home-route-data
   {:name :ook.route/home
    :view views/search
-   ;; :controllers [{:start #(rf/dispatch [:init/reset-db])}]
-   })
+   :controllers [{:start #(rf/dispatch [:datasets/fetch-datasets nil])}]})
 
 (def ^:private routes
   [["/" home-route-data]
@@ -33,7 +32,7 @@
                                        (let [facets (-> params :query :facet)]
                                          (if facets
                                            (rf/dispatch [:filters/apply facets])
-                                           (rf/dispatch [:init/initialize-db]))))
+                                           (rf/dispatch [:app/navigate :ook.route/home]))))
                               :parameters {:query [:facet]}}]}]])
 
 (defn- handle-navigation [new-match]

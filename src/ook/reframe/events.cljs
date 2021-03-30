@@ -22,14 +22,11 @@
 
 ;;;;;; INITIALIZATION
 
-(rf/reg-event-fx
+(rf/reg-event-db
  :init/initialize-db
  [validation-interceptor]
  (fn [_ [_ facets]]
-   {:dispatch [:datasets/fetch-datasets nil]
-    :db (-> db/initial-db
-            (assoc :facets/config facets)
-            (dissoc :facets/applied :ui.facets/current))}))
+   (-> db/initial-db (assoc :facets/config facets))))
 
 ;;;;;; FACETS
 
@@ -58,8 +55,9 @@
  [validation-interceptor]
  (fn [db _]
    (let [current-facet (:ui.facets/current db)]
-     (assoc-in db
-               [:facets/applied (:name current-facet)] (:selection current-facet)))))
+     (if-let [selection (seq (:selection current-facet))]
+       (assoc-in db [:facets/applied (:name current-facet)] selection)
+       db))))
 
 (rf/reg-event-db
  :filters/remove-facet
