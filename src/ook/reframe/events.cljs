@@ -30,7 +30,14 @@
    (-> db/initial-db (assoc :facets/config facets
                             :datasets/count dataset-count))))
 
-;;;;;; FACETS
+(rf/reg-event-fx
+ :filters/reset
+ [validation-interceptor]
+ (fn [_ _]
+   {:fx [[:dispatch [:filters/apply {}]]
+         [:dispatch [:app/navigate :ook.route/home]]]}))
+
+;;;;;; FILTERS
 
 (rf/reg-event-db
  :ui.facets/set-current
