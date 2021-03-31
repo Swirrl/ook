@@ -32,7 +32,7 @@
        [:strong "No datasets matched the applied filters."]
        [:button.btn.btn-link.mx-1.p-0
         {:type "button"
-         :on-click #(rf/dispatch [:init/initialize-db])}
+         :on-click #(rf/dispatch [:filters/reset])}
         "Clear filters"]
        [:span "to reset and make a new selection."]]
 
