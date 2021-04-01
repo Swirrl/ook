@@ -44,10 +44,6 @@
         (when (seq codes)
           [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Find datasets that use these codes"])]))))
 
-(defn- apply-filters []
-  (rf/dispatch [:filters/add-current-facet])
-  (rf/dispatch [:app/navigate :ook.route/search]))
-
 (defn- codelist-selection [selected-facet]
   (when selected-facet
     (let [codelists (:codelists selected-facet)]
@@ -55,7 +51,7 @@
        [:button.btn.btn-primary.mt-3
         {:type "button"
          :disabled (or (not (seq codelists)) (not (seq (:selection selected-facet))))
-         :on-click apply-filters}
+         :on-click #(rf/dispatch [:filters/add-current-facet])}
         "Apply filter"]
        (if (seq codelists)
          [:<>
@@ -96,8 +92,9 @@
     :aria-label "Close filter selection"
     :on-click #(rf/dispatch [:ui.facets/set-current nil])}])
 
-(defn configured-facets [facets]
-  (let [selected-facet @(rf/subscribe [:ui.facets/current])
+(defn configured-facets []
+  (let [facets @(rf/subscribe [:facets/config])
+        selected-facet @(rf/subscribe [:ui.facets/current])
         applied-facets @(rf/subscribe [:facets/applied])]
     [:div.card.my-4
      [:div.card-body

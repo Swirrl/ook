@@ -52,7 +52,12 @@
           :build-options {:ns-aliases {devcards-marked cljsjs.marked
                                        devcards-syntax-highlighter cljsjs.highlight}}}
 
+  :tests {:target    :browser-test
+          :test-dir  "target/test/cljs/browser-test"
+          :ns-regexp "-test$"
+          :devtools  {:http-port 8021
+                      :http-root "target/test/cljs/browser-test"}}
+
   :ci {:target :karma
        :output-to "target/test/cljs/ci/tests.js"
-       :ns-regexp "-test$"}
-  }}
+       :ns-regexp "-test$"}}}

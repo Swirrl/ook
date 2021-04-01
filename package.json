@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "compile": "shadow-cljs compile ook cards",
+    "compile": "shadow-cljs compile ook cards tests",
     "watch": "shadow-cljs watch ook",
-    "watch-all": "shadow-cljs watch ook cards",
+    "watch-all": "shadow-cljs watch ook cards tests",
     "release": "shadow-cljs release ook",
     "clean": "rm -rf target",
     "build-ci": "shadow-cljs compile ci"

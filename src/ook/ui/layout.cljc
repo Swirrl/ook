@@ -32,7 +32,7 @@
     [:div.container
      [:h1
       [:a.navbar-brand #?(:clj {:href "/"}
-                          :cljs {:on-click (rf/dispatch [:app/navigate :ook.route/home])})
+                          :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
        "Trade Data Search"]]
      [:span.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]])
 
