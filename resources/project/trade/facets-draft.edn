@@ -4,7 +4,9 @@
                 "def/trade/property/dimension/sitc-4"
                 "data/gss_data/trade/ons_pinkbook#dimension/pink-book-services"
                 "data/gss_data/trade/ons_cpa#dimension/cpa-2008"
-                "data/gss_data/trade/ons_mrets#dimension/mrets-product"]}
+                "data/gss_data/trade/ons_mrets#dimension/mrets-product"
+                "data/gss_data/trade/ons-balance-of-payments#dimension/bop-services"
+                "data/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply#dimension/service-account"]}
   {:name "Industry"
    :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/industry"
                 "def/trade/property/dimension/industry-section"
@@ -24,7 +26,8 @@
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/uk-region"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/country"
                 "def/trade/property/dimension/country-area"
-                "data/gss_data/trade/ons_mrets#dimension/trade-area"]}
+                "data/gss_data/trade/ons_mrets#dimension/trade-area"
+                "data/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply#dimension/country"]}
   {:name "Flow"
    :parent-dimension "def/trade/property/dimension/flow-directions"}
   {:name "Date"
