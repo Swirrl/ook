@@ -64,12 +64,14 @@ Then compile the cljs to JS and watch for changes:
 yarn  watch
 ```
 
-or, if you also want the devcards:
+or, if you also want the devcards and tests:
 ```bash
 yarn watch-all
 ```
 
 With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
+
+Tests are run and watched at `localhost:8021`.
 
 ## Fixtures
 
@@ -94,6 +96,18 @@ Run the tests with the alias:
 ```bash
 clojure -M:dev:test
 ```
+
+Clojurescript tests can be built and viewed in dev as described above. To build/run them from the command line you need to have Chrome installed and run:
+```bash
+yarn build-ci
+node_modules/karma/bin/karma start --single-run
+```
+Or, if you have the [karma cli](http://karma-runner.github.io/latest/index.html) installed globally, just
+```bash
+karma start --single-run
+```
+
+This runs the cljs tests in a way that can be reported programatically for CI.
 
 ## License
 

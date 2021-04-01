@@ -34,7 +34,7 @@
  :filters/reset
  [validation-interceptor]
  (fn [_ _]
-   {:fx [[:dispatch [:filters/apply {}]]
+   {:fx [[:dispatch [:filters/apply []]]
          [:dispatch [:app/navigate :ook.route/home]]]}))
 
 ;;;;;; FILTERS
@@ -56,14 +56,15 @@
          update-fn (if selected? disj conj)]
      (update-in db [:ui.facets/current :selection] update-fn val))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :filters/add-current-facet
  [validation-interceptor]
- (fn [db _]
-   (let [current-facet (:ui.facets/current db)]
-     (if-let [selection (seq (:selection current-facet))]
-       (assoc-in db [:facets/applied (:name current-facet)] selection)
-       db))))
+ (fn [{:keys [db]} _]
+   (let [current-facet (:ui.facets/current db)
+         selection (seq (:selection current-facet))]
+     {:db (cond-> db
+            selection (assoc-in [:facets/applied (:name current-facet)] selection))
+      :dispatch [:app/navigate :ook.route/search]})))
 
 (rf/reg-event-db
  :filters/remove-facet
