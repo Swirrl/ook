@@ -5,10 +5,9 @@
    [ook.reframe.views.datasets :as datasets]))
 
 (defn search []
-  (let [facets @(rf/subscribe [:facets/config])]
-    [:<>
-     (filters/configured-facets facets)
-     (datasets/results)]))
+  [:<>
+   (filters/configured-facets)
+   (datasets/results)])
 
 (defn main []
   (let [current-route @(rf/subscribe [:app/current-route])]

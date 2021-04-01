@@ -96,8 +96,9 @@
     :aria-label "Close filter selection"
     :on-click #(rf/dispatch [:ui.facets/set-current nil])}])
 
-(defn configured-facets [facets]
-  (let [selected-facet @(rf/subscribe [:ui.facets/current])
+(defn configured-facets []
+  (let [facets @(rf/subscribe [:facets/config])
+        selected-facet @(rf/subscribe [:ui.facets/current])
         applied-facets @(rf/subscribe [:facets/applied])]
     [:div.card.my-4
      [:div.card-body
