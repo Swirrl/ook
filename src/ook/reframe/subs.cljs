@@ -19,6 +19,11 @@
   (fn [db [_ codelist]]
     (-> db :ui.facets/current :selection (get codelist) boolean)))
 
+(rf/reg-sub
+  :ui.facets.current/tree
+  (fn [db [_ facet-name]]
+    (get-in db [:facets.codes/tree facet-name])))
+
 ;; (rf/reg-sub :ui.codes/query (fn [db _]
 ;;                               (:ui.codes/query db)))
 

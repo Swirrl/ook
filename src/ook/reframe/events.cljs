@@ -39,14 +39,24 @@
 
 ;;;;;; FILTERS
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :ui.facets/set-current
  [validation-interceptor]
- (fn [db [_ {:keys [codelists] :as facet}]]
-   (if facet
-     (let [with-selection (assoc facet :selection (->> codelists (map :ook/uri) set))]
-       (assoc db :ui.facets/current with-selection))
-     (dissoc db :ui.facets/current))))
+ (fn [{:keys [db]} [_ {:keys [codelists name] :as facet}]]
+   {:db (let [with-selection (assoc facet :selection (->> codelists (map :ook/uri) set))]
+          (assoc db :ui.facets/current with-selection))
+    :http-xhrio {:method :get
+                 :uri "/codes"
+                 ;; :params {} ??? send the list of top level codes we need trees for
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:facets.codes/success name]
+                 :on-failure [:facets.codes/error]}}))
+
+(rf/reg-event-db
+ :ui.facets/cancel-current-selection
+ [validation-interceptor]
+ (fn [db _]
+   (dissoc db :ui.facets/current)))
 
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
@@ -72,22 +82,6 @@
  (fn [db [_ facet-name]]
    (update db :facets/applied dissoc facet-name)))
 
-;;;;; UI STATE MANAGEMENT
-
-;; (rf/reg-event-db :ui.codes/query-change (fn [db [_ new-query]]
-;;                                           (assoc db :ui.codes/query new-query)))
-
-;; (rf/reg-event-db :ui.codes/toggle-selection (fn [db [_ val]]
-;;                                               (update-in db [:ui.codes/selection val] not)))
-
-;; (rf/reg-event-db :ui.codes/set-selection (fn [db [_ selection]]
-;;                                            (assoc db :ui.codes/selection selection)))
-
-;; (rf/reg-event-db :ui.codes.selection/reset (fn [db _]
-;;                                              (dissoc db :ui.codes/selection)))
-
-;; (rf/reg-event-db :results.datasets/reset (fn [db _]
-;;                                            (dissoc db :results.datasets/data :ui.codes/selection)))
 
 ;;; HTTP REQUESTS/RESPONSES
 
@@ -98,6 +92,26 @@
 
 ;; (rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
 ;;                                                 (assoc db :results.codes/error error)))
+
+(rf/reg-event-db
+ :facets.codes/success
+ [validation-interceptor]
+ (fn [db [_ facet-name result]]
+   ;; would be easier if facet configs were indexed by name.. probably change that
+   (let [facet (->> db :facets/config
+                    (filter #(= (:name %) facet-name))
+                    first)
+         facets (->> db :facets/config
+                     (remove #(= (:name %) facet-name)))]
+     ;; (assoc db :facets/config (conj facets (assoc facet :tree result)))
+     (assoc-in db [:facets.codes/tree facet-name] result)
+     )))
+
+(rf/reg-event-db
+  :facets.codes/error ;; TODO.. something in the ui if this actually happens
+  [validation-interceptor]
+  (fn [db [_ error]]
+    (assoc db :facets.codes/error error)))
 
 (rf/reg-event-db
  :results.datasets.request/success
@@ -112,8 +126,6 @@
  [validation-interceptor]
  (fn [db [_ result]]
    (assoc db :results.datasets/error result)))
-
-;;;;; HTTP REQUESTS
 
 ;; (rf/reg-event-fx :codes/submit-search (fn [_ [_ query]]
 ;;                                         {:http-xhrio {:method :get
