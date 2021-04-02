@@ -47,7 +47,7 @@
        (rf/dispatch [:ui.facets/set-current facet2])
        (is (= (assoc facet2 :selection #{"cl2" "cl3"}) @current-facet))
 
-       (rf/dispatch [:ui.facets/set-current nil])
+       (rf/dispatch [:ui.facets/cancel-current-selection])
        (is nil? @current-facet)))
 
    (testing "applying current facet works"
