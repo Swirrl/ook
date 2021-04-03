@@ -50,3 +50,7 @@
 
 (defn code-selected? [db uri]
   (-> db :ui.facets/current :selection (get uri) boolean))
+
+(defn facet-by-name [db name]
+   ;; would be easier if facet configs were indexed by name.. maybe change that?
+  (->> db :facets/config (filter #(= (:name %) name)) first))

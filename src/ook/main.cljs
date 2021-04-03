@@ -1,6 +1,7 @@
 (ns ook.main
   (:require
    [ook.reframe.events]
+   [ook.reframe.events.filter-ui]
    [ook.reframe.router :as router]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
