@@ -33,15 +33,13 @@
             selection (assoc-in [:facets/applied (:name current-facet)] selection))
       :dispatch [:app/navigate :ook.route/search]})))
 
-
-;;;;; SELECTING
-
-
 (rf/reg-event-db
  :ui.facets/cancel-current-selection
  [e/validation-interceptor]
  (fn [db _]
    (dissoc db :ui.facets/current)))
+
+;;;;; SELECTING
 
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
@@ -51,13 +49,22 @@
          update-fn (if selected? disj conj)]
      (update-in db [:ui.facets/current :selection] update-fn uri))))
 
+(rf/reg-event-db
+ :ui.facets.current/set-selection
+ [e/validation-interceptor]
+ (fn [db [_ which uri]]
+   (let [to-add (cond-> (db/uri->child-uris db uri)
+                  (= :any which) (conj uri))]
+     (js/console.log uri)
+     (update-in db [:ui.facets/current :selection] #(apply conj % to-add)))))
+
 ;;;;; EXPANDING/COLLAPSING
 
 (rf/reg-event-db
  :ui.facets.current/toggle-expanded
  [e/validation-interceptor]
  (fn [db [_ uri]]
-   (let [uri+children (db/uri->children-in-current-tree db uri)
+   (let [uri+children (cons uri (db/uri->expandable-child-uris db uri))
          expanded? (db/code-expanded? db uri)
          update-fn (if expanded? disj conj)]
      (update-in db [:ui.facets/current :expanded] #(apply update-fn % uri+children)))))

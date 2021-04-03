@@ -29,19 +29,28 @@
                        (mapcat walk* children))))]
     (set (mapcat walk tree))))
 
-;; (defn all-uris [tree]
-;;   (let [walk (fn walk* [node]
-;;                (cons (:ook/uri node)
-;;                      (when-let [children (:children node)]
-;;                        (mapcat walk* children))))]
-;;     (set (mapcat walk tree))))
+(defn- all-uris [tree]
+  (let [walk (fn walk* [node]
+               (cons (:ook/uri node)
+                     (when-let [children (:children node)]
+                       (mapcat walk* children))))]
+    (set (mapcat walk tree))))
 
-(defn uri->children-in-current-tree [db uri]
+(defn uri->child-uris [db uri]
   (let [tree (-> db :ui.facets/current :tree)
         walk (fn walk* [node]
                (when-let [children (:children node)]
                  (if (= (:ook/uri node) uri)
-                   (cons (:ook/uri node) (all-expandable-uris children))
+                   (all-uris children)
+                   (mapcat walk* children))))]
+    (set (mapcat walk tree))))
+
+(defn uri->expandable-child-uris [db uri]
+  (let [tree (-> db :ui.facets/current :tree)
+        walk (fn walk* [node]
+               (when-let [children (:children node)]
+                 (if (= (:ook/uri node) uri)
+                   (all-expandable-uris children)
                    (mapcat walk* children))))]
     (set (mapcat walk tree))))
 

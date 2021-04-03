@@ -45,18 +45,6 @@
  (fn [db [_ facet-name]]
    (update db :facets/applied dissoc facet-name)))
 
-;; (rf/reg-event-db
-;;   :filters.codes/add-to-selection
-;;   [validation-interceptor]
-;;   (fn [db _]
-;;     ))
-
-;; (rf/reg-event-db
-;;   :filters.codes/remove-from-selection
-;;   [validation-interceptor]
-;;   (fn [db _]))
-
-
 ;;; HTTP REQUESTS/RESPONSES
 
 ;; (rf/reg-event-db :results.codes.request/success (fn [db [_ query result]]
