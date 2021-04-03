@@ -65,11 +65,10 @@
                :checked selected?
                :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
         disabled? (merge {:disabled true}))]
-     [:label.form-check-label.d-inline {:for label} label]
+     [:label.form-check-label.d-inline {:for uri} label]
+     (when  children [:a.ms-1.link-primary (if allow-any? "any" "all children")])
      (when (and expanded? children)
-       [:<>
-        [:a.ms-1.link-primary (if allow-any? "any" "all children")]
-        [code-list children]])]))
+       [code-list children])]))
 
 (defn- code-list [tree & top-level?]
   [:ul.list-group-flush (when top-level? {:class "p-0"})

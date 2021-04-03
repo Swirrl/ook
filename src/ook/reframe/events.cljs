@@ -39,13 +39,6 @@
 
 ;;;;;; FILTERS
 
-(defn- get-all-expandable-uris [tree]
-  (let [walk (fn walk* [node]
-               (when-let [children (:children node)]
-                 (cons (:ook/uri node)
-                       (mapcat walk* children))))]
-    (mapcat walk tree)))
-
 (rf/reg-event-fx
  :ui.facets/set-current
  [validation-interceptor]
@@ -69,18 +62,21 @@
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
  [validation-interceptor]
- (fn [db [_ val]]
-   (let [selected? (-> db :ui.facets/current :selection (get val))
+ (fn [db [_ uri]]
+   (let [selected? (db/code-selected? db uri)
          update-fn (if selected? disj conj)]
-     (update-in db [:ui.facets/current :selection] update-fn val))))
+     (update-in db [:ui.facets/current :selection] update-fn uri))))
+
+(defn- get-children [db uri])
 
 (rf/reg-event-db
  :ui.facets.current/toggle-expanded
  [validation-interceptor]
- (fn [db [_ val]]
-   (let [expanded? (-> db :ui.facets/current :expanded (get val))
+ (fn [db [_ uri]]
+   (let [uri+children (db/uri->children-in-current-tree db uri)
+         expanded? (db/code-expanded? db uri)
          update-fn (if expanded? disj conj)]
-     (update-in db [:ui.facets/current :expanded] update-fn val))))
+     (update-in db [:ui.facets/current :expanded] #(apply update-fn % uri+children)))))
 
 (rf/reg-event-fx
  :filters/add-current-facet
@@ -99,23 +95,15 @@
    (update db :facets/applied dissoc facet-name)))
 
 ;; (rf/reg-event-db
-;;   :filters.codes/toggle-selection
+;;   :filters.codes/add-to-selection
 ;;   [validation-interceptor]
-;;   (fn [db [_ dimension]]
-;;     (update-in []db :ui.facets/current)
-;;     ;; put this dimension in some "selected codes" map
+;;   (fn [db _]
 ;;     ))
 
-(rf/reg-event-db
-  :filters.codes/add-to-selection
-  [validation-interceptor]
-  (fn [db _]
-    ))
-
-(rf/reg-event-db
-  :filters.codes/remove-from-selection
-  [validation-interceptor]
-  (fn [db _]))
+;; (rf/reg-event-db
+;;   :filters.codes/remove-from-selection
+;;   [validation-interceptor]
+;;   (fn [db _]))
 
 
 ;;; HTTP REQUESTS/RESPONSES
@@ -141,7 +129,7 @@
      (-> db
          (assoc :facets/config (conj facets (assoc facet :tree result)))
          (assoc-in [:ui.facets/current :tree] result)
-         (assoc-in [:ui.facets/current :expanded] (-> result get-all-expandable-uris set))))))
+         (assoc-in [:ui.facets/current :expanded] (db/all-expandable-uris result))))))
 
 (rf/reg-event-db
   :facets.codes/error ;; TODO.. something in the ui if this actually happens

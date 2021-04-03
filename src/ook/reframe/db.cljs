@@ -21,3 +21,32 @@
                (map (fn [[name selection]]
                       (cons name selection)))
                (map pu/encode-facet))})
+
+(defn all-expandable-uris [tree]
+  (let [walk (fn walk* [node]
+               (when-let [children (:children node)]
+                 (cons (:ook/uri node)
+                       (mapcat walk* children))))]
+    (set (mapcat walk tree))))
+
+;; (defn all-uris [tree]
+;;   (let [walk (fn walk* [node]
+;;                (cons (:ook/uri node)
+;;                      (when-let [children (:children node)]
+;;                        (mapcat walk* children))))]
+;;     (set (mapcat walk tree))))
+
+(defn uri->children-in-current-tree [db uri]
+  (let [tree (-> db :ui.facets/current :tree)
+        walk (fn walk* [node]
+               (when-let [children (:children node)]
+                 (if (= (:ook/uri node) uri)
+                   (cons (:ook/uri node) (all-expandable-uris children))
+                   (mapcat walk* children))))]
+    (set (mapcat walk tree))))
+
+(defn code-expanded? [db uri]
+  (-> db :ui.facets/current :expanded (get uri) boolean))
+
+(defn code-selected? [db uri]
+  (-> db :ui.facets/current :selection (get uri) boolean))

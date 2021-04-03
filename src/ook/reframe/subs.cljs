@@ -4,7 +4,11 @@
 
 ;;;;;; INITIAL, PERMANENT STATE
 
-(rf/reg-sub :facets/config (fn [db _] (:facets/config db)))
+(rf/reg-sub
+  :facets/config
+  (fn [db _]
+    (->> db :facets/config (sort-by :name))))
+
 (rf/reg-sub :datasets/count (fn [db _] (:datasets/count db)))
 
 ;;;;;; EPHEMERAL UI STATE
