@@ -39,12 +39,20 @@
 
 ;;;;;; FILTERS
 
+(defn- get-all-expandable-uris [tree]
+  (let [walk (fn walk* [node]
+               (when-let [children (:children node)]
+                 (cons (:ook/uri node)
+                       (mapcat walk* children))))]
+    (mapcat walk tree)))
+
 (rf/reg-event-fx
  :ui.facets/set-current
  [validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [codelists name] :as facet}]]
-   {:db (let [with-selection (assoc facet :selection (->> codelists (map :ook/uri) set))]
-          (assoc db :ui.facets/current with-selection))
+ (fn [{:keys [db]} [_ {:keys [tree codelists name] :as facet}]]
+   {:db (let [with-ui-state (assoc facet :selection (->> codelists (map :ook/uri) set))]
+          (assoc db :ui.facets/current with-ui-state))
+    ;; TODO: only get this if we haven't already fetched the tree
     :http-xhrio {:method :get
                  :uri "/codes"
                  ;; :params {} ??? send the list of top level codes we need trees for
@@ -66,6 +74,14 @@
          update-fn (if selected? disj conj)]
      (update-in db [:ui.facets/current :selection] update-fn val))))
 
+(rf/reg-event-db
+ :ui.facets.current/toggle-expanded
+ [validation-interceptor]
+ (fn [db [_ val]]
+   (let [expanded? (-> db :ui.facets/current :expanded (get val))
+         update-fn (if expanded? disj conj)]
+     (update-in db [:ui.facets/current :expanded] update-fn val))))
+
 (rf/reg-event-fx
  :filters/add-current-facet
  [validation-interceptor]
@@ -81,6 +97,25 @@
  [validation-interceptor]
  (fn [db [_ facet-name]]
    (update db :facets/applied dissoc facet-name)))
+
+;; (rf/reg-event-db
+;;   :filters.codes/toggle-selection
+;;   [validation-interceptor]
+;;   (fn [db [_ dimension]]
+;;     (update-in []db :ui.facets/current)
+;;     ;; put this dimension in some "selected codes" map
+;;     ))
+
+(rf/reg-event-db
+  :filters.codes/add-to-selection
+  [validation-interceptor]
+  (fn [db _]
+    ))
+
+(rf/reg-event-db
+  :filters.codes/remove-from-selection
+  [validation-interceptor]
+  (fn [db _]))
 
 
 ;;; HTTP REQUESTS/RESPONSES
@@ -103,9 +138,10 @@
                     first)
          facets (->> db :facets/config
                      (remove #(= (:name %) facet-name)))]
-     ;; (assoc db :facets/config (conj facets (assoc facet :tree result)))
-     (assoc-in db [:facets.codes/tree facet-name] result)
-     )))
+     (-> db
+         (assoc :facets/config (conj facets (assoc facet :tree result)))
+         (assoc-in [:ui.facets/current :tree] result)
+         (assoc-in [:ui.facets/current :expanded] (-> result get-all-expandable-uris set))))))
 
 (rf/reg-event-db
   :facets.codes/error ;; TODO.. something in the ui if this actually happens

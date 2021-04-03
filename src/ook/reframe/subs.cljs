@@ -20,6 +20,11 @@
     (-> db :ui.facets/current :selection (get codelist) boolean)))
 
 (rf/reg-sub
+  :ui.facets.current/code-expanded?
+  (fn [db [_ uri]]
+    (-> db :ui.facets/current :expanded (get uri) boolean)))
+
+(rf/reg-sub
   :ui.facets.current/tree
   (fn [db [_ facet-name]]
     (get-in db [:facets.codes/tree facet-name])))

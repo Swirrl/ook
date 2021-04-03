@@ -43,56 +43,60 @@
     :on-click #(rf/dispatch [:filters/add-current-facet])}
    "Apply filter"])
 
+(defn- toggle-open-button [uri expanded?]
+  [:button.btn.as-link.p-0.m-0.expand-code-button
+   {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])
+    :type "button"}
+   (if expanded? icons/down icons/up)])
+
 (declare code-list)
 
 (defn- code-list-item [{:keys [ook/uri label children disabled? allow-any?]}]
-  ^{:key label}
-  [:li.list-group-item.border-0.pb-0
-   (when children
-     (if (empty? children)
-       icons/up
-       icons/down))
-   [:input.form-check-input.mx-2
-    (cond-> {:type "checkbox"
-             :name "code"
-             :value uri
-             :id uri
-             :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? uri]))
-             :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
-      disabled? (merge {:disabled true}))]
-   [:label.form-check-label.d-inline {:for label} label]
-   (when children
-     [:<>
-      [:a.ms-1.link-primary (if allow-any? "any" "all children")]
-      [code-list children]])])
+  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])
+        selected? @(rf/subscribe [:ui.facets.current/codelist-selected? uri])]
+    [:li.list-group-item.border-0.pb-0
+     (when children
+       [toggle-open-button uri expanded?])
+     [:input.form-check-input.mx-2
+      (cond-> {:type "checkbox"
+               :name "code"
+               :value uri
+               :id uri
+               :checked selected?
+               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
+        disabled? (merge {:disabled true}))]
+     [:label.form-check-label.d-inline {:for label} label]
+     (when (and expanded? children)
+       [:<>
+        [:a.ms-1.link-primary (if allow-any? "any" "all children")]
+        [code-list children]])]))
 
 (defn- code-list [tree & top-level?]
   [:ul.list-group-flush (when top-level? {:class "p-0"})
-   (for [element tree]
-     [code-list-item element])])
+   (for [{:keys [ook/uri] :as code} tree]
+     ^{:key uri} [code-list-item code])])
 
-(defn- code-selection [{:keys [name codelists]}]
-  (let [tree @(rf/subscribe [:ui.facets.current/tree name])]
-    [:<>
-     [:p.h6.mt-4 "Codelists"]
-     [:form.mt-3
-      [code-list tree :top-level]
-      [:hr]
-      (doall
-       (for [{:keys [ook/uri label]} codelists]
-         ^{:key uri}
-         [:div.form-check.mb-3.bg-light
-          [:div.p-2
-           [:input.form-check-input
-            {:type "checkbox"
-             :name "codelist"
-             :value uri
-             :id uri
-             :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? uri]))
-             :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
-           [:label.form-check-label {:for uri}
-            [:strong label]
-            [:p.m-0 "id: " [:code uri]]]]]))]]))
+(defn- code-selection [{:keys [name codelists tree]}]
+  [:<>
+   [:p.h6.mt-4 "Codelists"]
+   [:form.mt-3
+    [code-list tree :top-level]
+    [:hr]
+    (doall
+     (for [{:keys [ook/uri label]} codelists]
+       ^{:key uri}
+       [:div.form-check.mb-3.bg-light
+        [:div.p-2
+         [:input.form-check-input
+          {:type "checkbox"
+           :name "codelist"
+           :value uri
+           :id uri
+           :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? uri]))
+           :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
+         [:label.form-check-label {:for uri}
+          [:strong label]
+          [:p.m-0 "id: " [:code uri]]]]]))]])
 
 (defn- no-codelist-message [{:keys [dimensions]}]
   [:<>

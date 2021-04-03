@@ -73,9 +73,7 @@
                 :children [{:ook/uri "/def/code7" :label "Beverages" :disabled? true
                             :children [{:ook/uri "/def/code8" :label "Beer made from malt (including ale, stout and porter)"}
                                        {:ook/uri "/def/code9" :label "Fermented beverages, nes (eg cider, perry, mead)"}]}]}
-              {:ook/uri "/def/code10" :label "Chemicals & related products, nes" :disabled true
-                :children [] ;; to provide disclosed example
-                }]}
+              {:ook/uri "/def/code10" :label "Chemicals & related products, nes" :disabled true}]}
    {:ook/uri "/def/code11" :label "Product" :disabled? true :allow-any? true
     :children [{:ook/uri "/def/code12" :label "Total" :disabled? true
                 :children [{:ook/uri "/def/code13" :label "A Products of agriculture, forestry & fishing" :disabled? true

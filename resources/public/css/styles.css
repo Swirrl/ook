@@ -21,3 +21,7 @@
   line-height: .5;
   border-radius: .2rem;
 }
+
+button svg {
+  vertical-align: top;
+}
