@@ -30,3 +30,8 @@
   [{:keys [query-params]}]
   (when (seq query-params)
     (-> query-params (get "facet") parse-named-facets)))
+
+(defn get-codelists
+  [{:keys [query-params]}]
+  (when (seq query-params)
+    (-> query-params u/box (get "codelist"))))

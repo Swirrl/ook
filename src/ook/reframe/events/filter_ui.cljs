@@ -3,9 +3,6 @@
    [re-frame.core :as rf]
    [ook.reframe.db :as db]
    [ajax.core :as ajax]
-   [clojure.spec.alpha :as s]
-   [ook.params.parse :as p]
-   [reitit.frontend.easy :as rtfe]
    [day8.re-frame.http-fx]
    [ook.spec]
    [ook.reframe.events :as e]))
@@ -17,11 +14,12 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [tree codelists name] :as facet}]]
    {:db (let [with-ui-state (cond-> facet
+                                ;; set selection to all uris in tree here eventually
                               :always (assoc :selection (->> codelists (map :ook/uri) set))
                               (seq tree) (assoc :expanded (db/all-expandable-uris tree)))]
           (assoc db :ui.facets/current with-ui-state))
     :fx [(when-not (:tree (db/facet-by-name db name))
-           [:dispatch [:facets.codes/fetch-codes name]])]}))
+           [:dispatch [:facets.codes/fetch-codes facet]])]}))
 
 (rf/reg-event-fx
  :filters/add-current-facet
@@ -55,7 +53,6 @@
  (fn [db [_ which uri]]
    (let [to-add (cond-> (db/uri->child-uris db uri)
                   (= :any which) (conj uri))]
-     (js/console.log uri)
      (update-in db [:ui.facets/current :selection] #(apply conj % to-add)))))
 
 ;;;;; EXPANDING/COLLAPSING
@@ -74,10 +71,10 @@
 (rf/reg-event-fx
  :facets.codes/fetch-codes
  [e/validation-interceptor]
- (fn [_ [_ name]]
+ (fn [_ [_ {:keys [name codelists]}]]
    {:http-xhrio {:method :get
                  :uri "/codes"
-                 ;; :params {} ??? send the list of top level codes we need trees for
+                 :params {:codelist (map :ook/uri codelists)}
                  :response-format (ajax/transit-response-format)
                  :on-success [:facets.codes/success name]
                  :on-failure [:facets.codes/error]}}))
