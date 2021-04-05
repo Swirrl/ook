@@ -10,8 +10,8 @@
 (defrecord Elasticsearch [opts]
   db/SearchBackend
 
-  (get-codes [_ query]
-    (codes/search query opts))
+  ;; (get-codes [_ query]
+  ;;   (codes/search query opts))
 
   (get-components [_ uris]
     (components/get-components uris opts))
@@ -35,7 +35,10 @@
     (ds/total-count opts))
 
   (get-facets [_]
-    (facets/get-facets opts)))
+    (facets/get-facets opts))
+
+  (get-code-trees [_ codelist-uris]
+    (codes/build-code-trees codelist-uris opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))

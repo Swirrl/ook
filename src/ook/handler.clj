@@ -83,6 +83,9 @@
 (defmethod ig/init-key :ook.handler/codes [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      (let [top-uris (p/get-codelists request)]
-        (transit-response cl-data)) ;; get real data for the give codelists/top level codes here
+      (let [top-uris (p/get-codelists request)
+            trees (db/get-code-trees db top-uris)]
+        (transit-response trees)
+        ;; (transit-response cl-data)
+) ;; get real data for the give codelists/top level codes here
       invalid-format-response)))
