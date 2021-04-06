@@ -84,7 +84,7 @@
 
 (defn results []
   (if @(rf/subscribe [:results.datasets/error])
-    (error-message)
+    [error-message]
     (let [data @(rf/subscribe [:results.datasets/data])
           applied-facets @(rf/subscribe [:facets/applied])]
       [:<>

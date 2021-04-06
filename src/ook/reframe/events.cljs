@@ -47,14 +47,6 @@
 
 ;;; HTTP REQUESTS/RESPONSES
 
-;; (rf/reg-event-db :results.codes.request/success (fn [db [_ query result]]
-;;                                                   (assoc db
-;;                                                          :results.codes/data result
-;;                                                          :results.codes/query query)))
-
-;; (rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
-;;                                                 (assoc db :results.codes/error error)))
-
 (rf/reg-event-db
  :results.datasets.request/success
  [validation-interceptor]
@@ -68,25 +60,6 @@
  [validation-interceptor]
  (fn [db [_ result]]
    (assoc db :results.datasets/error result)))
-
-;; (rf/reg-event-fx :codes/submit-search (fn [_ [_ query]]
-;;                                         {:http-xhrio {:method :get
-;;                                                       :uri "/get-codes"
-;;                                                       :params {:q query}
-;;                                                       :response-format (ajax/transit-response-format)
-;;                                                       :on-success [:results.codes.request/success query]
-;;                                                       :on-failure [:results.codes.request/errror]}
-;;                                          :fx [[:dispatch [:ui.codes/query-change query]]
-;;                                               [:dispatch [:results.datasets/reset]]]}))
-
-;; (rf/reg-event-fx :filters/apply-code-selection (fn [_ [_ facets]]
-;;                                                  {:http-xhrio {:method :get
-;;                                                                :uri "/apply-filters"
-;;                                                                :params {:facet facets}
-;;                                                                :response-format (ajax/transit-response-format)
-;;                                                                :on-success [:results.datasets.request/success]
-;;                                                                :on-failure [:results.datasets.request/errror]}
-;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
 
 (rf/reg-event-fx
  :datasets/fetch-datasets

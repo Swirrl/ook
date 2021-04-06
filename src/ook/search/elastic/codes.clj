@@ -2,6 +2,7 @@
   (:require
    [ook.util :as u]
    [ook.search.elastic.util :as esu]
+   [ook.search.elastic.components :as components]
    [clojurewerkz.elastisch.rest.document :as esd]))
 
 ;; (defn- index-by-codelist [results]
@@ -93,17 +94,17 @@
       (assoc concept :children (build-sub-tree conn children))
       concept)))
 
-(defn build-tree [conn codelist-id]
-  (doall
-   (map (partial find-narrower-concepts conn)
-        (get-top-concepts conn codelist-id))))
+(defn build-tree [{:keys [elastic/endpoint]} codelist-id]
+  (let [conn (esu/get-connection endpoint)]
+    (doall
+     (map (partial find-narrower-concepts conn)
+          (get-top-concepts conn codelist-id)))))
 
-(defn build-code-trees [codelist-ids {:keys [elastic/endpoint]}]
-  (when codelist-ids
-    (let [conn (esu/get-connection endpoint)]
-      (doall (map (fn [codelist-id]
-                    {:ook/uri codelist-id
-                     :label (str "label for " codelist-id " (TODO, get real label)") ;; TODO: put actual labels here
-                     :allow-any? true
-                     :children (build-tree conn codelist-id)})
-                  (u/box codelist-ids))))))
+(defn build-code-trees [dimensions opts]
+  (let [codelists (components/components->codelists dimensions opts)]
+    (when (seq codelists)
+      (doall (map (fn [{:keys [ook/uri] :as codelist}]
+                    (merge codelist
+                           {:allow-any? true
+                            :children (build-tree opts uri)}))
+                  codelists)))))

@@ -18,13 +18,12 @@
 
 (s/def :facets/config (s/coll-of :ook/facet))
 
-(s/def :ook/facet (s/keys :req-un [:facet/name :facet/codelists]
+(s/def :ook/facet (s/keys :req-un [:facet/name]
                           :opt-un [:facet/selection]))
 (s/def :facet/name string?)
 (s/def :facet/selection (s/coll-of :ook/uri))
 (s/def :ook/uri string?)
 
-(s/def :facet/codelists (s/coll-of :facet/codelist))
 (s/def :facet/codelist (s/keys :req [:ook/uri] :req-un [:ook/label]))
 
 (s/def :facets/applied (s/nilable (s/map-of :facet/name :facet/selection)))

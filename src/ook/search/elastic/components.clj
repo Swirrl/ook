@@ -1,6 +1,7 @@
 (ns ook.search.elastic.components
   (:require [ook.search.elastic.util :as esu]
             [clojurewerkz.elastisch.query :as q]
+            [clojure.set :as set]
             [ook.util :as u]
             [clojurewerkz.elastisch.rest.document :as esd]))
 
@@ -17,8 +18,7 @@
          (map esu/normalize-keys))))
 
 (defn components->codelists [uris opts]
-  (let [codelists (->> opts
-                       (get-components uris)
-                       (map #(select-keys % [:codelist]))
-                       (remove #(nil? (:codelist %))))]
-    (->> codelists (map :codelist) distinct)))
+  (->> opts
+       (get-components uris)
+       (map :codelist)
+       (remove nil?)))

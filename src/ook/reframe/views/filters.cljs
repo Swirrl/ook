@@ -58,7 +58,7 @@
 
 (declare code-list)
 
-(defn- code-list-item [{:keys [ook/uri label children disabled? allow-any?] :as code}]
+(defn- code-list-item [{:keys [ook/uri label children disabled?] :as code}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])
         selected? @(rf/subscribe [:ui.facets.current/codelist-selected? uri])]
     [:li.list-group-item.border-0.pb-0
@@ -82,28 +82,11 @@
    (for [{:keys [ook/uri] :as code} tree]
      ^{:key uri} [code-list-item code])])
 
-(defn- code-selection [{:keys [codelists tree]}]
+(defn- code-selection [{:keys [tree]}]
   [:<>
    [:p.h6.mt-4 "Codes"]
    [:form.mt-3
-    [code-list tree :top-level]
-    ;; [:hr]
-    ;; (doall
-    ;;  (for [{:keys [ook/uri label]} codelists]
-    ;;    ^{:key uri}
-    ;;    [:div.form-check.mb-3.bg-light
-    ;;     [:div.p-2
-    ;;      [:input.form-check-input
-    ;;       {:type "checkbox"
-    ;;        :name "codelist"
-    ;;        :value uri
-    ;;        :id uri
-    ;;        :checked (-> @(rf/subscribe [:ui.facets.current/codelist-selected? uri]))
-    ;;        :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}]
-    ;;      [:label.form-check-label {:for uri}
-    ;;       [:strong label]
-    ;;       [:p.m-0 "id: " [:code uri]]]]]))
-    ]])
+    [code-list tree :top-level]]])
 
 (defn- no-codelist-message [{:keys [dimensions]}]
   [:<>
@@ -116,7 +99,7 @@
   (when selected-facet
     [:<>
      [apply-filter-button selected-facet]
-     (if (seq (:codelists selected-facet))
+     (if (seq (:tree selected-facet))
        [code-selection selected-facet]
        [no-codelist-message selected-facet])]))
 
@@ -137,7 +120,8 @@
 (defn configured-facets []
   (let [facets @(rf/subscribe [:facets/config])
         selected-facet @(rf/subscribe [:ui.facets/current])
-        applied-facets @(rf/subscribe [:facets/applied])]
+        applied-facets @(rf/subscribe [:facets/applied])
+        error @(rf/subscribe [:facets.codes/error])]
     [:div.card.my-4
      [:div.card-body
       [:h2.h5.card-title.me-2.d-inline "Find data"]
@@ -149,4 +133,6 @@
             (facet-button facet selected-facet)))]
        (when selected-facet
          (cancel-facet-selection))]
-      (codelist-selection selected-facet)]]))
+      (if error
+        [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]
+        (codelist-selection selected-facet))]]))
