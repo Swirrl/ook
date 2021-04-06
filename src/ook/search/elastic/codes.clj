@@ -44,24 +44,28 @@
       (->> scheme sort first)
       scheme)))
 
-(defn- build-codes [results]
+(defn- build-codes
+  "Map the codes from the elasticsearch result format to a more succinct format used internally.
+  The scheme is passed in as an argument and not taken from (-> result :_source :scheme) because
+  sometimes a code belongs to multiple schemes and that value is a collection. We pass in the
+  correct one to avoid this ambiguity. It's included in the result in the first place so that each
+  individual map contains all the information it needs to fetch its own children."
+  [results scheme]
   (map (fn [result]
-         {:scheme (get-scheme result)
+         {:scheme scheme
           :ook/uri (-> result :_id)
           :label (-> result :_source :label)})
        results))
 
 (defn get-top-concepts [conn codelist-id]
-  (let [codes (-> conn
-                  (esd/search "code" "_doc"
-                              {:query
-                               {:bool
-                                {:must {:term {:scheme codelist-id}}
-                                 :must_not {:exists {:field :broader}}}}})
-                  :hits :hits
-                  build-codes)]
-    codes
-    ))
+  (-> conn
+      (esd/search "code" "_doc"
+                  {:query
+                   {:bool
+                    {:must {:term {:scheme codelist-id}}
+                     :must_not {:exists {:field :broader}}}}})
+      :hits :hits
+      (build-codes codelist-id)))
 
 (defn get-children [conn {:keys [ook/uri scheme]}]
   (-> conn
@@ -71,7 +75,7 @@
                     {:must [{:term {:scheme scheme}}
                             {:term {:broader uri}}]}}})
       :hits :hits
-      build-codes))
+      (build-codes scheme)))
 
 (declare find-narrower-concepts)
 
@@ -99,7 +103,7 @@
     (let [conn (esu/get-connection endpoint)]
       (doall (map (fn [codelist-id]
                     {:ook/uri codelist-id
-                     :label (str "label for " codelist-id "(TODO, get real label)") ;; TODO: put actual labels here
+                     :label (str "label for " codelist-id " (TODO, get real label)") ;; TODO: put actual labels here
                      :allow-any? true
                      :children (build-tree conn codelist-id)})
                   (u/box codelist-ids))))))

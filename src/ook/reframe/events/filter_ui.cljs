@@ -15,7 +15,8 @@
  (fn [{:keys [db]} [_ {:keys [tree codelists name] :as facet}]]
    {:db (let [with-ui-state (cond-> facet
                                 ;; set selection to all uris in tree here eventually
-                              :always (assoc :selection (db/all-uris tree))
+                              :always (assoc :selection #{};; (db/all-uris tree)
+                                             )
                               (seq tree) (assoc :expanded (db/all-expandable-uris tree)))]
           (assoc db :ui.facets/current with-ui-state))
     :fx [(when-not (:tree (db/facet-by-name db name))
