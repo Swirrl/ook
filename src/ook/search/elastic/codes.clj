@@ -35,6 +35,7 @@
 ;;            (merge code (dimensions (:codelist code))))
 ;;          codes)))
 
+
 (defn- get-scheme [result]
   ;; TODO:: This is a hack to make things work right now, just (deterministically) select the first scheme
   ;; almost certainly not the right way to handle a concept that belongs to multiple schemes
@@ -51,14 +52,16 @@
        results))
 
 (defn get-top-concepts [conn codelist-id]
-  (-> conn
-      (esd/search "code" "_doc"
-                  {:query
-                   {:bool
-                    {:must {:term {:scheme codelist-id}}
-                     :must_not {:exists {:field :broader}}}}})
-      :hits :hits
-      build-codes))
+  (let [codes (-> conn
+                  (esd/search "code" "_doc"
+                              {:query
+                               {:bool
+                                {:must {:term {:scheme codelist-id}}
+                                 :must_not {:exists {:field :broader}}}}})
+                  :hits :hits
+                  build-codes)]
+    codes
+    ))
 
 (defn get-children [conn {:keys [ook/uri scheme]}]
   (-> conn
@@ -74,11 +77,11 @@
 
 (defn- build-sub-tree [conn concepts]
   (doall
-    (map (fn [concept]
-           (if (:children concept)
-             (find-narrower-concepts conn concept)
-             concept))
-         concepts)))
+   (map (fn [concept]
+          (if (:children concept)
+            (find-narrower-concepts conn concept)
+            concept))
+        concepts)))
 
 (defn- find-narrower-concepts [conn concept]
   (let [children (get-children conn concept)]
@@ -94,4 +97,9 @@
 (defn build-code-trees [codelist-ids {:keys [elastic/endpoint]}]
   (when codelist-ids
     (let [conn (esu/get-connection endpoint)]
-      (doall (mapcat (partial build-tree conn) (u/box codelist-ids))))))
+      (doall (map (fn [codelist-id]
+                    {:ook/uri codelist-id
+                     :label (str "label for " codelist-id "(TODO, get real label)") ;; TODO: put actual labels here
+                     :allow-any? true
+                     :children (build-tree conn codelist-id)})
+                  (u/box codelist-ids))))))

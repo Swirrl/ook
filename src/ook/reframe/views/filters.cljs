@@ -82,7 +82,7 @@
    (for [{:keys [ook/uri] :as code} tree]
      ^{:key uri} [code-list-item code])])
 
-(defn- code-selection [{:keys [name codelists tree]}]
+(defn- code-selection [{:keys [codelists tree]}]
   [:<>
    [:p.h6.mt-4 "Codes"]
    [:form.mt-3
