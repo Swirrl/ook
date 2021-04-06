@@ -15,7 +15,7 @@
  (fn [{:keys [db]} [_ {:keys [tree codelists name] :as facet}]]
    {:db (let [with-ui-state (cond-> facet
                                 ;; set selection to all uris in tree here eventually
-                              :always (assoc :selection (->> codelists (map :ook/uri) set))
+                              :always (assoc :selection (db/all-uris tree))
                               (seq tree) (assoc :expanded (db/all-expandable-uris tree)))]
           (assoc db :ui.facets/current with-ui-state))
     :fx [(when-not (:tree (db/facet-by-name db name))
@@ -52,8 +52,11 @@
  [e/validation-interceptor]
  (fn [db [_ which uri]]
    (let [to-add (cond-> (db/uri->child-uris db uri)
-                  (= :any which) (conj uri))]
-     (update-in db [:ui.facets/current :selection] #(apply conj % to-add)))))
+                  (= :any which) (conj uri))
+         to-collapse (when (= :any which) (cons uri (db/uri->expandable-child-uris db uri)))]
+     (-> db
+         (update-in [:ui.facets/current :selection] #(apply conj % to-add))
+         (update-in [:ui.facets/current :expanded] #(apply disj % to-collapse))))))
 
 ;;;;; EXPANDING/COLLAPSING
 
@@ -88,7 +91,9 @@
      (-> db
          (assoc :facets/config (conj facets (assoc facet :tree result)))
          (assoc-in [:ui.facets/current :tree] result)
-         (assoc-in [:ui.facets/current :expanded] (db/all-expandable-uris result))))))
+         (assoc-in [:ui.facets/current :expanded] (db/all-expandable-uris result))
+         ;; (assoc-in [:ui.facets/current :selection] (db/all-uris result))
+         ))))
 
 (rf/reg-event-db
  :facets.codes/error ;; TODO.. something in the ui if this actually happens

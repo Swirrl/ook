@@ -29,7 +29,7 @@
                        (mapcat walk* children))))]
     (set (mapcat walk tree))))
 
-(defn- all-uris [tree]
+(defn all-uris [tree]
   (let [walk (fn walk* [node]
                (cons (:ook/uri node)
                      (when-let [children (:children node)]
