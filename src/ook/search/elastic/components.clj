@@ -21,4 +21,5 @@
   (->> opts
        (get-components uris)
        (map :codelist)
-       (remove nil?)))
+       (remove nil?)
+       distinct))
