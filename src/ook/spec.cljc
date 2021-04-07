@@ -27,7 +27,8 @@
 (s/def :facet/codelist (s/keys :req [:ook/uri] :req-un [:ook/label]))
 
 (s/def :facets/applied (s/nilable (s/map-of :facet/name :facet/selection)))
-(s/def :ui.facets/current (s/nilable :ook/facet))
+(s/def :ook/current-facet-state #{:loading :error})
+(s/def :ui.facets/current (s/nilable (s/or :facet :ook/facet :state :ook/current-facet-state)))
 
 ;;;;;;; datasets
 

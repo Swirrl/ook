@@ -36,10 +36,10 @@
           (when (seq codes)
             [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Find datasets that use these codes"])]))))
 
-(defn- apply-filter-button [{:keys [codelists selection]}]
+(defn- apply-filter-button [{:keys [tree selection]}]
   [:button.btn.btn-primary.mt-3
    {:type "button"
-    :disabled (or (not (seq codelists)) (not (seq selection)))
+    :disabled (or (not (seq tree)) (not (seq selection)))
     :on-click #(rf/dispatch [:filters/add-current-facet])}
    "Apply filter"])
 
@@ -79,8 +79,8 @@
 
 (defn- code-list [tree & top-level?]
   [:ul.list-group-flush (when top-level? {:class "p-0"})
-   (for [{:keys [ook/uri] :as code} tree]
-     ^{:key uri} [code-list-item code])])
+   (for [{:keys [ook/uri label] :as code} tree]
+     ^{:key [uri label]} [code-list-item code])])
 
 (defn- code-selection [{:keys [tree]}]
   [:<>
@@ -97,14 +97,23 @@
 
 (defn- codelist-selection [selected-facet]
   (when selected-facet
-    [:<>
-     [apply-filter-button selected-facet]
-     (if (seq (:tree selected-facet))
-       [code-selection selected-facet]
-       [no-codelist-message selected-facet])]))
+    (cond
+      (= :loading selected-facet)
+      [:div.mt-4.spinner-border {:role "status"}
+       [:span.visually-hidden "Loading..."]]
+
+      (= :error selected-facet)
+      [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]
+
+      (seq (:tree selected-facet))
+      [:<>
+       [apply-filter-button selected-facet]
+       [code-selection selected-facet]]
+
+      (and (:tree selected-facet) (empty? (:tree selected-facet)))
+      [no-codelist-message selected-facet])))
 
 (defn- facet-button [{:keys [name] :as facet} selected-facet]
-  ^{:key name}
   [:button.btn.me-2
    {:type "button"
     :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
@@ -120,8 +129,7 @@
 (defn configured-facets []
   (let [facets @(rf/subscribe [:facets/config])
         selected-facet @(rf/subscribe [:ui.facets/current])
-        applied-facets @(rf/subscribe [:facets/applied])
-        error @(rf/subscribe [:facets.codes/error])]
+        applied-facets @(rf/subscribe [:facets/applied])]
     [:div.card.my-4
      [:div.card-body
       [:h2.h5.card-title.me-2.d-inline "Find data"]
@@ -130,9 +138,7 @@
        [:div
         (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
-            (facet-button facet selected-facet)))]
+            ^{:key name}[facet-button facet selected-facet]))]
        (when selected-facet
-         (cancel-facet-selection))]
-      (if error
-        [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]
-        (codelist-selection selected-facet))]]))
+         [cancel-facet-selection])]
+      [codelist-selection selected-facet]]]))

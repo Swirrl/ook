@@ -73,8 +73,9 @@
 (rf/reg-event-fx
  :facets.codes/fetch-codes
  [e/validation-interceptor]
- (fn [_ [_ {:keys [name dimensions]}]]
-   {:http-xhrio {:method :get
+ (fn [{:keys [db]} [_ {:keys [name dimensions]}]]
+   {:db (assoc db :ui.facets/current :loading)
+    :http-xhrio {:method :get
                  :uri "/codes"
                  :params {:dimension dimensions}
                  :response-format (ajax/transit-response-format)
@@ -97,7 +98,7 @@
          (assoc-in [:ui.facets/current :expanded] (db/all-expandable-uris result))))))
 
 (rf/reg-event-db
- :facets.codes/error ;; TODO.. something in the ui if this actually happens
+ :facets.codes/error
  [e/validation-interceptor]
  (fn [db [_ error]]
-   (assoc db :facets.codes/error error)))
+   (assoc db :ui.facets/current :error)))

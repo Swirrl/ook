@@ -38,11 +38,6 @@
  (fn [db _]
    (:facets/applied db)))
 
-(rf/reg-sub
- :facets.codes/error
- (fn [db _]
-   (:facets.codes/error db)))
-
 ;;;;;; DATASETS
 
 (rf/reg-sub
