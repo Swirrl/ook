@@ -1,6 +1,7 @@
 (ns ook.reframe.subs
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [ook.reframe.db :as db]))
 
 ;;;;;; INITIAL, PERMANENT STATE
 
@@ -19,17 +20,17 @@
 (rf/reg-sub
  :ui.facets/current
  (fn [db _]
-   (:ui.facets/current db)))
+   (-> db :ui.facets/current (update :tree #(sort-by :label %)))))
 
 (rf/reg-sub
  :ui.facets.current/codelist-selected?
- (fn [db [_ codelist]]
-   (-> db :ui.facets/current :selection (get codelist) boolean)))
+ (fn [db [_ uri]]
+   (db/code-selected? db uri)))
 
 (rf/reg-sub
  :ui.facets.current/code-expanded?
  (fn [db [_ uri]]
-   (-> db :ui.facets/current :expanded (get uri) boolean)))
+   (db/code-expanded? db uri)))
 
 ;;;;;; FACETS
 

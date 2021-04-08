@@ -54,8 +54,5 @@
 (defmethod ig/init-key :ook.handler/codes [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      (->> request
-           p/get-dimensions
-           (db/get-code-trees db)
-           transit-response)
+      (->> request p/get-codelist (db/get-concept-tree db) transit-response)
       invalid-format-response)))

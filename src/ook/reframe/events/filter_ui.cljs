@@ -18,7 +18,15 @@
             (assoc db :ui.facets/current with-ui-state))
           db)
     :fx [(when-not tree
-           [:dispatch [:facets.codelists/fetch-codelists facet]])]}))
+           [:dispatch [:ui.facets.current/get-codelists facet]])]}))
+
+(rf/reg-event-fx
+ :ui.facets.current/get-codelists
+ [e/validation-interceptor]
+ (fn [{:keys [db]} [_ facet]]
+   {:db (assoc db :ui.facets.current/loading true)
+    :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
+         [:dispatch [:facets.codelists/fetch-codelists facet]]]}))
 
 (rf/reg-event-fx
  :filters/add-current-facet
@@ -59,6 +67,14 @@
 
 ;;;;; EXPANDING/COLLAPSING
 
+(rf/reg-event-fx
+ :ui.facets.current/toggle-codelist
+ [e/validation-interceptor]
+ (fn [{:keys [db]} [_ {:keys [children ook/uri] :as codelist}]]
+   {:fx [(if (seq children)
+           [:dispatch [:ui.facets.current/toggle-expanded uri]]
+           [:dispatch [:facets.codes/fetch-codes codelist]])]}))
+
 (rf/reg-event-db
  :ui.facets.current/toggle-expanded
  [e/validation-interceptor]
@@ -73,42 +89,24 @@
 (rf/reg-event-fx
  :facets.codelists/fetch-codelists
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [name dimensions]}]]
-   {:db (assoc db :ui.facets.current/loading true)
-    :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
-         [:http-xhrio {:method :get
-                       :uri "/codelists"
-                       :params {:dimension dimensions}
-                       :response-format (ajax/transit-response-format)
-                       :on-success [:facets.codelists/success name]
-                       :on-failure [:ui.facets.current/error]}]]}))
+ (fn [_ [_ {:keys [name dimensions]}]]
+   {:http-xhrio {:method :get
+                 :uri "/codelists"
+                 :params {:dimension dimensions}
+                 :response-format (ajax/transit-response-format)
+                 :on-success [:facets.codelists/success name]
+                 :on-failure [:ui.facets.current/error]}}))
 
 (rf/reg-event-fx
  :facets.codes/fetch-codes
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [name dimensions]}]]
-   {:db (assoc db :ui.facets/current nil)
-    :http-xhrio {:method :get
+ (fn [{:keys [db]} [_ {:keys [ook/uri] :as codelist}]]
+   {:http-xhrio {:method :get
                  :uri "/codes"
-                 :params {:dimension dimensions}
+                 :params {:codelist uri}
                  :response-format (ajax/transit-response-format)
-                 :on-success [:facets.codes/success name]
+                 :on-success [:facets.codes/success codelist]
                  :on-failure [:facets.codes/error]}}))
-
-(rf/reg-event-db
- :facets.codes/success
- [e/validation-interceptor]
- (fn [db [_ facet-name result]]
-   (let [old-facet (db/facet-by-name db facet-name)
-         facet-with-tree (assoc old-facet :tree result)
-         facets (->> db :facets/config (remove #(= (:name %) facet-name)))]
-     (-> db
-         (dissoc :facets.codes/error)
-         ;; cache the result so we don't need to re-request it
-         (assoc :facets/config (conj facets facet-with-tree))
-         (assoc :ui.facets/current facet-with-tree)
-         (assoc-in [:ui.facets/current :selection] #{})
-         (assoc-in [:ui.facets/current :expanded] (db/all-expandable-uris result))))))
 
 (rf/reg-event-db
  :facets.codelists/success
@@ -125,6 +123,24 @@
          (assoc :ui.facets/current facet-with-tree)
          (assoc-in [:ui.facets/current :selection] #{})
          (assoc-in [:ui.facets/current :expanded] #{})))))
+
+(rf/reg-event-db
+ :facets.codes/success
+ [e/validation-interceptor]
+ (fn [db [_ codelist result]]
+   (let [old-facet (-> db :ui.facets/current (dissoc :selection :expanded))
+         old-codelist (->> old-facet :tree (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
+         tree (->> old-facet :tree (remove #(= (:ook/uri %) (:ook/uri codelist))))
+         facet-with-tree (-> old-facet
+                             (assoc :tree (conj tree (assoc old-codelist :children result))))
+         facets (->> db :facets/config (remove #(= (:name %) (:name old-facet))))
+         expanded (-> (:ook/uri codelist) (cons (db/all-expandable-uris result)) set)]
+     (-> db
+         ;; cache the result so we don't need to re-request it
+         (assoc :facets/config (conj facets facet-with-tree))
+         (assoc :ui.facets/current facet-with-tree)
+         (assoc-in [:ui.facets/current :selection] #{})
+         (assoc-in [:ui.facets/current :expanded] expanded)))))
 
 (rf/reg-event-db
   :ui.facets.current/error

@@ -37,8 +37,8 @@
   (get-facets [_]
     (facets/get-facets opts))
 
-  (get-code-trees [_ dimensions]
-    (codes/build-code-trees dimensions opts)))
+  (get-concept-tree [_ codelist]
+    (codes/build-concept-tree codelist opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))

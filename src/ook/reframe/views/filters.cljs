@@ -1,40 +1,7 @@
 (ns ook.reframe.views.filters
   (:require
    [re-frame.core :as rf]
-   [ook.ui.icons :as icons]
-   [clojure.string :as str]
-   [ook.util :as u]))
-
-#_(defn filters []
-    (let [codes @(rf/subscribe [:results.codes/data])
-          query @(rf/subscribe [:results.codes/query])
-          cnt (count codes)]
-      (when codes
-        (list
-         ^{:key "answer"}
-         [:p "Found " [:strong cnt (u/pluralize " code" cnt)] " matching " [:strong "\"" query "\"."]]
-         (when (seq codes)
-           [:p "Select all the codes that you're interested in."])
-         ^{:key "data"}
-         [:form {:id "codes" :on-submit apply-code-selection}
-          (doall
-           (for [{code-id :code/id dim-id :dim/id label :code/label} codes
-                 :let [value (str dim-id "," code-id)]]
-             ^{:key code-id} [:div.form-check.mb-3.bg-light
-                              [:div.p-2
-                               [:input.form-check-input
-                                {:type "checkbox"
-                                 :name "code"
-                                 :value value
-                                 :checked (-> @(rf/subscribe [:ui.codes/selection]) (get value))
-                                 :id code-id
-                                 :on-change #(rf/dispatch [:ui.codes/toggle-selection
-                                                           (-> % .-target .-value)])}]
-                               [:label.form-check-label {:for code-id}
-                                [:strong (single-label label)]
-                                [:p.m-0 "id: " [:code code-id]]]]]))
-          (when (seq codes)
-            [:button.btn.btn-primary.mt-2.mb-4 {:type "submit"} "Find datasets that use these codes"])]))))
+   [ook.ui.icons :as icons]))
 
 (defn- apply-filter-button [{:keys [tree selection]}]
   [:button.btn.btn-primary.mt-3
@@ -43,9 +10,11 @@
     :on-click #(rf/dispatch [:filters/add-current-facet])}
    "Apply filter"])
 
-(defn- toggle-expanded-button [uri expanded?]
+(defn- toggle-expanded-button [{:keys [ook/uri] :as code} expanded? & top-level?]
   [:button.btn.as-link.p-0.m-0.expand-code-button
-   {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])
+   {:on-click #(if top-level?
+                 (rf/dispatch [:ui.facets.current/toggle-codelist code])
+                 (rf/dispatch [:ui.facets.current/toggle-expanded uri]))
     :type "button"}
    (if expanded? icons/down icons/up)])
 
@@ -58,12 +27,12 @@
 
 (declare code-list)
 
-(defn- code-list-item [{:keys [ook/uri label children disabled?] :as code}]
+(defn- code-list-item [{:keys [ook/uri label children disabled?] :as code} & top-level?]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])
         selected? @(rf/subscribe [:ui.facets.current/codelist-selected? uri])]
     [:li.list-group-item.border-0.pb-0
      (when children
-       [toggle-expanded-button uri expanded?])
+       [toggle-expanded-button code expanded? top-level?])
      [:input.form-check-input.mx-2
       (cond-> {:type "checkbox"
                :name "code"
@@ -80,7 +49,7 @@
 (defn- code-list [tree & top-level?]
   [:ul.list-group-flush (when top-level? {:class "p-0"})
    (for [{:keys [ook/uri label] :as code} tree]
-     ^{:key [uri label]} [code-list-item code])])
+     ^{:key [uri label]} [code-list-item code top-level?])])
 
 (defn- code-selection [{:keys [tree]}]
   [:<>

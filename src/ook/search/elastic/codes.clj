@@ -94,17 +94,8 @@
       (assoc concept :children (build-sub-tree conn children))
       concept)))
 
-(defn build-tree [{:keys [elastic/endpoint]} codelist-id]
+(defn build-concept-tree [codelist-id {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
     (doall
      (map (partial find-narrower-concepts conn)
           (get-top-concepts conn codelist-id)))))
-
-(defn build-code-trees [dimensions opts]
-  (let [codelists (components/components->codelists dimensions opts)]
-    (when (seq codelists)
-      (doall (map (fn [{:keys [ook/uri] :as codelist}]
-                    (merge codelist
-                           {:allow-any? true
-                            :children (build-tree opts uri)}))
-                  codelists)))))

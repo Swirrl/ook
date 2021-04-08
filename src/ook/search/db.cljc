@@ -28,5 +28,5 @@
   (get-facets [db]
     "Resolve facets from configuration and database")
 
-  (get-code-trees [db dimensions]
-    "Resolve code trees for dimensions, with the dimension at the top of each tree"))
+  (get-concept-tree [db codelist]
+    "Resolve concept tree for codelist"))

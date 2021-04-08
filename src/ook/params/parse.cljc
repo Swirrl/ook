@@ -31,7 +31,10 @@
   (when (seq query-params)
     (-> query-params (get "facet") parse-named-facets)))
 
-(defn get-dimensions
-  [{:keys [query-params]}]
+(defn get-dimensions [{:keys [query-params]}]
   (when (seq query-params)
     (-> query-params (get "dimension") u/box)))
+
+(defn get-codelist [{:keys [query-params]}]
+  (when (seq query-params)
+    (get query-params "codelist")))
