@@ -45,6 +45,12 @@
         (transit-response datasets))
       invalid-format-response)))
 
+(defmethod ig/init-key :ook.handler/codelists [_ {:keys [search/db]}]
+  (fn [request]
+    (if (requesting-transit? request)
+      (->> request p/get-dimensions (db/components->codelists db) transit-response)
+      invalid-format-response)))
+
 (defmethod ig/init-key :ook.handler/codes [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)

@@ -84,7 +84,7 @@
 
 (defn- code-selection [{:keys [tree]}]
   [:<>
-   [:p.h6.mt-4 "Codes"]
+   [:p.h6.mt-4 "Codelists"]
    [:form.mt-3
     [code-list tree :top-level]]])
 
