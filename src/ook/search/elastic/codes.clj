@@ -3,7 +3,6 @@
    [ook.util :as u]
    [clojurewerkz.elastisch.query :as q]
    [ook.search.elastic.util :as esu]
-   [ook.search.elastic.components :as components]
    [clojurewerkz.elastisch.rest.document :as esd]))
 
 ;; (defn- index-by-codelist [results]
@@ -21,17 +20,21 @@
 ;;           :hits :hits
 ;;           index-by-codelist))))
 
+(defn get-codes* [conn uris]
+  (->> (esd/search conn "code" "_doc"
+                   {:query (q/ids "_doc" uris)
+                    :size (count uris)})
+       :hits :hits
+       (map :_source)
+       (map esu/normalize-keys)))
+
 (defn get-codes
   "Find codes using their URIs."
   [uris {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
         uris (u/box uris)]
-    (->> (esd/search conn "code" "_doc"
-                     {:query (q/ids "_doc" uris)
-                      :size (count uris)})
-         :hits :hits
-         (map :_source)
-         (map esu/normalize-keys))))
+    (get-codes* conn uris)))
+
 
 ;; (defn- get-codes [conn query]
 ;;   (-> conn
@@ -47,63 +50,45 @@
 ;;            (merge code (dimensions (:codelist code))))
 ;;          codes)))
 
-
-(defn- get-scheme [result]
-  ;; TODO:: This is a hack to make things work right now, just (deterministically) select the first scheme
-  ;; almost certainly not the right way to handle a concept that belongs to multiple schemes
-  (let [scheme (-> result :_source :scheme)]
-    (if (coll? scheme)
-      (->> scheme sort first)
-      scheme)))
-
 (defn- build-codes
   "Map the codes from the elasticsearch result format to a more succinct format used internally.
   The scheme is passed in as an argument and not taken from (-> result :_source :scheme) because
-  sometimes a code belongs to multiple schemes and that value is a collection. We pass in the
-  correct one to avoid this ambiguity. It's included in the result in the first place so that each
-  individual map contains all the information it needs to fetch its own children."
+  sometimes a code belongs to multiple schemes and that value is a collection.. It's included in
+  the result in the first place so that each individual map contains all the information it
+  needs to fetch its own children."
   [results scheme]
   (map (fn [result]
          {:scheme scheme
           :ook/uri (-> result :_id)
-          :label (-> result :_source :label)})
+          :label (-> result :_source :label)
+          :children (-> result :_source :narrower)})
        results))
 
 (defn get-top-concepts [conn codelist-id]
   (-> conn
       (esd/search "code" "_doc"
-                  {:query
+                  {:size 500
+                   :query
                    {:bool
                     {:must {:term {:scheme codelist-id}}
                      :must_not {:exists {:field :broader}}}}})
       :hits :hits
       (build-codes codelist-id)))
 
-(defn get-children [conn {:keys [ook/uri scheme]}]
-  (-> conn
-      (esd/search "code" "_doc"
-                  {:query
-                   {:bool
-                    {:must [{:term {:scheme scheme}}
-                            {:term {:broader uri}}]}}})
-      :hits :hits
-      (build-codes scheme)))
-
 (declare find-narrower-concepts)
 
-(defn- build-sub-tree [conn concepts]
+(defn- build-sub-tree [conn code-uris]
   (doall
-   (map (fn [concept]
-          (if (:children concept)
-            (find-narrower-concepts conn concept)
-            concept))
-        concepts)))
+   (map (fn [code]
+          (if (:children code)
+            (find-narrower-concepts conn code)
+            code))
+        (get-codes* conn code-uris))))
 
-(defn- find-narrower-concepts [conn concept]
-  (let [children (get-children conn concept)]
-    (if (seq children)
-      (assoc concept :children (build-sub-tree conn children))
-      concept)))
+(defn- find-narrower-concepts [conn {:keys [children] :as concept}]
+  (if (seq children)
+    (assoc concept :children (build-sub-tree conn children))
+    concept))
 
 (defn build-concept-tree [codelist-id {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
