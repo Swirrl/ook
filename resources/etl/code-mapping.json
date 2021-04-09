@@ -7,6 +7,7 @@
       "scheme": { "type": "keyword" },
       "notation": { "type": "keyword" },
       "broader": { "type": "keyword" },
+      "narrower": { "type": "keyword" },
       "priority": { "type": "integer" }
     }
   }

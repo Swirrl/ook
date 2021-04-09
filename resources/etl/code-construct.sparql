@@ -10,6 +10,7 @@ CONSTRUCT {
         skos:inScheme ?scheme;
         skos:notation ?notation;
         skos:broader ?broader;
+	skos:narrower ?narrower;
         ui:sortPriority ?sort_priority;
     .
 } WHERE {
@@ -31,5 +32,9 @@ CONSTRUCT {
 
     OPTIONAL {
         ?code skos:broader ?broader;
+    }
+
+    OPTIONAL {
+        ?code skos:narrower ?narrower;
     }
 }

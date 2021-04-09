@@ -4,6 +4,9 @@
   ;; (get-codes [db query]
   ;;   "Return a search result with all codes that have the given term in their label.")
 
+  (get-codes [db uris]
+    "Retrieve codes by URI")
+
   (get-components [db uris]
     "Retrieve components by URI")
 

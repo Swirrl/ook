@@ -34,8 +34,8 @@
         (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))
 
-(deftest components-test
-  (testing "Components pipeline schema"
+(deftest component-pipeline-test
+  (testing "Component pipeline schema"
     (with-system [system ["drafter-client.edn"
                           "cogs-staging.edn"
                           "elasticsearch-test.edn"]]
@@ -50,3 +50,22 @@
           :label "Alcohol Type"
           :codelist {:ook/uri "def/trade/concept-scheme/alcohol-type"
                      :label "Alcohol Type"})))))
+
+(deftest code-pipeline-test
+  (testing "Code pipeline schema"
+    (with-system [system ["drafter-client.edn"
+                          "cogs-staging.edn"
+                          "elasticsearch-test.edn"
+                          "project/fixture/data.edn"]]
+      (setup/reset-indicies! system)
+      (vcr/with-cassette {:name :extract-codes :recordable? setup/not-localhost?}
+        (etl/code-pipeline system))
+
+      (let [db (setup/get-db system)
+            doc (first (db/get-codes db ["def/trade/concept/alcohol-type/beer"]))]
+        (are [key value] (= value (key doc))
+          :ook/uri "def/trade/concept/alcohol-type/beer"
+          :label "Beer"
+          :notation "beer"
+          :narrower nil
+          :broader nil)))))

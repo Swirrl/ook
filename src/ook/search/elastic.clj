@@ -10,8 +10,8 @@
 (defrecord Elasticsearch [opts]
   db/SearchBackend
 
-  ;; (get-codes [_ query]
-  ;;   (codes/search query opts))
+  (get-codes [_ uris]
+    (codes/get-codes uris opts))
 
   (get-components [_ uris]
     (components/get-components uris opts))
