@@ -99,7 +99,7 @@
   (let [facets @(rf/subscribe [:facets/config])
         selected-facet @(rf/subscribe [:ui.facets/current])
         applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.card.my-4
+    [:div.card.my-4.filters
      [:div.card-body
       [:h2.h5.card-title.me-2.d-inline "Find data"]
       [:span.text-muted "Add a filter"]
