@@ -1,5 +1,5 @@
 (ns ook.search.elastic-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [ook.test.util.setup :as setup :refer [with-system get-db]]
             [ook.search.db :as sut]))
 
@@ -42,19 +42,46 @@
                    (map :label datasets)))))
 
         (testing "get-datasets-for-facets"
-          (let [selections {"Alcohol Type" ["def/trade/concept-scheme/alcohol-type"]
-                            "Bulletin Type" ["def/trade/concept-scheme/bulletin-type"]}
-                response (sut/get-datasets-for-facets db selections)]
-            (testing "returns only matching datasets"
-              (is (= 2 (count response))))
-            (testing "describes which codelists match for each facet"
-              (let [dataset (first response)
-                    codelist-for-facet (fn [name] (->> (:facets dataset)
-                                                       (filter #(= (:name %) name))
-                                                       (map (comp :codelist first :dimensions))
-                                                       first
-                                                       :ook/uri))]
-                (is (= "def/trade/concept-scheme/alcohol-type"
-                       (codelist-for-facet "Alcohol Type")))
-                (is (= "def/trade/concept-scheme/bulletin-type"
-                       (codelist-for-facet "Bulletin Type")))))))))))
+          (testing "returns only matching datasets"
+            (are [n codes] (= n (count (sut/get-datasets-for-facets db {"Alcohol Type"
+                                                                        {"def/trade/concept-scheme/alcohol-type" codes}})))
+              2 ["def/trade/concept/alcohol-type/beer-and-cider"]
+              1 ["def/trade/concept/alcohol-type/wine"]
+              2 ["def/trade/concept/alcohol-type/spirits"]))
+
+          (testing "describes which codes match for each facet"
+            (let [selections {"Alcohol Type" {"def/trade/concept-scheme/alcohol-type" ["def/trade/concept/alcohol-type/wine"]}
+                              "Bulletin Type" {"def/trade/concept-scheme/bulletin-type" []}
+                              }
+                  response (sut/get-datasets-for-facets db selections)
+                  dataset (first response)
+                  description-for-facet (fn [name] (->> (:facets dataset)
+                                                        (filter #(= (:name %) name))
+                                                        first))] ;; switch to use map from facet name to details?
+              (is (= {:name "Alcohol Type"
+                      :codelists
+                      [{:ook/uri "def/trade/concept-scheme/alcohol-type"
+                        :label "Alcohol Type"
+                        :examples
+                        [{:ook/uri "def/trade/concept/alcohol-type/wine"
+                          :ook/type "skos:Concept"
+                          :label "Wine"
+                          :broader nil
+                          :notation "wine"
+                          :priority "1"}]}]}
+                     (description-for-facet "Alcohol Type")))
+              (is (= {:name "Bulletin Type"
+                      :codelists
+                      [{:ook/uri "def/trade/concept-scheme/bulletin-type"
+                        :label "Bulletin Type"
+                        :examples
+                        [{:ook/uri
+                          "def/trade/concept/bulletin-type/total-wine-duty-receipts"
+                          :ook/type "skos:Concept"
+                          :label "Total Wine Duty receipts"
+                          :broader nil
+                          :notation "total-wine-duty-receipts"
+                          :priority "8"}]}]}
+                     (description-for-facet "Bulletin Type")))
+              (is (= nil
+                     (description-for-facet "Date"))))))))))

@@ -5,7 +5,7 @@
 (defrecord FakeSearch []
   db/SearchBackend
 
-  (get-codes [_ query]
+  #_(get-codes [_ query]
     (condp = query
       "" []
       "test" [{:id "http://test" :label "This is a test label"}]))

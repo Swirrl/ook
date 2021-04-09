@@ -7,7 +7,9 @@
    [ook.search.elastic.util :as esu]
    [ook.util :as u]
    [ook.search.elastic.facets :as facets]
-   [ook.search.elastic.components :as components]))
+   [ook.search.elastic.components :as components]
+   [ook.util :as util]
+   [ook.search.elastic.codes :as codes]))
 
 (defn- flatten-description-lang-strings [m]
   (-> m
@@ -19,37 +21,6 @@
        (map :_source)
        (map esu/normalize-keys)
        (map flatten-description-lang-strings)))
-
-;; (defn- cubes->datasets [conn cubes]
-;;   (-> conn
-;;       (esd/search "dataset" "_doc" {:query {:terms {:cube cubes}}})
-;;       clean-datasets-result))
-
-;; (defn- datasets-for-facet [conn {:keys [dimension value] :as facet}]
-;;   (->> (esd/search conn "observation" "_doc"
-;;                    {:size 0
-;;                     :query {:term {(str dimension ".@id") value}}
-;;                     :aggregations {:observation-count
-;;                                    {:terms
-;;                                     {:field "qb:dataSet.@id"}}}})
-;;        :aggregations :observation-count :buckets
-;;        (map #(set/rename-keys % {:key :cube
-;;                                  :doc_count :matching-observations}))
-;;        (map #(assoc % :filter-facets [facet]))))
-
-;; (defn- get-datasets [conn facets]
-;;   (let [matches (->> facets
-;;                      ;; get all datasets that match a given facet
-;;                      (mapcat (partial datasets-for-facet conn))
-;;                      (group-by :cube)
-;;                      ;; group all filter facets that found this dataset into one list
-;;                      (map (fn [[_ datasets]] (reduce mm/meta-merge datasets))))
-;;         more-ds-info (cubes->datasets conn (map :cube matches))]
-;;     (u/mjoin matches more-ds-info :cube)))
-
-;; (defn apply-filter [facets {:keys [elastic/endpoint]}]
-;;   (let [conn (esu/get-connection endpoint)]
-;;     (get-datasets conn facets)))
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
@@ -63,13 +34,104 @@
                     {:query {:terms {:component components}}})
          :hits :hits (map :_source))))
 
-(defn for-facets [selections opts]
-  (let [facets (facets/get-facets opts)
-        faceted-dimensions (distinct (mapcat :dimensions facets))
-        components (components/get-components faceted-dimensions opts)
-        datasets (for-components faceted-dimensions opts)]
+(defn observation-query
+  "Creates a query for finding observations with selected dimensions and dimension-values.
+
+  Provides counts by dataset and collapses to a few example observations for each dataset."
+  [dimension-selections]
+  (let [dimension-selections (reduce ;; append .@id to reach into nested dimval docs
+                              (fn [m [k v]] (assoc m (str k ".@id") v))
+                              {}
+                              dimension-selections)
+        dimensions (keys dimension-selections)
+        criteria (map (fn [[dim codes]]
+                        (if (empty? codes)
+                          {:exists {:field dim}} ;; dimension (with no codes specified) ought to be present
+                          {:terms {dim codes}})) dimension-selections) ;; dimensions' values are one of the specified codes
+        ]
+    {:collapse {:field "qb:dataSet.@id"}
+     :fields dimensions
+     :_source false
+     :query {:bool {:should criteria}}
+     :aggregations {:datasets {:terms {:field "qb:dataSet.@id"}}}}))
+
+(defn find-observations
+  "Finds observations with given dimensions and dimension-values. Groups results by dataset."
+  [dimension-selections {:keys [elastic/endpoint] :as opts}]
+  (let [conn (esu/get-connection endpoint)]
+    (esd/search conn "observation" "_doc"
+                (observation-query dimension-selections))))
+
+(defn datasets-from-observation-hits
+  "Parses observation-query results to return a sequence of datasets."
+  [observation-hits]
+  (let [examples (->> observation-hits :hits :hits
+                      (reduce (fn [matches {:keys [fields]}]
+                                ;; Fields always returned as arrays even though obs properties (dimvals)
+                                ;; are scalar. Here we extract the first value from each to unbox them.
+                                (let [fields (zipmap (keys fields) (map first (vals fields)))]
+                                  (assoc matches
+                                         (get fields (keyword "qb:dataSet.@id"))
+                                         {:matching_observation_example (dissoc fields (keyword "qb:dataSet.@id"))})))
+                              {}))
+        buckets (->> observation-hits :aggregations :datasets :buckets
+                     (reduce (fn [matches {:keys [key doc_count]}]
+                               (assoc matches
+                                      key
+                                      {:matching_observation_count doc_count}))
+                             {}))]
+    (map (fn [[id description]] (merge {:ook/uri id} description))
+         (merge-with merge buckets examples))))
+
+(defn code-uris-from-observation-hits
+  "Parses observation-query results to return a sequence of code-uris."
+  [observation-hits]
+  (->> observation-hits :hits :hits
+       (mapcat (fn [hit]
+                 (-> hit
+                     :fields
+                     (dissoc (keyword "qb:dataSet.@id"))
+                     vals
+                     ((partial map first)))))
+       distinct))
+
+(defn explain-match
+  "Replace matching observation example with per facet, per dimension, codelist and code summary"
+  [datasets facets codelists codes]
+  (let [code-lookup (util/id-lookup codes)
+        codelist-lookup (util/id-lookup codelists)]
+    (for [{:keys [matching_observation_example] :as dataset} datasets]
+      (-> dataset
+          (dissoc :matching_observation_example)
+          (assoc :facets (for [{:keys [name dimensions]} facets]
+                           (let [code-uris (map
+                                            (fn [d]
+                                              (get matching_observation_example
+                                                   (keyword (str d ".@id"))))
+                                            dimensions)
+                                 matches (->>
+                                          code-uris
+                                          (map code-lookup)
+                                          (partition-by :scheme)
+                                          (map (fn [codes]
+                                                 (assoc (codelist-lookup (-> codes first :scheme))
+                                                        :examples
+                                                        (map #(dissoc % :scheme) codes)))))]
+                             {:name name
+                              :codelists matches})))))))
+
+(defn for-facets [selections {:keys [elastic/endpoint] :as opts}]
+  (let [codelist-uris (mapcat keys (vals selections))
+        dimensions-lookup (components/codelist-to-dimensions-lookup codelist-uris opts)
+        dimension-selections (facets/dimension-selections selections dimensions-lookup)
+        observation-hits (find-observations dimension-selections opts)
+        dataset-hits (datasets-from-observation-hits observation-hits)
+        code-uris (code-uris-from-observation-hits observation-hits)
+        facets (facets/get-facets-for-selections selections opts)
+        codelists (components/get-codelists codelist-uris opts)
+        codes (codes/get-codes code-uris opts)]
     (->>
-     (facets/apply-facets datasets components facets selections)
+     (explain-match dataset-hits facets codelists codes)
      (map esu/normalize-keys)
      (map flatten-description-lang-strings))))
 

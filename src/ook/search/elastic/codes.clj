@@ -1,6 +1,7 @@
 (ns ook.search.elastic.codes
   (:require
    [ook.util :as u]
+   [clojurewerkz.elastisch.query :as q]
    [ook.search.elastic.util :as esu]
    [ook.search.elastic.components :as components]
    [clojurewerkz.elastisch.rest.document :as esd]))
@@ -20,7 +21,17 @@
 ;;           :hits :hits
 ;;           index-by-codelist))))
 
-
+(defn get-codes
+  "Find codes using their URIs."
+  [uris {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)
+        uris (u/box uris)]
+    (->> (esd/search conn "code" "_doc"
+                     {:query (q/ids "_doc" uris)
+                      :size (count uris)})
+         :hits :hits
+         (map :_source)
+         (map esu/normalize-keys))))
 
 ;; (defn- get-codes [conn query]
 ;;   (-> conn
