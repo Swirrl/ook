@@ -20,7 +20,8 @@
 (rf/reg-sub
  :ui.facets/current
  (fn [db _]
-   (-> db :ui.facets/current (update :tree #(sort-by :label %)))))
+   (when-let [facet (:ui.facets/current db)]
+     (update facet :tree #(sort-by :label %)))))
 
 (rf/reg-sub
  :ui.facets.current/codelist-selected?

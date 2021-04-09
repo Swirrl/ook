@@ -1,6 +1,6 @@
 (ns ook.search.elastic.components-test
   (:require [ook.search.elastic.components :as sut]
-            [ook.test.util.setup :as setup :refer [with-system get-db]]
+            [ook.test.util.setup :as setup :refer [with-system]]
             [clojure.test :refer [deftest testing is]]))
 
 (deftest components-tests
@@ -9,7 +9,7 @@
                         "elasticsearch-test.edn"
                         "project/fixture/data.edn"
                         "project/fixture/facets.edn"]]
-    
+
     (setup/load-fixtures! system)
 
     (let [opts {:elastic/endpoint (:ook.concerns.elastic/endpoint system)}
@@ -26,9 +26,16 @@
 
       (testing "get-codelists"
         (let [codelists (sut/get-codelists codelist-uris opts)]
-          (testing "provides uris" 
+          (testing "provides uris"
             (is (= codelist-uris
                    (map :ook/uri codelists))))
           (testing "provides labels"
             (is (= '("Alcohol Type" "Bulletin Type")
-                   (map :label codelists)))))))))
+                   (map :label codelists))))))
+
+      (testing "components->codelists"
+        (let [component-uris ["def/trade/property/dimension/alcohol-type"
+                              "def/trade/property/dimension/bulletin-type"]]
+          (is (=  [{:ook/uri "def/trade/concept-scheme/alcohol-type" :label "Alcohol Type"}
+                   {:ook/uri "def/trade/concept-scheme/bulletin-type" :label "Bulletin Type"}]
+                  (sut/components->codelists component-uris opts))))))))
