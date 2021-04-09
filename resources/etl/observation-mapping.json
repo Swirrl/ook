@@ -1,17 +1,18 @@
 {
-    "mappings": {
-        "properties": {
-            "@type": { "type": "keyword" }
-        },
-        "dynamic_templates": [
-            {
-                "string": {
-                    "match_mapping_type": "string",
-                    "mapping": {
-                        "type": "keyword"
-                    } 
-                }
-            }
-        ] 
-    }
+  "mappings": {
+    "properties": {
+      "@id": { "type": "keyword" },
+      "@type": { "type": "keyword" }
+    },
+    "dynamic_templates": [
+      {
+        "string": {
+          "match_mapping_type": "string",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ]
+  }
 }

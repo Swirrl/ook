@@ -1,13 +1,14 @@
 {
-    "mappings": {
-        "properties": {
-            "@type": { "type": "keyword" },
-          "label": { "type": "text" },
-	  "codelist": { "type": "nested", "properties" : {
-	    "@id": { "type": "keyword" },
-	    "label": { "type": "text" }
-	  }},
-          "subPropertyOf": { "type": "keyword" }
-        }
+  "mappings": {
+    "properties": {
+      "@id": { "type": "keyword" },
+      "@type": { "type": "keyword" },
+      "label": { "type": "text" },
+      "codelist": { "type": "nested", "properties": {
+	"@id": { "type": "keyword" },
+	"label": { "type": "text" }
+      }},
+      "subPropertyOf": { "type": "keyword" }
     }
+  }
 }
