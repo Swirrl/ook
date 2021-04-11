@@ -19,7 +19,7 @@
    (if expanded? icons/down icons/up)])
 
 (defn- multi-select-button [{:keys [ook/uri allow-any? children]}]
-  (when (seq children)
+  (when children
     [:button.btn.btn-link.mx-1.p-0.align-baseline
      {:type "button"
       :on-click #(rf/dispatch [:ui.facets.current/set-selection (if allow-any? :any :children) uri])}

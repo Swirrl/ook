@@ -21,7 +21,7 @@
  :ui.facets/current
  (fn [db _]
    (if-let [facet (:ui.facets/current db)]
-     (update facet :tree #(sort-by :label %))
+     (update facet :tree #(sort-by :ook/uri %))
      db)))
 
 (rf/reg-sub

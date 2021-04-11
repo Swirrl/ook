@@ -32,3 +32,20 @@
 
 (defn press-enter [target]
   (send-keys target "{enter}"))
+
+(defn click-text [text]
+  (click (qh/find-text text)))
+
+;;;;;;; OOK-specific UI helpers
+
+(defn cancel-facet-selection []
+  (click (qh/find-query ".filters button.btn-close")))
+
+(defn click-expansion-toggle [label]
+  (click (qh/find-expand-toggle label)))
+
+(defn click-select-any [label]
+  (click (qh/select-any-button label)))
+
+(defn click-select-toggle [label]
+  (click (qh/find-text label)))

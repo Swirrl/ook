@@ -58,11 +58,12 @@
  :ui.facets.current/set-selection
  [e/validation-interceptor]
  (fn [db [_ which uri]]
-   (let [to-add (cond-> (db/uri->child-uris db uri)
-                  (= :any which) (conj uri))
+   (let [to-add (if (= :any which) [uri] (db/uri->child-uris db uri))
+         to-remove (if (= :any which) (db/uri->child-uris db uri) [uri])
          to-collapse (when (= :any which) (cons uri (db/uri->expandable-child-uris db uri)))]
      (-> db
          (update-in [:ui.facets/current :selection] #(apply conj % to-add))
+         (update-in [:ui.facets/current :selection] #(apply disj % to-remove))
          (update-in [:ui.facets/current :expanded] #(apply disj % to-collapse))))))
 
 ;;;;; EXPANDING/COLLAPSING
@@ -100,7 +101,7 @@
 (rf/reg-event-fx
  :facets.codes/fetch-codes
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [ook/uri] :as codelist}]]
+ (fn [_ [_ {:keys [ook/uri] :as codelist}]]
    {:http-xhrio {:method :get
                  :uri "/codes"
                  :params {:codelist uri}
@@ -128,18 +129,19 @@
  :facets.codes/success
  [e/validation-interceptor]
  (fn [db [_ codelist result]]
-   (let [old-facet (-> db :ui.facets/current (dissoc :selection :expanded))
+   (let [old-facet (:ui.facets/current db)
          old-codelist (->> old-facet :tree (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
          tree (->> old-facet :tree (remove #(= (:ook/uri %) (:ook/uri codelist))))
          facet-with-tree (-> old-facet
                              (assoc :tree (conj tree (assoc old-codelist :children result))))
          facets (->> db :facets/config (remove #(= (:name %) (:name old-facet))))
-         expanded (-> (:ook/uri codelist) (cons (db/all-expandable-uris result)) set)]
+         expanded (apply conj
+                         (:expanded old-facet)
+                         (-> (:ook/uri codelist) (cons (db/all-expandable-uris result)) set))]
      (-> db
          ;; cache the result so we don't need to re-request it
          (assoc :facets/config (conj facets facet-with-tree))
          (assoc :ui.facets/current facet-with-tree)
-         (assoc-in [:ui.facets/current :selection] #{})
          (assoc-in [:ui.facets/current :expanded] expanded)))))
 
 (rf/reg-event-db

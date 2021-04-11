@@ -40,3 +40,24 @@
   ([container selector]
    (->> (find-all-query container selector)
         (map text-content))))
+
+;;;;;;; OOK-specific UI helpers
+
+(defn find-expand-toggle [label]
+  (-> (find-text label)
+      .-parentNode
+      (find-query "button")))
+
+(def code-label-query ".filters input[type='checkbox'] + label")
+
+(defn all-labels []
+  (all-text-content code-label-query))
+
+(defn all-selected-labels []
+  (all-text-content ".filters input[type='checkbox']:checked + label"))
+
+(defn expanded-labels-under-label [label]
+  (-> label find-text .-parentNode (all-text-content code-label-query)))
+
+(defn select-any-button [label]
+  (-> label find-text .-parentNode (find-text "any")))
