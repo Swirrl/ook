@@ -1,9 +1,6 @@
 (ns ook.search.db)
 
 (defprotocol SearchBackend
-  ;; (get-codes [db query]
-  ;;   "Return a search result with all codes that have the given term in their label.")
-
   (get-codes [db uris]
     "Retrieve codes by URI")
 
@@ -12,9 +9,6 @@
 
   (components->codelists [db component-uris]
     ("Retrieve codelist URIs from component URIs"))
-
-  (get-datasets [db codes]
-    "Return a search result with all datasets that have the given codes")
 
   (get-datasets-for-components [db components]
     "Retrieve datasets that use the components")

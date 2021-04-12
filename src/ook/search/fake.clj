@@ -5,20 +5,6 @@
 (defrecord FakeSearch []
   db/SearchBackend
 
-  #_(get-codes [_ query]
-    (condp = query
-      "" []
-      "test" [{:id "http://test" :label "This is a test label"}]))
-
-  ;; (get-datasets [_ filters]
-  ;;   (condp = filters
-  ;;     nil []
-
-  ;;     [{:value "a-code" :dimension "scheme-1"}] "valid response 1"
-
-  ;;     [{:value "a-code", :dimension "scheme-1"} {:value "another-code", :dimension "scheme-2"}]
-  ;;     "valid response 2"))
-
   (get-datasets-for-facets [_ facets]
     (condp = facets
       {"facet1" ["codelist1"]} "valid response 1"
