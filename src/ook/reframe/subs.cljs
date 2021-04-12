@@ -21,12 +21,12 @@
  :ui.facets/current
  (fn [db _]
    (let [facet (:ui.facets/current db)]
-     (if (:tree facet)
-       (update facet :tree #(sort-by :ook/uri %))
+     (if (:codelists facet)
+       (update facet :codelists #(sort-by :ook/uri %))
        db))))
 
 (rf/reg-sub
- :ui.facets.current/codelist-selected?
+ :ui.facets.current/code-selected?
  (fn [db [_ uri]]
    (db/code-selected? db uri)))
 

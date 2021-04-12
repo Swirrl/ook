@@ -3,10 +3,10 @@
    [re-frame.core :as rf]
    [ook.ui.icons :as icons]))
 
-(defn- apply-filter-button [{:keys [tree selection]}]
+(defn- apply-filter-button [{:keys [codelists selection]}]
   [:button.btn.btn-primary.mt-3
    {:type "button"
-    :disabled (or (not (seq tree)) (not (seq selection)))
+    :disabled (or (not (seq codelists)) (not (seq selection)))
     :on-click #(rf/dispatch [:filters/add-current-facet])}
    "Apply filter"])
 
@@ -29,7 +29,7 @@
 
 (defn- code-list-item [{:keys [ook/uri label children disabled?] :as code} & top-level?]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])
-        selected? @(rf/subscribe [:ui.facets.current/codelist-selected? uri])]
+        selected? @(rf/subscribe [:ui.facets.current/code-selected? uri])]
     [:li.list-group-item.border-0.pb-0
      (when children
        [toggle-expanded-button code expanded? top-level?])
@@ -51,11 +51,11 @@
    (for [{:keys [ook/uri label] :as code} tree]
      ^{:key [uri label]} [code-list-item code top-level?])])
 
-(defn- code-selection [{:keys [tree]}]
+(defn- code-selection [{:keys [codelists]}]
   [:<>
    [:p.h6.mt-4 "Codelists"]
    [:form.mt-3
-    [code-list tree :top-level]]])
+    [code-list codelists :top-level]]])
 
 (defn- no-codelist-message [{:keys [dimensions]}]
   [:<>
@@ -74,12 +74,12 @@
       (= :error selected-facet)
       [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]
 
-      (seq (:tree selected-facet))
+      (seq (:codelists selected-facet))
       [:<>
        [apply-filter-button selected-facet]
        [code-selection selected-facet]]
 
-      (and (:tree selected-facet) (empty? (:tree selected-facet)))
+      (and (:codelists selected-facet) (empty? (:codelists selected-facet)))
       [no-codelist-message selected-facet])))
 
 (defn- facet-button [{:keys [name] :as facet} selected-facet]
