@@ -10,52 +10,84 @@
     :on-click #(rf/dispatch [:filters/add-current-facet])}
    "Apply filter"])
 
-(defn- toggle-expanded-button [{:keys [ook/uri] :as code} expanded? & top-level?]
+(defn- text-button [opts & children]
+  [:button.btn.btn-link.mx-1.p-0.align-baseline
+   (merge opts {:type "button"})
+   children])
+
+(defn- toggle-level-button [opts expanded?]
   [:button.btn.as-link.p-0.m-0.expand-code-button
-   {:on-click #(if top-level?
-                 (rf/dispatch [:ui.facets.current/toggle-codelist code])
-                 (rf/dispatch [:ui.facets.current/toggle-expanded uri]))
-    :type "button"}
+   (merge opts {:type "button"})
    (if expanded? icons/down icons/up)])
 
-(defn- multi-select-button [{:keys [ook/uri allow-any? children]}]
-  (when children
-    [:button.btn.btn-link.mx-1.p-0.align-baseline
-     {:type "button"
-      :on-click #(rf/dispatch [:ui.facets.current/set-selection (if allow-any? :any :children) uri])}
-     (if allow-any? "any" "all children")]))
+(defn- toggle-code-expanded-button [{:keys [ook/uri]} expanded?]
+  [toggle-level-button
+   {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])}
+   expanded?])
 
-(declare code-list)
+(defn- toggle-codelist-expanded-button [codelist expanded?]
+  [toggle-level-button
+   {:on-click #(rf/dispatch [:ui.facets.current/toggle-codelist codelist])}
+   expanded?])
 
-(defn- code-list-item [{:keys [ook/uri label children disabled?] :as code} & top-level?]
-  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])
-        selected? @(rf/subscribe [:ui.facets.current/code-selected? uri])]
+(defn- select-any-button [{:keys [ook/uri]}]
+  [text-button
+   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :any uri])}
+   "any"])
+
+(defn- select-all-children-button [{:keys [ook/uri]}]
+  [text-button
+   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children uri])}
+   "all children"])
+
+(defn- checkbox-input [uri disabled?]
+  (let [selected? @(rf/subscribe [:ui.facets.current/code-selected? uri])]
+    [:input.form-check-input.mx-2
+     (cond-> {:type "checkbox"
+              :name "code"
+              :value uri
+              :id uri
+              :checked selected?
+              :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
+       disabled? (merge {:disabled true}))]))
+
+(declare code-tree)
+
+(defn- code-item [{:keys [ook/uri label children disabled?] :as code}]
+  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [:li.list-group-item.border-0.pb-0
-     (when children
-       [toggle-expanded-button code expanded? top-level?])
-     [:input.form-check-input.mx-2
-      (cond-> {:type "checkbox"
-               :name "code"
-               :value uri
-               :id uri
-               :checked selected?
-               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
-        disabled? (merge {:disabled true}))]
+     (when (seq children)
+       [toggle-code-expanded-button code expanded?])
+     [checkbox-input uri disabled?]
      [:label.form-check-label.d-inline {:for uri} label]
-     [multi-select-button code]
-     (when (and expanded? children)
-       [code-list children])]))
+     (when (seq children)
+       [:<>
+        [select-all-children-button code]
+        (when expanded?
+          [code-tree children])])]))
 
-(defn- code-list [tree & top-level?]
-  [:ul.list-group-flush (when top-level? {:class "p-0"})
+(defn- code-tree [tree]
+  [:ul.list-group-flush
    (for [{:keys [ook/uri label] :as code} tree]
-     ^{:key [uri label]} [code-list-item code top-level?])])
+     ^{:key [uri label]} [code-item code])])
+
+(defn- codelist-item [{:keys [ook/uri label children] :as codelist}]
+  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
+    [:li.list-group-item.border-0.pb-0
+     [toggle-codelist-expanded-button codelist expanded?]
+     [checkbox-input uri false]
+     [:label.form-check-label.d-inline {:for uri} label]
+     [select-any-button codelist]
+     (when expanded?
+       [code-tree children])]))
 
 (defn- code-selection [{:keys [codelists]}]
   [:<>
    [:p.h6.mt-4 "Codelists"]
    [:form.mt-3
-    [code-list codelists :top-level]]])
+    [:ul.list-group-flush.p-0
+     (for [{:keys [ook/uri label] :as codelist} codelists]
+       ^{:key [uri label]} [codelist-item codelist])]]])
 
 (defn- no-codelist-message [{:keys [dimensions]}]
   [:<>
