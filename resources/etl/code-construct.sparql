@@ -2,6 +2,7 @@ PREFIX qb: <http://purl.org/linked-data/cube#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ui: <http://www.w3.org/ns/ui#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 
 CONSTRUCT {
     ?code
@@ -12,6 +13,7 @@ CONSTRUCT {
         skos:broader ?broader;
 	skos:narrower ?narrower;
         ui:sortPriority ?sort_priority;
+	<http://example.net/def/used> ?used;
     .
 } WHERE {
     ?code
@@ -37,4 +39,12 @@ CONSTRUCT {
     OPTIONAL {
         ?code skos:narrower ?narrower;
     }
+
+    BIND (EXISTS {
+      ?odataset pmdcat:datasetContents ?oqb .
+          
+      ?obs qb:dataSet ?oqb;
+           ?p ?code;
+           .
+    } AS ?used)
 }

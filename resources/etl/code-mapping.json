@@ -8,7 +8,8 @@
       "notation": { "type": "keyword" },
       "broader": { "type": "keyword" },
       "narrower": { "type": "keyword" },
-      "priority": { "type": "integer" }
+      "priority": { "type": "integer" },
+      "used": { "type": "boolean" }
     }
   }
 }

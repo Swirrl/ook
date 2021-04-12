@@ -67,5 +67,6 @@
           :ook/uri "def/trade/concept/alcohol-type/beer"
           :label "Beer"
           :notation "beer"
+          :used "false"
           :narrower nil
           :broader nil)))))
