@@ -15,9 +15,11 @@
     "comment": {"@id": "rdfs:comment" },
     "description": {"@id": "dcterms:description", "@type": "https://www.w3.org/ns/iana/media-types/text/markdown#Resource" },
     "label": {"@id": "rdfs:label" },
+    "altlabel": {"@id": "skos:altLabel" },
     "cube": {"@id": "pmdcat:datasetContents", "@type": "@id" },
     "family": {"@id": "http://gss-data.org.uk/def/gdp#family", "@type": "@id"},
     "component": {"@id": "http://example.net/def/components", "@type": "@id" }
   },
-  "@type": "pmdcat:Dataset"
+  "@type": "pmdcat:Dataset",
+  "publisher": { "@embed": "@always" }
 }

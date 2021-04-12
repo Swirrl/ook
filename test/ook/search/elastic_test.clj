@@ -70,6 +70,7 @@
                             :label "Wine"
                             :broader nil
                             :narrower nil
+                            :used "true"
                             :notation "wine"
                             :priority "1"}]}]}]}
                      (description-for-facet "Alcohol Type")))
@@ -86,6 +87,7 @@
                             :label "Total Wine Duty receipts"
                             :broader nil
                             :narrower nil
+                            :used "true"
                             :notation "total-wine-duty-receipts"
                             :priority "8"}]}]}]}
                      (description-for-facet "Bulletin Type")))

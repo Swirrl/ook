@@ -5,7 +5,11 @@
       "@type": { "type": "keyword" },
       "family": { "type": "keyword" },
       "cube": { "type": "keyword" },
-      "publisher": { "type": "keyword" },
+      "publisher": { "type": "nested", "properties": {
+        "@id": {"type": "keyword"},
+        "label": {"type": "text"},
+        "altlabel": {"type": "text"}
+      }},
       "label": { "type": "text" },
       "comment": { "type": "text" },
       "description": { "type": "text" },

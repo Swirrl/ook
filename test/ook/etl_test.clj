@@ -34,13 +34,32 @@
         (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))
 
+(deftest dataset-pipeline-test
+  (testing "Dataset pipeline schema"
+    (with-system [system ["drafter-client.edn"
+                          "cogs-staging.edn"
+                          "elasticsearch-test.edn"
+                          "project/fixture/data.edn"]]
+      (setup/reset-indicies! system)
+      (vcr/with-cassette {:name :dataset-pipeline :recordable? setup/not-localhost?}
+        (etl/dataset-pipeline system))
+
+      (let [db (setup/get-db system)
+            doc (first (db/all-datasets db))]
+        (are [key value] (= value (key doc))
+          :ook/uri "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
+          :label "Alcohol Bulletin - Duty Receipts"
+          :publisher {:ook/uri "https://www.gov.uk/government/organisations/hm-revenue-customs"
+                      :label "HM Revenue & Customs"
+                      :altlabel "HMRC"})))))
+
 (deftest component-pipeline-test
   (testing "Component pipeline schema"
     (with-system [system ["drafter-client.edn"
                           "cogs-staging.edn"
                           "elasticsearch-test.edn"]]
       (setup/reset-indicies! system)
-      (vcr/with-cassette {:name :extract-components :recordable? setup/not-localhost?}
+      (vcr/with-cassette {:name :component-pipeline :recordable? setup/not-localhost?}
         (etl/component-pipeline system))
 
       (let [db (setup/get-db system)
@@ -58,7 +77,7 @@
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)
-      (vcr/with-cassette {:name :extract-codes :recordable? setup/not-localhost?}
+      (vcr/with-cassette {:name :code-pipeline :recordable? setup/not-localhost?}
         (etl/code-pipeline system))
 
       (let [db (setup/get-db system)
