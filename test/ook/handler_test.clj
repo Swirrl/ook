@@ -90,4 +90,40 @@
           (let [response (request-transit "datasets?facet=facet1,codelist1&facet=facet2,codelist2")]
             (is (= 200 (:status response)))
             (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "valid response 3"))))))))
+            (is (str/includes? (:body response) "valid response 3")))))
+
+      (testing "/codes"
+        (testing "rejects html requests"
+          (let [response (request-html "codes")]
+            (is (= 406 (:status response)))
+            (is (= "Unsupported content type" (:body response)))))
+
+        (testing "works with no query param"
+          (let [response (request-transit "codes")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (= "[]" (:body response)))))
+
+        (testing "calls the db with a codelist when there is one"
+          (let [response (request-transit "codes?codelist=cl1")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (str/includes? (:body response) "concept tree for cl1")))))
+
+      (testing "/codelists"
+        (testing "rejects html requests"
+          (let [response (request-html "codelists")]
+            (is (= 406 (:status response)))
+            (is (= "Unsupported content type" (:body response)))))
+
+        (testing "doesn't blow up with no query param"
+          (let [response (request-transit "codelists")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (= "[]" (:body response)))))
+
+        (testing "calls the db with dimensions when they're there"
+          (let [response (request-transit "codelists?dimension=dim1")]
+            (is (= 200 (:status response)))
+            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+            (is (str/includes? (:body response) "codelists for dim1"))))))))

@@ -9,13 +9,15 @@
   "Find components using their URIs."
   [uris {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
-        uris (u/box uris)]
-    (->> (esd/search conn "component" "_doc"
-                     {:query (q/ids "_doc" uris)
-                      :size (count uris)})
-         :hits :hits
-         (map :_source)
-         (map esu/normalize-keys))))
+        uris (when uris (u/box uris))]
+    (if uris
+      (->> (esd/search conn "component" "_doc"
+                       {:query (q/ids "_doc" uris)
+                        :size 500})
+           :hits :hits
+           (map :_source)
+           (map esu/normalize-keys))
+      [])))
 
 (defn components->codelists [uris opts]
   (->> opts

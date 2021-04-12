@@ -91,7 +91,9 @@
     concept))
 
 (defn build-concept-tree [codelist-id {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (doall
-     (map (partial find-narrower-concepts conn)
-          (get-top-concepts conn codelist-id)))))
+  (if codelist-id
+    (let [conn (esu/get-connection endpoint)]
+      (doall
+       (map (partial find-narrower-concepts conn)
+            (get-top-concepts conn codelist-id))))
+    []))

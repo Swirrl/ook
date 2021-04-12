@@ -2,6 +2,7 @@
 
  :ook.handler/main {:search/db #ig/ref :ook.search.fake/db}
 
- ;; :ook.handler/get-codes {:search/db #ig/ref :ook.search.fake/db}
- :ook.handler/datasets {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/datasets  {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/codelists {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/codes     {:search/db #ig/ref :ook.search.fake/db}
  :ook.search.fake/db {}}
