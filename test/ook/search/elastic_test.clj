@@ -59,31 +59,35 @@
                                                         (filter #(= (:name %) name))
                                                         first))] ;; switch to use map from facet name to details?
               (is (= {:name "Alcohol Type"
-                      :codelists
-                      [{:ook/uri "def/trade/concept-scheme/alcohol-type"
-                        :label "Alcohol Type"
-                        :examples
-                        [{:ook/uri "def/trade/concept/alcohol-type/wine"
-                          :ook/type "skos:Concept"
-                          :label "Wine"
-                          :broader nil
-                          :narrower nil
-                          :notation "wine"
-                          :priority "1"}]}]}
+                      :dimensions
+                      [{:ook/uri "def/trade/property/dimension/alcohol-type"
+                        :codelists
+                        [{:ook/uri "def/trade/concept-scheme/alcohol-type"
+                          :label "Alcohol Type"
+                          :examples
+                          [{:ook/uri "def/trade/concept/alcohol-type/wine"
+                            :ook/type "skos:Concept"
+                            :label "Wine"
+                            :broader nil
+                            :narrower nil
+                            :notation "wine"
+                            :priority "1"}]}]}]}
                      (description-for-facet "Alcohol Type")))
               (is (= {:name "Bulletin Type"
-                      :codelists
-                      [{:ook/uri "def/trade/concept-scheme/bulletin-type"
-                        :label "Bulletin Type"
-                        :examples
-                        [{:ook/uri
-                          "def/trade/concept/bulletin-type/total-wine-duty-receipts"
-                          :ook/type "skos:Concept"
-                          :label "Total Wine Duty receipts"
-                          :broader nil
-                          :narrower nil
-                          :notation "total-wine-duty-receipts"
-                          :priority "8"}]}]}
+                      :dimensions
+                      [{:ook/uri "def/trade/property/dimension/bulletin-type"
+                        :codelists
+                        [{:ook/uri "def/trade/concept-scheme/bulletin-type"
+                          :label "Bulletin Type"
+                          :examples
+                          [{:ook/uri
+                            "def/trade/concept/bulletin-type/total-wine-duty-receipts"
+                            :ook/type "skos:Concept"
+                            :label "Total Wine Duty receipts"
+                            :broader nil
+                            :narrower nil
+                            :notation "total-wine-duty-receipts"
+                            :priority "8"}]}]}]}
                      (description-for-facet "Bulletin Type")))
               (is (= nil
                      (description-for-facet "Date"))))))))))

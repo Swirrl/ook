@@ -104,21 +104,22 @@
       (-> dataset
           (dissoc :matching_observation_example)
           (assoc :facets (for [{:keys [name dimensions]} facets]
-                           (let [code-uris (map
-                                            (fn [d]
-                                              (get matching_observation_example
-                                                   (keyword (str d ".@id"))))
-                                            dimensions)
-                                 matches (->>
-                                          code-uris
-                                          (map code-lookup)
-                                          (partition-by :scheme)
-                                          (map (fn [codes]
-                                                 (assoc (codelist-lookup (-> codes first :scheme))
-                                                        :examples
-                                                        (map #(dissoc % :scheme) codes)))))]
-                             {:name name
-                              :codelists matches})))))))
+                           {:name name
+                            :dimensions (for [d dimensions]
+                                          (let [code-uris [(get matching_observation_example
+                                                                (keyword (str d ".@id")))]
+                                                matches
+                                                (->>
+                                                 code-uris
+                                                 (map code-lookup)
+                                                 (partition-by :scheme)
+                                                 (map (fn [codes]
+                                                        (assoc (codelist-lookup (-> codes first :scheme))
+                                                               :examples
+                                                               (map #(dissoc % :scheme) codes)))))]
+                                            {:ook/uri d
+                                             :codelists matches
+                                             }))}))))))
 
 (defn for-facets [selections {:keys [elastic/endpoint] :as opts}]
   (let [codelist-uris (mapcat keys (vals selections))

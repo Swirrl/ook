@@ -54,7 +54,7 @@
                  code-uris)))))))
 
 (deftest explain-match-test
-  (let [dataset-hits [{:ook/uri "cube1" 
+  (let [dataset-hits [{:ook/uri "cube1"
                        :matching_observation_example
                        {(keyword "date.@id") "2019"
                         (keyword "area.@id") "germany"}}
@@ -78,23 +78,40 @@
 
     (testing "adds :facets vector with one explanation per facet"
       (is (= [[{:name "time"
-                :codelists [{:ook/uri "years"
-                             :label "Years"
-                             :examples [{:ook/uri "2019"
-                                         :label "2019"}]}]}
+                :dimensions
+                [{:ook/uri "date"
+                  :codelists
+                  [{:ook/uri "years"
+                    :label "Years"
+                    :examples
+                    [{:ook/uri "2019"
+                      :label "2019"}]}]}]}
                {:name "place"
-                :codelists [{:ook/uri "countries"
-                             :label "Countries"
-                             :examples [{:ook/uri "germany"
-                                         :label "Germany"}]}]}]
+                :dimensions
+                [{:ook/uri "area"
+                  :codelists
+                  [{:ook/uri "countries"
+                    :label "Countries"
+                    :examples
+                    [{:ook/uri "germany"
+                      :label "Germany"}]}]}]}]
+
               [{:name "time"
-                :codelists [{:ook/uri "years"
-                             :label "Years"
-                             :examples [{:ook/uri "2020"
-                                         :label "2020"}]}]}
+                :dimensions
+                [{:ook/uri "date"
+                  :codelists
+                  [{:ook/uri "years"
+                    :label "Years"
+                    :examples
+                    [{:ook/uri "2020"
+                      :label "2020"}]}]}]}
                {:name "place"
-                :codelists [{:ook/uri "countries"
-                             :label "Countries"
-                             :examples [{:ook/uri "canada"
-                                         :label "Canada"}]}]}]]
+                :dimensions
+                [{:ook/uri "area"
+                  :codelists
+                  [{:ook/uri "countries"
+                    :label "Countries"
+                    :examples
+                    [{:ook/uri "canada"
+                      :label "Canada"}]}]}]}]]
              (map :facets datasets))))))
