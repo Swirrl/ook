@@ -107,7 +107,7 @@
        [:div
         (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
-            ^{:key name}[facet-button facet selected-facet]))]
+            ^{:key name} [facet-button facet selected-facet]))]
        (when selected-facet
          [cancel-facet-selection])]
       [codelist-selection selected-facet]]]))

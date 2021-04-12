@@ -61,3 +61,6 @@
 
 (defn select-any-button [label]
   (-> label find-text .-parentNode (find-text "any")))
+
+(defn all-children-button [label]
+  (-> label find-text .-parentNode (find-text "all children")))

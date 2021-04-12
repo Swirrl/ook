@@ -24,10 +24,11 @@
               {:ook/uri "cl3" :label "Codelist 3 Label"}]})
 
 (def concept-trees
-  {"cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "1 child 1" :children nil}
-          {:scheme "cl2" :ook/uri "cl2-code2" :label "1 child 2"
-           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2 child 1" :children nil}
-                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2 child 2" :children nil}]}]})
+  {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1"}]
+   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :children nil}
+          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2"
+           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :children nil}
+                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :children nil}]}]})
 
 (def codelist-request (atom nil))
 
@@ -39,11 +40,14 @@
      (reset! codelist-request name)
      {:dispatch [:facets.codelists/success name (get codelists name)]})))
 
+(def concept-tree-request (atom nil))
+
 (defn stub-code-fetch-success []
   (rf/reg-event-fx
    :facets.codes/fetch-codes
    [events/validation-interceptor]
-   (fn [_ [_ {:keys [ook/uri] :as codelist}]]
+   (fn [_ [_ {:keys [ook/uri label] :as codelist}]]
+     (reset! concept-tree-request label)
      {:dispatch [:facets.codes/success codelist (get concept-trees uri)]})))
 
 (defn select-any-buttons []
@@ -80,27 +84,41 @@
 
 (deftest expanding-and-collapsing
   (rft/run-test-sync
-    (stub-codelist-fetch-success)
-    (stub-code-fetch-success)
-    (setup/init! filters/configured-facets initial-state)
-    (eh/click-text "Facet 2")
+   (stub-codelist-fetch-success)
+   (stub-code-fetch-success)
+   (setup/init! filters/configured-facets initial-state)
+   (eh/click-text "Facet 2")
 
-    (testing "expanding a codelist fetches its concept tree and expands all children"
-      (eh/click-expansion-toggle "Codelist 2 Label")
-      (is (= ["Codelist 2 Label" "1 child 1" "1 child 2" "2 child 1" "2 child 2"]
-             (qh/expanded-labels-under-label "Codelist 2 Label"))))
+   (testing "expanding a codelist fetches its concept tree and expands all children"
+     (eh/click-expansion-toggle "Codelist 2 Label")
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+            (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
-    (testing "collapsing a sub-tree works"
-      (eh/click-expansion-toggle "1 child 2")
-      (is (= ["Codelist 2 Label" "1 child 1" "1 child 2"]
-             (qh/expanded-labels-under-label "Codelist 2 Label"))))
+   (testing "concept trees are cached"
+     (is (= "Codelist 2 Label" @concept-tree-request))
 
-    (testing "expanding a parent node expands all its children"
-      (eh/click-expansion-toggle "Codelist 2 Label")
-      (is (= ["Codelist 2 Label"] (qh/expanded-labels-under-label "Codelist 2 Label")))
-      (eh/click-expansion-toggle "Codelist 2 Label")
-      (is (= ["Codelist 2 Label" "1 child 1" "1 child 2" "2 child 1" "2 child 2"]
-             (qh/expanded-labels-under-label "Codelist 2 Label")))))
+     ;; expand codelist 3
+     (eh/click-expansion-toggle "Codelist 3 Label")
+     (is (= "Codelist 3 Label" @concept-tree-request))
+
+     ;; collapse and re-expand codelist 2
+     (eh/click-expansion-toggle "Codelist 2 Label")
+     (eh/click-expansion-toggle "Codelist 2 Label")
+
+     ;; codelist 2 tree is not re-fetched
+     (is (= "Codelist 3 Label" @concept-tree-request)))
+
+   (testing "collapsing a sub-tree works"
+     (eh/click-expansion-toggle "2-1 child 2")
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
+            (qh/expanded-labels-under-label "Codelist 2 Label"))))
+
+   (testing "expanding a parent node expands all its children"
+     (eh/click-expansion-toggle "Codelist 2 Label")
+     (is (= ["Codelist 2 Label"] (qh/expanded-labels-under-label "Codelist 2 Label")))
+     (eh/click-expansion-toggle "Codelist 2 Label")
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+            (qh/expanded-labels-under-label "Codelist 2 Label")))))
 
   (setup/cleanup!))
 
@@ -130,62 +148,34 @@
        (eh/click-select-any "Codelist 2 Label")
        (is (= 1 (count (qh/expanded-labels-under-label "Codelist 2 Label")))))
 
-     (testing "un-selects all children"
+     (testing "selects parent and un-selects all children"
        (eh/click-expansion-toggle "Codelist 2 Label")
        (is (= 1 (count (qh/all-selected-labels))))
 
        (eh/click-select-toggle "Codelist 2 Label")
-       (eh/click-select-toggle "1 child 1")
-       (eh/click-select-toggle "2 child 1")
+       (eh/click-select-toggle "2-1 child 1")
+       (eh/click-select-toggle "2-2 child 1")
        (is (= 2 (count (qh/all-selected-labels))))
 
        (eh/click-select-any "Codelist 2 Label")
        (eh/click-expansion-toggle "Codelist 2 Label")
        (is (= 1 (count (qh/all-selected-labels))))))
 
-   (testing "checking any child then unselects the parent"
-     (eh/click-select-toggle "1 child 2")
-     (is (= ["1 child 2"] (qh/all-selected-labels)))
+   ;; (testing "checking any child then unselects the parent"
+   ;;   (eh/click-select-toggle "2-1 child 2")
+   ;;   (is (= ["2-1 child 2"] (qh/all-selected-labels)))
 
-     (eh/click-select-any "Codelist 2 Label")
-     (eh/click-expansion-toggle "Codelist 2 Label")
-
-
-     ;; (eh/click-select)
-     )
+   ;;   (eh/click-select-any "Codelist 2 Label")
+   ;;   (eh/click-expansion-toggle "Codelist 2 Label")
+   ;;   )
 
    (testing "selecting 'all children'"
      (testing "selects all the children"
-       )
+       (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
+       (eh/click-select-all-children "2-1 child 2")
+       (is (= ["Codelist 2 Label" "2-2 child 1" "2-2 child 2"] (qh/all-selected-labels))))
 
-     (testing "unselects the parent (if it was selected)")
-     ;;
-     )
+     ;; (testing "unselects the parent (if it was selected)")
+     ))
 
-
-
-   ;; (testing "expanding a codelist fetches its concept tree")
-   )
-
-  ;; (setup/cleanup!)
-  )
-
-;; (deftest selecting-codelists
-;;   (rft/run-test-sync
-;;    (stub-codelist-fetch-success)
-;;    (stub-code-fetch-success)
-;;    (setup/init! filters/configured-facets initial-state)
-
-;;    (testing "all codelists have 'select any' button"
-;;      (eh/click-text "Facet 2")
-;;      (is (= 2 (count (select-any-buttons)))))
-
-;;    (testing "selecting 'any' checks the parent but no children"
-;;      (eh/click-text "Codelist 2 Label")
-;;      ;; (is (expanded? "Codelist 2 Label"))
-;;      )
-
-;;    (testing "expanding a codelist fetches its concept tree"))
-
-;;   (setup/cleanup!)
-;;   )
+  (setup/cleanup!))

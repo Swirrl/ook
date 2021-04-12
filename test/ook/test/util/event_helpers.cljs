@@ -49,3 +49,6 @@
 
 (defn click-select-toggle [label]
   (click (qh/find-text label)))
+
+(defn click-select-all-children [label]
+  (click (qh/all-children-button label)))
