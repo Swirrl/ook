@@ -161,21 +161,14 @@
        (eh/click-expansion-toggle "Codelist 2 Label")
        (is (= 1 (count (qh/all-selected-labels))))))
 
-   ;; (testing "checking any child then unselects the parent"
-   ;;   (eh/click-select-toggle "2-1 child 2")
-   ;;   (is (= ["2-1 child 2"] (qh/all-selected-labels)))
-
-   ;;   (eh/click-select-any "Codelist 2 Label")
-   ;;   (eh/click-expansion-toggle "Codelist 2 Label")
-   ;;   )
+   (testing "checking any child then unselects the parent"
+     (eh/click-select-toggle "2-1 child 2")
+     (is (= ["2-1 child 2"] (qh/all-selected-labels))))
 
    (testing "selecting 'all children'"
-     (testing "selects all the children"
+     (testing "selects all the children and unselects the parent"
        (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
        (eh/click-select-all-children "2-1 child 2")
-       (is (= ["Codelist 2 Label" "2-2 child 1" "2-2 child 2"] (qh/all-selected-labels))))
-
-     ;; (testing "unselects the parent (if it was selected)")
-     ))
+       (is (= ["2-2 child 1" "2-2 child 2"] (qh/all-selected-labels))))))
 
   (setup/cleanup!))

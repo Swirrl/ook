@@ -30,14 +30,14 @@
    {:on-click #(rf/dispatch [:ui.facets.current/toggle-codelist codelist])}
    expanded?])
 
-(defn- select-any-button [{:keys [ook/uri]}]
+(defn- select-any-button [codelist]
   [text-button
-   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :any uri])}
+   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :any codelist])}
    "any"])
 
-(defn- select-all-children-button [{:keys [ook/uri]}]
+(defn- select-all-children-button [code]
   [text-button
-   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children uri])}
+   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children code])}
    "all children"])
 
 (defn- checkbox-input [{:keys [ook/uri disabled?] :as option}]

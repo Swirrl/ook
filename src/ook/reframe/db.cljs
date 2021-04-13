@@ -51,3 +51,7 @@
 (defn facet-by-name [db name]
    ;; would be easier if facet configs were indexed by name.. maybe change that?
   (->> db :facets/config (filter #(= (:name %) name)) first))
+
+(defn collapse-children [db uri]
+  (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]
+    (update-in db [:ui.facets/current :expanded] #(apply disj % to-collapse))))

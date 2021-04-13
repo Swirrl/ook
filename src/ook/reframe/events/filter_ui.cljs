@@ -56,14 +56,10 @@
 (rf/reg-event-db
  :ui.facets.current/set-selection
  [e/validation-interceptor]
- (fn [db [_ which uri]]
-   (let [to-add (if (= :any which) [uri] (db/uri->child-uris db uri))
-         to-remove (if (= :any which) (db/uri->child-uris db uri) [uri])
-         to-collapse (when (= :any which) (cons uri (db/uri->expandable-child-uris db uri)))]
-     (-> db
-         (update-in [:ui.facets/current :selection] #(apply conj % to-add))
-         (update-in [:ui.facets/current :selection] #(apply disj % to-remove))
-         (update-in [:ui.facets/current :expanded] #(apply disj % to-collapse))))))
+ (fn [db [_ which {:keys [ook/uri] :as option}]]
+   (if (= :any which)
+     (-> db (selection/add-codelist uri) (db/collapse-children uri))
+     (selection/add-children db option))))
 
 ;;;;; EXPANDING/COLLAPSING
 
