@@ -1,14 +1,11 @@
 (ns ook.search.elastic.datasets
   (:require
-   [clojure.set :as set]
-   [meta-merge.core :as mm]
    [clojurewerkz.elastisch.query :as q]
    [clojurewerkz.elastisch.rest.document :as esd]
    [ook.search.elastic.util :as esu]
-   [ook.util :as u]
+   [ook.util :as util]
    [ook.search.elastic.facets :as facets]
    [ook.search.elastic.components :as components]
-   [ook.util :as util]
    [ook.search.elastic.codes :as codes]))
 
 (defn- flatten-description-lang-strings [m]
@@ -72,13 +69,13 @@
                                 (let [fields (zipmap (keys fields) (map first (vals fields)))]
                                   (assoc matches
                                          (get fields (keyword "qb:dataSet.@id"))
-                                         {:matching_observation_example (dissoc fields (keyword "qb:dataSet.@id"))})))
+                                         {:matching-observation-example (dissoc fields (keyword "qb:dataSet.@id"))})))
                               {}))
         buckets (->> observation-hits :aggregations :datasets :buckets
                      (reduce (fn [matches {:keys [key doc_count]}]
                                (assoc matches
                                       key
-                                      {:matching_observation_count doc_count}))
+                                      {:matching-observation-count doc_count}))
                              {}))]
     (map (fn [[id description]] (merge {:ook/uri id} description))
          (merge-with merge buckets examples))))
@@ -100,13 +97,13 @@
   [datasets facets codelists codes]
   (let [code-lookup (util/id-lookup codes)
         codelist-lookup (util/id-lookup codelists)]
-    (for [{:keys [matching_observation_example] :as dataset} datasets]
+    (for [{:keys [matching-observation-example] :as dataset} datasets]
       (-> dataset
-          (dissoc :matching_observation_example)
+          (dissoc :matching-observation-example)
           (assoc :facets (for [{:keys [name dimensions]} facets]
                            {:name name
                             :dimensions (for [d dimensions]
-                                          (let [code-uris [(get matching_observation_example
+                                          (let [code-uris [(get matching-observation-example
                                                                 (keyword (str d ".@id")))]
                                                 matches
                                                 (->>
@@ -117,11 +114,9 @@
                                                         (assoc (codelist-lookup (-> codes first :scheme))
                                                                :examples
                                                                (map #(dissoc % :scheme) codes)))))]
-                                            {:ook/uri d
-                                             :codelists matches
-                                             }))}))))))
+                                            {:ook/uri d :codelists matches}))}))))))
 
-(defn for-facets [selections {:keys [elastic/endpoint] :as opts}]
+(defn for-facets [selections opts]
   (let [codelist-uris (mapcat keys (vals selections))
         dimensions-lookup (components/codelist-to-dimensions-lookup codelist-uris opts)
         dimension-selections (facets/dimension-selections selections dimensions-lookup)
@@ -130,11 +125,10 @@
         code-uris (code-uris-from-observation-hits observation-hits)
         facets (facets/get-facets-for-selections selections opts)
         codelists (components/get-codelists codelist-uris opts)
-        codes (codes/get-codes code-uris opts)]
-    (->>
-     (explain-match dataset-hits facets codelists codes)
-     (map esu/normalize-keys)
-     (map flatten-description-lang-strings))))
+        codes (codes/get-codes code-uris opts)
+        ]
+    (->> (explain-match dataset-hits facets codelists codes)
+      (map #(merge % {:label "TODO: get label" :comment "TODO: get comment"})))))
 
 (defn total-count [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)

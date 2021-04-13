@@ -17,12 +17,15 @@
                  (assoc result facet-name codelists))
                {})))
 
+(defn deserialize-filter-state [filter-state]
+  (t/read-string filter-state))
+
 (defn get-facets
   "Parse query param facet tuples into a map of facet-name [codelists] for
   use in db queries, referred to as 'selection' elsewhere"
   [{:keys [query-params]}]
   (when (seq query-params)
-    (-> query-params (get "facet") parse-named-facets)))
+    (-> query-params (get "filters") deserialize-filter-state)))
 
 (defn get-dimensions [{:keys [query-params]}]
   (when (seq query-params)
@@ -31,6 +34,3 @@
 (defn get-codelist [{:keys [query-params]}]
   (when (seq query-params)
     (get query-params "codelist")))
-
-(defn deserialize-filter-state [filter-state]
-  (t/read-string filter-state))

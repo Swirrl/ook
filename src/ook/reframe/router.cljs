@@ -13,24 +13,11 @@
 
 (def ^:private routes
   [["/" home-route-data]
-
-   ;; ["/search" {:name :ook.route/search
-   ;;             :view views/results
-   ;;             :parameters {:query {:q string? :facet [string?]}}
-   ;;             :controllers [{:start (fn [params]
-   ;;                                     (let [query (-> params :query :q)
-   ;;                                           facets (-> params :query :facet)]
-   ;;                                       (rf/dispatch [:codes/submit-search query])
-   ;;                                       (when facets
-   ;;                                         (rf/dispatch [:filters/apply-code-selection facets]))))
-   ;;                            :parameters {:query [:q :facet]}}]}]
-
    ["/search" {:name :ook.route/search
                :view views/search
                :parameters {:query {:filters [string?]}}
                :controllers [{:start (fn [params]
                                        (let [filter-state (-> params :query :filters)]
-                                         (js/console.log "filters:::" filter-state)
                                          (if filter-state
                                            (rf/dispatch [:filters/apply filter-state])
                                            (rf/dispatch [:app/navigate :ook.route/home]))))

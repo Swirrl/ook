@@ -36,14 +36,14 @@
 
         (testing "Provides a count for each dataset"
           (is (= [735 5]
-                 (map :matching_observation_count datasets))))
+                 (map :matching-observation-count datasets))))
 
         (testing "Provides example of matching value for each dimension"
           (is (= [{(keyword "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dimension/period.@id")
                    "http://reference.data.gov.uk/id/government-year/1999-2000"}
                   {(keyword "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dimension/period.@id")
                    "http://reference.data.gov.uk/id/year/2019"}]
-                 (map :matching_observation_example datasets))))))
+                 (map :matching-observation-example datasets))))))
 
     (testing "code-uris-from-observation-hits"
       (let [code-uris (sut/code-uris-from-observation-hits results)]
@@ -55,11 +55,11 @@
 
 (deftest explain-match-test
   (let [dataset-hits [{:ook/uri "cube1"
-                       :matching_observation_example
+                       :matching-observation-example
                        {(keyword "date.@id") "2019"
                         (keyword "area.@id") "germany"}}
                       {:ook/uri "cube2"
-                       :matching_observation_example
+                       :matching-observation-example
                        {(keyword "date.@id") "2020"
                         (keyword "area.@id") "canada"}}]
         facets [{:name "time" :dimensions ["date"]}
@@ -72,9 +72,9 @@
                {:ook/uri "canada" :label "Canada" :scheme "countries"}]
         datasets (sut/explain-match dataset-hits facets codelists codes)]
 
-    (testing "removes :matching_observation_example"
+    (testing "removes :matching-observation-example"
       (is (= [nil nil]
-             (map :matching_observation_example datasets))))
+             (map :matching-observation-example datasets))))
 
     (testing "adds :facets vector with one explanation per facet"
       (is (= [[{:name "time"
