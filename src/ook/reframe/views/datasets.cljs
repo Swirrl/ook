@@ -4,7 +4,7 @@
             [ook.params.util :as pu]))
 
 (defn- total-observations [data]
-  (reduce + (map :matching-observations data)))
+  (reduce + (map :matching-observation-count data)))
 
 (defn- remove-facet [facet-name]
   (rf/dispatch [:filters/remove-facet facet-name])
@@ -44,7 +44,7 @@
 
 (defn- codelists-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
-        codelists (->> facet :dimensions (map :codelist) distinct)]
+        codelists (->> facet :dimensions (mapcat :codelists) distinct)]
     (for [{:keys [ook/uri label]} codelists]
       ^{:key uri} [:p.badge.bg-secondary.me-1 label])))
 
@@ -56,10 +56,10 @@
    [:th.title-column "Title / Description"]
    (for [[facet-name _] applied-facets]
      ^{:key facet-name} [:th.text-nowrap facet-name (remove-facet-button facet-name)])
-   (when (some :matching-observations data)
+   (when (some :matching-observation-count data)
      [:th])])
 
-(defn- dataset-row [{:keys [label comment ook/uri matching-observations facets]} applied-facets]
+(defn- dataset-row [{:keys [label comment ook/uri matching-observation-count facets]} applied-facets]
   ^{:key uri}
   [:tr
    [:td.title-column
@@ -67,9 +67,9 @@
     [:p.vertical-truncate comment]]
    (for [[facet-name _] applied-facets]
      ^{:key [uri facet-name]} [:td (codelists-for-facet facet-name facets)])
-   (when matching-observations
+   (when matching-observation-count
      [:td
-      [:small (str "Found " matching-observations " matching observations")]
+      [:small (str "Found " matching-observation-count " matching observations")]
       [:div
        [:a.btn.btn-secondary.btn-sm
         {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
