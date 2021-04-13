@@ -2,18 +2,11 @@
   (:require
    [ook.util :as u]
    [cemerick.url :as url]
+   [ook.concerns.transit :as t]
    [clojure.string :as str]))
 
 (defn get-query [{:keys [query-params]}]
   (get query-params "q"))
-
-;; (defn parse-filters [{:keys [query-params]}]
-;;   (let [param (get query-params "facet")]
-;;     (when (seq param)
-;;       (some->> param
-;;                u/box
-;;                (map #(str/split % #","))
-;;                (map (fn [[dim val]] {:value val :dimension dim}))))))
 
 (defn parse-named-facets [facets]
   (->> facets
@@ -38,3 +31,6 @@
 (defn get-codelist [{:keys [query-params]}]
   (when (seq query-params)
     (get query-params "codelist")))
+
+(defn deserialize-filter-state [filter-state]
+  (t/read-string filter-state))

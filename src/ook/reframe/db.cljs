@@ -1,17 +1,15 @@
 (ns ook.reframe.db
   (:require [ook.params.util :as pu]
             [reitit.core :as rt]
-            [ook.reframe.router :as router]))
+            [ook.reframe.router :as router]
+            [ook.concerns.transit :as t]))
 
 (def initial-db
   {:app/current-route (rt/map->Match {:template "/" :path "/" :data router/home-route-data})
    :results.datasets/data []})
 
 (defn filters->query-params [db]
-  {:facet (->> (:facets/applied db)
-               (map (fn [[name selection]]
-                      (cons name selection)))
-               (map pu/encode-facet))})
+  {:filters (t/write-string (:facets/applied db))})
 
 (defn all-expandable-uris [tree]
   (let [walk (fn walk* [node]

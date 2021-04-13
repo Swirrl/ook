@@ -64,10 +64,10 @@
 (rf/reg-event-fx
  :datasets/fetch-datasets
  [validation-interceptor]
- (fn [_ [_ facets]]
+ (fn [_ [_ filters]]
    {:http-xhrio {:method :get
                  :uri "/datasets"
-                 :params (when facets {:facet facets})
+                 :params (when filters {:filters filters})
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-failure [:results.datasets.request/error]}}))
@@ -75,10 +75,10 @@
 (rf/reg-event-fx
  :filters/apply
  [validation-interceptor]
- (fn [{db :db} [_ facets]]
-   {:dispatch [:datasets/fetch-datasets facets]
+ (fn [{db :db} [_ filter-state]]
+   {:dispatch [:datasets/fetch-datasets filter-state]
     :db (-> db
-            (assoc :facets/applied (p/parse-named-facets facets))
+            (assoc :facets/applied (p/deserialize-filter-state filter-state))
             (dissoc :ui.facets/current))}))
 
 ;;;; NAVIGATION

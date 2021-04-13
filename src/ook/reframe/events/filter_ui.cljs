@@ -34,9 +34,9 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} _]
    (let [current-facet (:ui.facets/current db)
-         selection (seq (:selection current-facet))]
+         selection (:selection current-facet)]
      {:db (cond-> db
-            selection (assoc-in [:facets/applied (:name current-facet)] selection))
+            (seq selection) (assoc-in [:facets/applied (:name current-facet)] selection))
       :dispatch [:app/navigate :ook.route/search]})))
 
 (rf/reg-event-db

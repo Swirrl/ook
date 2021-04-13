@@ -27,13 +27,14 @@
 
    ["/search" {:name :ook.route/search
                :view views/search
-               :parameters {:query {:facet [string?]}}
+               :parameters {:query {:filters [string?]}}
                :controllers [{:start (fn [params]
-                                       (let [facets (-> params :query :facet)]
-                                         (if facets
-                                           (rf/dispatch [:filters/apply facets])
+                                       (let [filter-state (-> params :query :filters)]
+                                         (js/console.log "filters:::" filter-state)
+                                         (if filter-state
+                                           (rf/dispatch [:filters/apply filter-state])
                                            (rf/dispatch [:app/navigate :ook.route/home]))))
-                              :parameters {:query [:facet]}}]}]])
+                              :parameters {:query [:filters]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]
