@@ -39,7 +39,7 @@
 ;;;;;;; OOK-specific UI helpers
 
 (defn cancel-facet-selection []
-  (click (qh/find-query ".filters button.btn-close")))
+  (click (qh/cancel-facet-selection-button)))
 
 (defn click-expansion-toggle [label]
   (click (qh/find-expand-toggle label)))

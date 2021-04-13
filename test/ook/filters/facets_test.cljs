@@ -19,7 +19,8 @@
    :dataset-count 20})
 
 (def codelists
-  {"Facet 1" [{:ook/uri "cl1" :label "Codelist 1 Label"}]
+  {"Facet 1" [{:ook/uri "cl1" :label "Codelist 1 Label"}
+              {:ook/uri "another-codelist" :label "Another codelist"}]
    "Facet 2" [{:ook/uri "cl2" :label "Codelist 2 Label"}
               {:ook/uri "cl3" :label "Codelist 3 Label"}]})
 
@@ -58,10 +59,17 @@
    (stub-codelist-fetch-success)
    (setup/init! filters/configured-facets initial-state)
 
+   (testing "clear facet selection button only shows when a facet is selected"
+     (is (nil? (qh/cancel-facet-selection-button)))
+     (eh/click-text "Facet 1")
+     (is (not (nil? (qh/cancel-facet-selection-button))))
+     (eh/cancel-facet-selection)
+     (is (nil? (qh/cancel-facet-selection-button))))
+
    (testing "selecting a facet fetches the codelists"
      (eh/click-text "Facet 1")
      (is (not (nil? (qh/find-text "Codelists"))))
-     (is (= ["Codelist 1 Label"] (qh/all-labels)))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
 
      (eh/click-text "Facet 2")
      (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels))))
@@ -72,13 +80,13 @@
    (testing "codelists are cached"
      (is (= "Facet 2" @codelist-request))
      (eh/click-text "Facet 1")
-     (is (= ["Codelist 1 Label"] (qh/all-labels)))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
      (is (= "Facet 2" @codelist-request)))
 
    (testing "cancelling facet selection works"
      (is (seq (qh/all-labels)))
      (eh/cancel-facet-selection)
-     (is (empty? (qh/all-labels)))) )
+     (is (empty? (qh/all-labels)))))
 
   (setup/cleanup!))
 
@@ -118,7 +126,13 @@
      (is (= ["Codelist 2 Label"] (qh/expanded-labels-under-label "Codelist 2 Label")))
      (eh/click-expansion-toggle "Codelist 2 Label")
      (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
-            (qh/expanded-labels-under-label "Codelist 2 Label")))))
+            (qh/expanded-labels-under-label "Codelist 2 Label"))))
+
+   (testing "codelists remain sorted by uri when expanded/collapsed"
+     (eh/click-text "Facet 1")
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
+     (eh/click-expansion-toggle "Codelist 1 Label")
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))))
 
   (setup/cleanup!))
 

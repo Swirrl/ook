@@ -64,3 +64,6 @@
 
 (defn all-children-button [label]
   (-> label find-text .-parentNode (find-text "all children")))
+
+(defn cancel-facet-selection-button []
+  (find-query ".filters button.btn-close"))

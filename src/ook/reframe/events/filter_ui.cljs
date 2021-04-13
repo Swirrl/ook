@@ -109,7 +109,7 @@
  [e/validation-interceptor]
  (fn [db [_ facet-name result]]
    (let [old-facet (db/facet-by-name db facet-name)
-         codelists (map #(assoc % :allow-any? true :children []) result)
+         codelists (sort-by :ook/uri result)
          facet-with-codelists (assoc old-facet :codelists codelists)
          facets (->> db :facets/config (remove #(= (:name %) facet-name)))]
      (-> db
@@ -126,8 +126,10 @@
    (let [old-facet (:ui.facets/current db)
          old-codelist (->> old-facet :codelists (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
          codelists (->> old-facet :codelists (remove #(= (:ook/uri %) (:ook/uri codelist))))
+         new-codelists (sort-by :ook/uri
+                        (conj codelists (assoc old-codelist :children result)))
          facet-with-codelists (-> old-facet
-                                  (assoc :codelists (conj codelists (assoc old-codelist :children result))))
+                                  (assoc :codelists new-codelists))
          facets (->> db :facets/config (remove #(= (:name %) (:name old-facet))))
          expanded (apply conj
                          (:expanded old-facet)
