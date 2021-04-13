@@ -32,7 +32,7 @@
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "dataset" "_doc"
-                    {:query {:terms {:component components}}})
+                     {:query {:terms {:component components}}})
          :hits :hits (map :_source))))
 
 (defn for-cubes
@@ -114,21 +114,23 @@
     (for [{:keys [matching-observation-example] :as dataset} datasets]
       (-> dataset
           (dissoc :matching-observation-example)
-          (assoc :facets (for [{:keys [name dimensions]} facets]
-                           {:name name
-                            :dimensions (for [d dimensions]
-                                          (let [code-uris [(get matching-observation-example
-                                                                (keyword (str d ".@id")))]
-                                                matches
-                                                (->>
-                                                 code-uris
-                                                 (map code-lookup)
-                                                 (partition-by :scheme)
-                                                 (map (fn [codes]
-                                                        (assoc (codelist-lookup (-> codes first :scheme))
-                                                               :examples
-                                                               (map #(dissoc % :scheme) codes)))))]
-                                            {:ook/uri d :codelists matches}))}))))))
+          (assoc :facets
+                 (for [{:keys [name dimensions]} facets]
+                   {:name name
+                    :dimensions
+                    (for [d dimensions]
+                      (let [code-uris (some-> matching-observation-example
+                                              (get (keyword (str d ".@id")))
+                                              util/box)
+                            matches (some->> code-uris
+                                             (map code-lookup)
+                                             (partition-by :scheme)
+                                             (map (fn [codes]
+                                                    (assoc (codelist-lookup (-> codes first :scheme))
+                                                           :examples
+                                                           (map #(dissoc % :scheme) codes)))))]
+                        (cond-> {:ook/uri d}
+                          matches (assoc :codelists matches))))}))))))
 
 (defn for-facets [selections opts]
   (let [codelist-uris (mapcat keys (vals selections))

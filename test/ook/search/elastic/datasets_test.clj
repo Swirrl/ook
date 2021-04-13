@@ -37,7 +37,7 @@
         (testing "Provides an observation count for each dataset"
           (is (= [735
                   5]
-                 (map :matching_observation_count datasets))))
+                 (map :matching-observation-count datasets))))
 
         (testing "Provides example of matching value for each dimension"
           (is (= [{(keyword "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dimension/period.@id")
@@ -115,4 +115,21 @@
                     :examples
                     [{:ook/uri "canada"
                       :label "Canada"}]}]}]}]]
+             (map :facets datasets)))))
+
+  (testing "excludes codelist examples for dimensions that have none"
+    (let [dataset-hits [{:ook/uri "cube1" :matching-observation-example {(keyword "date.@id") "2019"}}]
+          facets [{:name "time" :dimensions ["date" "another-dimension"]}]
+          codelists [{:ook/uri "years" :label "Years"}]
+          codes [{:ook/uri "2019" :label "2019" :scheme "years"}
+                 {:ook/uri "2020" :label "2020" :scheme "years"}]
+          datasets (sut/explain-match dataset-hits facets codelists codes)]
+      (is (= [[{:name "time"
+                :dimensions
+                [{:ook/uri "date"
+                  :codelists [{:ook/uri "years"
+                               :label "Years"
+                               :examples
+                               [{:ook/uri "2019" :label "2019"}]}]}
+                 {:ook/uri "another-dimension"}]}]]
              (map :facets datasets))))))
