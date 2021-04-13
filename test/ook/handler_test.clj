@@ -31,66 +31,25 @@
             (is (= "404" (:body response))))))
 
       (testing "internal api routes"
-        ;; (testing "/get-codes rejects html requests"
-        ;;   (let [response (request-html "get-codes?q=test")]
-        ;;     (is (= 406 (:status response)))
-        ;;     (is (= "Unsupported content type" (:body response)))))
+        (testing "/datasets"
 
-        ;; (testing "/get-codes returns data when transit is requested"
-        ;;   (let [response (request-transit "get-codes?q=test")]
-        ;;     (is (= 200 (:status response)))
-        ;;     (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-        ;;     (is (str/includes? (:body response) "\"~:label\",\"This is a test label\""))))
+          (testing "rejects html requests"
+            (let [response (request-html "datasets")]
+              (is (= 406 (:status response)))
+              (is (= "Unsupported content type" (:body response)))))
 
-        ;; (testing "/get-codes can handle empty query"
-        ;;   (let [response (request-transit "get-codes?q=")]
-        ;;     (is (= 200 (:status response)))
-        ;;     (is (= "[]" (:body response)))))
+          (testing "with no facet params returns all (unfiltered) datasets"
+            (let [response (request-transit "datasets")]
+              (is (= 200 (:status response)))
+              (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+              (is (str/includes? (:body response) "all datasets..."))))
 
-        ;; (testing "/apply-filters can parse no param"
-        ;;   (let [response (request-transit "apply-filters?code=")]
-        ;;     (is (= 200 (:status response)))
-        ;;     (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-        ;;     (is (= (:body response) "[]"))))
-
-        ;; (testing "/apply-filters can parse a single code param"
-        ;;   (let [response (request-transit "apply-filters?facet=scheme-1,a-code")]
-        ;;     (is (= 200 (:status response)))
-        ;;     (is (str/includes? (:body response) "valid response 1"))))
-
-        ;; (testing "/apply-filters can parse multiple code params"
-        ;;   (let [response (request-transit "apply-filters?facet=scheme-1,a-code&facet=scheme-2,another-code")]
-        ;;     (is (= 200 (:status response)))
-        ;;     (is (str/includes? (:body response) "valid response 2"))))
-
-        (testing "/datasets rejects html requests"
-          (let [response (request-html "datasets")]
-            (is (= 406 (:status response)))
-            (is (= "Unsupported content type" (:body response)))))
-
-        (testing "/datasets with no facet params returns all (unfiltered) datasets"
-          (let [response (request-transit "datasets")]
-            (is (= 200 (:status response)))
-            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "all datasets..."))))
-
-        (testing "/datasets with one facet works"
-          (let [response (request-transit "datasets?facet=facet1,codelist1")]
-            (is (= 200 (:status response)))
-            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "valid response 1"))))
-
-        (testing "/datasets with one facet works"
-          (let [response (request-transit "datasets?facet=facet1,codelist1,codelist2")]
-            (is (= 200 (:status response)))
-            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "valid response 2"))))
-
-        (testing "/datasets with one facet works"
-          (let [response (request-transit "datasets?facet=facet1,codelist1&facet=facet2,codelist2")]
-            (is (= 200 (:status response)))
-            (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
-            (is (str/includes? (:body response) "valid response 3")))))
+          (testing "with filters works"
+            (let [response (request-transit
+                            "datasets?filters=%5B%22%5E%20%22%2C%22facet1%22%2C%5B%22%5E%20%22%2C%22codelist1%22%2C%5B%22code1%22%5D%5D%5D")]
+              (is (= 200 (:status response)))
+              (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
+              (is (str/includes? (:body response) "valid response"))))))
 
       (testing "/codes"
         (testing "rejects html requests"

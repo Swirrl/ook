@@ -1,21 +1,7 @@
 (ns ook.params.parse
   (:require
    [ook.util :as u]
-   [cemerick.url :as url]
-   [ook.concerns.transit :as t]
-   [clojure.string :as str]))
-
-(defn get-query [{:keys [query-params]}]
-  (get query-params "q"))
-
-(defn parse-named-facets [facets]
-  (->> facets
-       u/box
-       (map #(str/split % #","))
-       (map #(map url/url-decode %))
-       (reduce (fn [result [facet-name & codelists]]
-                 (assoc result facet-name codelists))
-               {})))
+   [ook.concerns.transit :as t]))
 
 (defn deserialize-filter-state [filter-state]
   (t/read-string filter-state))

@@ -18,7 +18,7 @@
 
 (defn write-string [unencoded-string]
   #?(:clj
-     (let [stream (ByteArrayOutputStream.)
+     (let [stream (ByteArrayOutputStream. 4096)
            writer (transit/writer stream :json)]
        (transit/write writer unencoded-string)
        (str stream))

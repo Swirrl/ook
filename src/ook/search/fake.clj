@@ -6,14 +6,10 @@
 (defrecord FakeSearch []
   db/SearchBackend
 
-  (get-datasets-for-facets [_ facets]
-    (condp = facets
-      {"facet1" ["codelist1"]} "valid response 1"
-
-      {"facet1" ["codelist1" "codelist2"]} "valid response 2"
-
-      {"facet1" ["codelist1"]
-       "facet2" ["codelist2"]} "valid response 3"))
+  (get-datasets-for-facets [_ filters]
+    (if (= filters {"facet1" {"codelist1" ["code1"]}})
+      "valid response"
+      "something wrong with filter parsing..."))
 
   (get-facets [_]
     [{:name "facet"}])
