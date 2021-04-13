@@ -1,7 +1,8 @@
 (ns ook.reframe.subs
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.db :as db]))
+   [ook.reframe.db :as db]
+   [ook.reframe.db.selection :as selection]))
 
 ;;;;;; INITIAL, PERMANENT STATE
 
@@ -26,9 +27,9 @@
        db))))
 
 (rf/reg-sub
- :ui.facets.current/code-selected?
- (fn [db [_ uri]]
-   (db/code-selected? db uri)))
+ :ui.facets.current/option-selected?
+ (fn [db [_ option]]
+   (selection/option-selected? db option)))
 
 (rf/reg-sub
  :ui.facets.current/code-expanded?

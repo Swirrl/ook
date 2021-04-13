@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [ook.reframe.db :as db]
+   [ook.reframe.db.selection :as selection]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
    [ook.spec]
@@ -14,7 +15,7 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [codelists] :as facet}]]
    {:db (if codelists
-          (let [with-ui-state (assoc facet :selection #{} :expanded #{})]
+          (let [with-ui-state (assoc facet :expanded #{})]
             (assoc db :ui.facets/current with-ui-state))
           db)
     :fx [(when-not codelists
@@ -49,10 +50,8 @@
 (rf/reg-event-db
  :ui.facets.current/toggle-selection
  [e/validation-interceptor]
- (fn [db [_ uri]]
-   (let [selected? (db/code-selected? db uri)
-         update-fn (if selected? disj conj)]
-     (update-in db [:ui.facets/current :selection] update-fn uri))))
+ (fn [db [_ option]]
+   (selection/toggle db option)))
 
 (rf/reg-event-db
  :ui.facets.current/set-selection
@@ -122,7 +121,6 @@
          ;; cache the result so we don't need to re-request it
          (assoc :facets/config (conj facets facet-with-codelists))
          (assoc :ui.facets/current facet-with-codelists)
-         (assoc-in [:ui.facets/current :selection] #{})
          (assoc-in [:ui.facets/current :expanded] #{})))))
 
 (rf/reg-event-db

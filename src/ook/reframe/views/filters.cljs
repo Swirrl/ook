@@ -40,25 +40,25 @@
    {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children uri])}
    "all children"])
 
-(defn- checkbox-input [uri disabled?]
-  (let [selected? @(rf/subscribe [:ui.facets.current/code-selected? uri])]
+(defn- checkbox-input [{:keys [ook/uri disabled?] :as option}]
+  (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])]
     [:input.form-check-input.mx-2
      (cond-> {:type "checkbox"
               :name "code"
               :value uri
               :id uri
               :checked selected?
-              :on-change #(rf/dispatch [:ui.facets.current/toggle-selection (-> % .-target .-value)])}
+              :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
        disabled? (merge {:disabled true}))]))
 
 (declare code-tree)
 
-(defn- code-item [{:keys [ook/uri label children disabled?] :as code}]
+(defn- code-item [{:keys [ook/uri label children] :as code}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [:li.list-group-item.border-0.pb-0
      (when (seq children)
        [toggle-code-expanded-button code expanded?])
-     [checkbox-input uri disabled?]
+     [checkbox-input code]
      [:label.form-check-label.d-inline {:for uri} label]
      (when (seq children)
        [:<>
@@ -75,7 +75,7 @@
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [:li.list-group-item.border-0.pb-0
      [toggle-codelist-expanded-button codelist expanded?]
-     [checkbox-input uri false]
+     [checkbox-input codelist]
      [:label.form-check-label.d-inline {:for uri} label]
      [select-any-button codelist]
      (when expanded?
