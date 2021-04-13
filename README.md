@@ -64,14 +64,12 @@ Then compile the cljs to JS and watch for changes:
 yarn  watch
 ```
 
-or, if you also want the devcards and tests:
+or, if you also want the tests:
 ```bash
 yarn watch-all
 ```
 
-With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
-
-Tests are run and watched at `localhost:8021`.
+With the shadow-cljs watcher running, cljs tests are run and watched at `localhost:8021`.
 
 ## Fixtures
 

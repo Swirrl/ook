@@ -142,8 +142,7 @@
         facets (facets/get-facets-for-selections selections opts)
         codelists (components/get-codelists codelist-uris opts)
         codes (codes/get-codes code-uris opts)]
-    (->>
-     (explain-match datasets facets codelists codes))))
+    (explain-match datasets facets codelists codes)))
 
 (defn total-count [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
