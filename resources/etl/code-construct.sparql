@@ -41,10 +41,12 @@ CONSTRUCT {
     }
 
     BIND (EXISTS {
-      ?odataset pmdcat:datasetContents ?oqb .
+      ?dimension qb:codeList ?scheme .
+
+      ?cube qb:structure/qb:components/qb:dimension ?dimension .
           
-      ?obs qb:dataSet ?oqb;
-           ?p ?code;
+      ?obs qb:dataSet ?cube;
+           ?dimension ?code;
            .
     } AS ?used)
 }
