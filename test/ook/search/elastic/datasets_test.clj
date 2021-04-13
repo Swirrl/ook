@@ -34,9 +34,10 @@
                   "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dataset"]
                  (map :ook/uri datasets))))
 
-        (testing "Provides a count for each dataset"
-          (is (= [735 5]
-                 (map :matching-observation-count datasets))))
+        (testing "Provides an observation count for each dataset"
+          (is (= [735
+                  5]
+                 (map :matching_observation_count datasets))))
 
         (testing "Provides example of matching value for each dimension"
           (is (= [{(keyword "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dimension/period.@id")

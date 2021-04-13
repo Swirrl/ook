@@ -11,6 +11,7 @@ CONSTRUCT {
     pmdcat:datasetContents ?qb;
     rdfs:comment ?comment;
     dcterms:description ?description;
+    pmdcat:markdownDescription ?md_description;
     dcterms:publisher ?publisher;
     <http://gss-data.org.uk/def/gdp#family> ?family;
     <http://example.net/def/components> ?component;
@@ -37,7 +38,13 @@ CONSTRUCT {
   }
 
   OPTIONAL {
-    ?entry dcterms:description ?description;
+    ?entry dcterms:description ?description_;
+    BIND(STR(?description_) AS ?description)
+  }
+
+  OPTIONAL {
+    ?entry pmdcat:markdownDescription ?md_description_;
+    BIND(STR(?md_description_) AS ?md_description)
   }
 
   OPTIONAL {

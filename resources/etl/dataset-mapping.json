@@ -13,6 +13,7 @@
       "label": { "type": "text" },
       "comment": { "type": "text" },
       "description": { "type": "text" },
+      "markdown_description": { "type": "text" },
       "component": { "type": "keyword" }
     }
   }

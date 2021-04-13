@@ -8,16 +8,10 @@
    [ook.search.elastic.components :as components]
    [ook.search.elastic.codes :as codes]))
 
-(defn- flatten-description-lang-strings [m]
-  (-> m
-      (assoc :description (-> m :dcterms:description :value))
-      (dissoc :dcterms:description)))
-
 (defn- clean-datasets-result [result]
   (->> result :hits :hits
        (map :_source)
-       (map esu/normalize-keys)
-       (map flatten-description-lang-strings)))
+       (map esu/normalize-keys)))
 
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
@@ -25,11 +19,31 @@
                                     :size 500})
       clean-datasets-result))
 
+(defn get-datasets
+  "Find datasets using their URIs."
+  [uris {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)
+        uris (util/box uris)]
+    (->> (esd/search conn "dataset" "_doc"
+                     {:query (q/ids "_doc" uris)
+                      :size (count uris)})
+         clean-datasets-result)))
+
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "dataset" "_doc"
                     {:query {:terms {:component components}}})
          :hits :hits (map :_source))))
+
+(defn for-cubes
+  "Find datasets for cube URIs"
+  [cube-uris {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)
+        uris (util/box cube-uris)]
+    (->> (esd/search conn "dataset" "_doc"
+                     {:query {:terms {:cube cube-uris}}
+                      :size (count cube-uris)})
+         clean-datasets-result)))
 
 (defn observation-query
   "Creates a query for finding observations with selected dimensions and dimension-values.
@@ -77,7 +91,7 @@
                                       key
                                       {:matching-observation-count doc_count}))
                              {}))]
-    (map (fn [[id description]] (merge {:ook/uri id} description))
+    (map (fn [[id match-description]] (merge {:ook/uri id} match-description))
          (merge-with merge buckets examples))))
 
 (defn code-uris-from-observation-hits
@@ -122,13 +136,14 @@
         dimension-selections (facets/dimension-selections selections dimensions-lookup)
         observation-hits (find-observations dimension-selections opts)
         dataset-hits (datasets-from-observation-hits observation-hits)
+        dataset-descriptions (for-cubes (map :ook/uri dataset-hits) opts)
+        datasets (util/join-by dataset-hits dataset-descriptions :ook/uri :cube)
         code-uris (code-uris-from-observation-hits observation-hits)
         facets (facets/get-facets-for-selections selections opts)
         codelists (components/get-codelists codelist-uris opts)
-        codes (codes/get-codes code-uris opts)
-        ]
-    (->> (explain-match dataset-hits facets codelists codes)
-      (map #(merge % {:label "TODO: get label" :comment "TODO: get comment"})))))
+        codes (codes/get-codes code-uris opts)]
+    (->>
+     (explain-match datasets facets codelists codes))))
 
 (defn total-count [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)

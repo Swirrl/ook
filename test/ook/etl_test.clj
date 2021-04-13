@@ -13,7 +13,7 @@
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
     (with-system [system ["drafter-client.edn" "cogs-staging.edn"]]
-      (is (= 33 (count (setup/example-datasets system)))))))
+      (is (= 35 (count (setup/example-datasets system)))))))
 
 (deftest transform-test
   (testing "Transform triples into json-ld"
