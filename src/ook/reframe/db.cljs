@@ -6,7 +6,7 @@
 
 (def initial-db
   {:app/current-route (rt/map->Match {:template "/" :path "/" :data router/home-route-data})
-   :results.datasets/data []})
+   :results.datasets/data :loading})
 
 (defn filters->query-params [db]
   (let [filters (:facets/applied db)]

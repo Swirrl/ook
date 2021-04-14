@@ -86,7 +86,7 @@
        (s/def :ook.spec/db map?)
 
        (.appendChild body test-div)
-       (rf/dispatch [:init/initialize-db initial-state])
+       (rf/dispatch-sync [:init/initialize-db initial-state])
        (rdom/render [component-fn] test-div))
 
      (def codelist-request (atom nil))
@@ -109,9 +109,9 @@
 
      (defn stub-dataset-fetch-success [datasets]
        (rf/reg-event-fx
-        :datasets/fetch-datasets
+        :http/fetch-datasets
         (fn [_ [_ filters]]
-          {:dispatch [:results.datasets.request/success (datasets (transit/read-string filters))]})))
+          {:dispatch [:results.datasets.request/success (get datasets (transit/read-string filters) [])]})))
 
      (def last-navigation (atom nil))
 

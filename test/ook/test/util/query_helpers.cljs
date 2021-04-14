@@ -80,7 +80,7 @@
   (-> (find-query ".ook-datasets") (all-text-content ".title-column strong")))
 
 (defn dataset-count-text []
-  (-> (find-query ".filters") .-nextElementSibling text-content))
+  (some-> (find-query ".filters") .-nextElementSibling text-content))
 
 (defn datset-results-columns []
   (all-text-content ".ook-datasets th"))

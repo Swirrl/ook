@@ -1,7 +1,8 @@
 (ns ook.reframe.views.datasets
   (:require [re-frame.core :as rf]
             [ook.util :as u]
-            [ook.params.util :as pu]))
+            [ook.params.util :as pu]
+            [ook.ui.common :as common]))
 
 (defn- total-observations [data]
   (reduce + (map :matching-observation-count data)))
@@ -22,15 +23,6 @@
 
       (= dataset-count total-dataset-count)
       [:p.my-4 "Showing all datasets"]
-
-      (empty? data)
-      [:div.d-flex.align-items-center
-       [:strong "No datasets matched the applied filters. "]
-       [:a.btn-link.mx-1
-        {:role "button"
-         :on-click #(rf/dispatch [:filters/reset])}
-        "Clear filters"]
-       [:span " to reset and make a new selection."]]
 
       :else
       [:p.my-4
@@ -70,19 +62,32 @@
        [:a.btn.btn-secondary.btn-sm
         {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
 
-(defn- dataset-table [data applied-facets]
-  (when (seq data)
-    [:div.ook-datasets
-     [:table.table
-      [:thead (column-headers data applied-facets)]
-      [:tbody (for [ds data]
-                (dataset-row ds applied-facets))]]]))
+(defn- dataset-table [data]
+  (let [applied-facets @(rf/subscribe [:facets/applied])]
+    [:<>
+     (dataset-count-message data)
+     [:div.ook-datasets
+      [:table.table
+       [:thead (column-headers data applied-facets)]
+       [:tbody (for [ds data]
+                 (dataset-row ds applied-facets))]]]]))
+
+(defn- no-matches-message []
+  [:div.d-flex.align-items-center
+   [:strong "No datasets matched the applied filters. "]
+   [:a.btn-link.mx-1
+    {:role "button"
+     :on-click #(rf/dispatch [:filters/reset])}
+    "Clear filters"]
+   [:span " to reset and make a new selection."]])
 
 (defn results []
-  (if @(rf/subscribe [:results.datasets/error])
-    [error-message]
-    (let [data @(rf/subscribe [:results.datasets/data])
-          applied-facets @(rf/subscribe [:facets/applied])]
-      [:<>
-       (dataset-count-message data)
-       (dataset-table data applied-facets)])))
+  (when-let [data @(rf/subscribe [:results.datasets/data])]
+    (cond
+      (= :loading data) [common/loading-spinner]
+
+      (= :error data) [error-message]
+
+      (seq data) [dataset-table data]
+
+      :else [no-matches-message])))

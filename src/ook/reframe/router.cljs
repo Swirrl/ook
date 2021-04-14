@@ -7,7 +7,7 @@
    [reitit.frontend :as rt]))
 
 (defn home-controller []
-  (rf/dispatch [:datasets/fetch-datasets nil]))
+  (rf/dispatch [:datasets/get-datasets nil]))
 
 (def home-route-data
   {:name :ook.route/home

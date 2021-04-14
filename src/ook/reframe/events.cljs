@@ -53,17 +53,35 @@
  [validation-interceptor]
  (fn [db [_ result]]
    (-> db
-       (dissoc :results.codes/error)
+       (dissoc :ui.datasets/loading)
        (assoc :results.datasets/data result))))
 
 (rf/reg-event-db
  :results.datasets.request/error
  [validation-interceptor]
- (fn [db [_ result]]
-   (assoc db :results.datasets/error result)))
+ (fn [db [_ error]]
+   (-> db
+       (dissoc :ui.datasets/loading)
+       (assoc :results.datasets/data :error))))
 
 (rf/reg-event-fx
- :datasets/fetch-datasets
+  :datasets/get-datasets
+  [validation-interceptor]
+  (fn [{:keys [db]} [_ filters]]
+    {:db (assoc db :ui.datasets/loading true)
+     :fx [[:dispatch-later {:ms 300 :dispatch [:ui.datasets/set-loading]}]
+          [:dispatch [:http/fetch-datasets filters]]]}))
+
+(rf/reg-event-db
+  :ui.datasets/set-loading
+  [validation-interceptor]
+  (fn [db _]
+    (if (:ui.datasets/loading db)
+      (assoc db :results.datasets/data :loading)
+      db)))
+
+(rf/reg-event-fx
+ :http/fetch-datasets
  [validation-interceptor]
  (fn [_ [_ filters]]
    {:http-xhrio {:method :get
@@ -77,7 +95,7 @@
  :filters/apply
  [validation-interceptor]
  (fn [{db :db} [_ filter-state]]
-   {:dispatch [:datasets/fetch-datasets filter-state]
+   {:dispatch [:datasets/get-datasets filter-state]
     :db (-> db
             (assoc :facets/applied (p/deserialize-filter-state filter-state))
             (dissoc :ui.facets/current))}))

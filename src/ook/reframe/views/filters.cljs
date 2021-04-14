@@ -1,7 +1,8 @@
 (ns ook.reframe.views.filters
   (:require
    [re-frame.core :as rf]
-   [ook.ui.icons :as icons]))
+   [ook.ui.icons :as icons]
+   [ook.ui.common :as common]))
 
 (defn- apply-filter-button [{:keys [codelists selection]}]
   [:button.btn.btn-primary.mt-3
@@ -100,8 +101,7 @@
   (when selected-facet
     (cond
       (= :loading selected-facet)
-      [:div.mt-4.spinner-border {:role "status"}
-       [:span.visually-hidden "Loading..."]]
+      [common/loading-spinner]
 
       (= :error selected-facet)
       [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]

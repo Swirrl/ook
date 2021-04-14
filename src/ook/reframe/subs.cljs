@@ -47,10 +47,6 @@
  (fn [db _]
    (:results.datasets/data db)))
 
-(rf/reg-sub
- :results.datasets/error
- (fn [db _]
-   (:results.datasets/error db)))
 
 ;;;;;; NAVIGATION
 

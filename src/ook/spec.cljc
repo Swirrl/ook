@@ -5,7 +5,7 @@
 (s/def :ook.spec/db (s/keys :req [:app/current-route
                                   :facets/config
                                   :datasets/count
-                                  (or :results.datasets/data :results.datasets/error)]
+                                  :results.datasets/data]
 
                             :opt [:facets/applied
                                   :ui.facets/current]))
@@ -34,10 +34,10 @@
 
 (s/def :datasets/count number?)
 
-(s/def :results.datasets/data (s/coll-of :ook/dataset))
+(s/def :results.datasets/data (s/or :state #{:loading :error} :results (s/coll-of :ook/dataset)))
 (s/def :ook/dataset (s/keys :req [:ook/uri]
                             :req-un [:ook/label]
-                            :opt-un [:ook/matching-observations
+                            :opt-un [:ook/matching-observation-count
                                      :ook/comment
                                      :dataset/facets]))
 
