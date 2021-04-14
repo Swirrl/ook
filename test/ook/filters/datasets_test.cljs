@@ -35,8 +35,14 @@
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2"}]}]})
 (def datasets
   {nil initial-datasets
-   {"Facet 2" {"cl2" nil}} [ds1]})
-
+   {"Facet 2" {"cl2" nil}} [(assoc ds1
+                                   :matching-observation-count 123
+                                   :facets [{:name "Facet 2"
+                                             :dimensions [{:ook/uri "dim2"
+                                                           :codelists [{:ook/uri "cl2"
+                                                                        :label "Codelist 2 Label"
+                                                                        :examples [{:ook/uri "a-code"
+                                                                                     :label "Label for code"}]}]}]}])]})
 
 (deftest filtering-datasets
   (rft/run-test-sync
@@ -75,11 +81,14 @@
      (eh/click-apply-filter)
 
      (testing "fetches datasets"
-       (is (= "1 of 2 datasets match" (qh/dataset-count-text)))
+       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
        (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
      (testing "adds current facet to results table"
-       (is (= ["Title / Description" "Facet 2"] (qh/datset-results-columns))))
+       (is (= ["Title / Description" "Facet 2" ""] (qh/datset-results-columns))))
+
+     (testing "shows matching codelists in the results table"
+       (is (= ["Codelist 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
      (testing "removes current facet from facet config"
        (is (= ["Facet 1"] (qh/all-available-facets)))))

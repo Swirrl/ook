@@ -33,8 +33,13 @@
 (defn- codelists-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (mapcat :codelists) distinct)]
-    (for [{:keys [ook/uri label]} codelists]
-      ^{:key uri} [:p.badge.bg-secondary.me-1 label])))
+    (for [{:keys [ook/uri label examples]} codelists]
+      ^{:key uri}
+      [:p
+       [:span.me-1 label]
+       (for [{code-uri :ook/uri code-label :label} examples]
+         ^{:key code-uri}
+         [:span.badge.bg-secondary.rounded-pill.me-1 code-label])])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])

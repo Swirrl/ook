@@ -79,6 +79,9 @@
 (defn all-dataset-titles []
   (-> (find-query ".ook-datasets") (all-text-content ".title-column strong")))
 
+(defn column-x-contents [column-index-starting-from-1]
+  (all-text-content (str ".ook-datasets tr td:nth-child(" column-index-starting-from-1 ")")))
+
 (defn dataset-count-text []
   (some-> (find-query ".filters") .-nextElementSibling text-content))
 
