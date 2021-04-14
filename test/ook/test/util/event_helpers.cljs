@@ -38,6 +38,8 @@
 
 ;;;;;;; OOK-specific UI helpers
 
+;;; Filter UI
+
 (defn cancel-facet-selection []
   (click (qh/cancel-facet-selection-button)))
 
@@ -52,3 +54,9 @@
 
 (defn click-select-all-children [label]
   (click (qh/all-children-button label)))
+
+(defn click-apply-filter []
+  (click (qh/apply-filter-button)))
+
+(defn remove-facet-column [facet-name]
+  (click (qh/remove-facet-button facet-name)))

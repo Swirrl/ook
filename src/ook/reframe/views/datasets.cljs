@@ -6,14 +6,10 @@
 (defn- total-observations [data]
   (reduce + (map :matching-observation-count data)))
 
-(defn- remove-facet [facet-name]
-  (rf/dispatch [:filters/remove-facet facet-name])
-  (rf/dispatch [:app/navigate :ook.route/search]))
-
 (defn- remove-facet-button [facet-name]
   [:button.btn-close.border.btn-xs.ms-2.align-middle
    {:type "button"
-    :on-click #(remove-facet facet-name)}])
+    :on-click #(rf/dispatch [:filters/remove-facet facet-name])}])
 
 (defn- dataset-count-message [data]
   (let [dataset-count (count data)
@@ -29,12 +25,12 @@
 
       (empty? data)
       [:div.d-flex.align-items-center
-       [:strong "No datasets matched the applied filters."]
-       [:button.btn.btn-link.mx-1.p-0
-        {:type "button"
+       [:strong "No datasets matched the applied filters. "]
+       [:a.btn-link.mx-1
+        {:role "button"
          :on-click #(rf/dispatch [:filters/reset])}
         "Clear filters"]
-       [:span "to reset and make a new selection."]]
+       [:span " to reset and make a new selection."]]
 
       :else
       [:p.my-4

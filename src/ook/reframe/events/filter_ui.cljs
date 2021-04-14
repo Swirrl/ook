@@ -127,16 +127,15 @@
          old-codelist (->> old-facet :codelists (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
          codelists (->> old-facet :codelists (remove #(= (:ook/uri %) (:ook/uri codelist))))
          new-codelists (sort-by :ook/uri
-                        (conj codelists (assoc old-codelist :children result)))
-         facet-with-codelists (-> old-facet
-                                  (assoc :codelists new-codelists))
+                                (conj codelists (assoc old-codelist :children result)))
+         facet-with-codelists (-> old-facet (assoc :codelists new-codelists))
          facets (->> db :facets/config (remove #(= (:name %) (:name old-facet))))
-         expanded (apply conj
+         expanded (apply (fnil conj #{})
                          (:expanded old-facet)
                          (-> (:ook/uri codelist) (cons (db/all-expandable-uris result)) set))]
      (-> db
          ;; cache the result so we don't need to re-request it
-         (assoc :facets/config (conj facets facet-with-codelists))
+         (assoc :facets/config (conj facets (dissoc facet-with-codelists :selection :expanded)))
          (assoc :ui.facets/current facet-with-codelists)
          (assoc-in [:ui.facets/current :expanded] expanded)))))
 

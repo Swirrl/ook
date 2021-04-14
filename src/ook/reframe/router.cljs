@@ -6,21 +6,26 @@
    [reitit.frontend.easy :as rtfe]
    [reitit.frontend :as rt]))
 
+(defn home-controller []
+  (rf/dispatch [:datasets/fetch-datasets nil]))
+
 (def home-route-data
   {:name :ook.route/home
    :view views/search
-   :controllers [{:start #(rf/dispatch [:datasets/fetch-datasets nil])}]})
+   :controllers [{:start home-controller}]})
+
+(defn search-controller [params]
+  (let [filter-state (-> params :query :filters)]
+    (if filter-state
+      (rf/dispatch [:filters/apply filter-state])
+      (rf/dispatch [:app/navigate :ook.route/home]))))
 
 (def ^:private routes
   [["/" home-route-data]
    ["/search" {:name :ook.route/search
                :view views/search
                :parameters {:query {:filters [string?]}}
-               :controllers [{:start (fn [params]
-                                       (let [filter-state (-> params :query :filters)]
-                                         (if filter-state
-                                           (rf/dispatch [:filters/apply filter-state])
-                                           (rf/dispatch [:app/navigate :ook.route/home]))))
+               :controllers [{:start search-controller
                               :parameters {:query [:filters]}}]}]])
 
 (defn- handle-navigation [new-match]

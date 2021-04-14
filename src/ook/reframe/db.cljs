@@ -9,7 +9,9 @@
    :results.datasets/data []})
 
 (defn filters->query-params [db]
-  {:filters (t/write-string (:facets/applied db))})
+  (let [filters (:facets/applied db)]
+    (when (seq filters)
+      {:filters (t/write-string filters)})))
 
 (defn all-expandable-uris [tree]
   (let [walk (fn walk* [node]

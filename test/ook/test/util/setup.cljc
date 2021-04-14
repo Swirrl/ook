@@ -10,7 +10,9 @@
              [vcr-clj.clj-http :refer [with-cassette]]
              [ook.main :as main]]
        :cljs [[reagent.dom :as rdom]
-              [re-frame.core :as rf]])))
+              [re-frame.core :as rf]
+              [ook.reframe.router :as router]
+              [ook.concerns.transit :as transit]])))
 
 #?(:clj
    (do
@@ -86,6 +88,44 @@
        (.appendChild body test-div)
        (rf/dispatch [:init/initialize-db initial-state])
        (rdom/render [component-fn] test-div))
+
+     (def codelist-request (atom nil))
+
+     (defn stub-codelist-fetch-success [codelists]
+       (rf/reg-event-fx
+        :facets.codelists/fetch-codelists
+        (fn [_ [_ {:keys [name]}]]
+          (reset! codelist-request name)
+          {:dispatch [:facets.codelists/success name (get codelists name)]})))
+
+     (def concept-tree-request (atom nil))
+
+     (defn stub-code-fetch-success [concept-trees]
+       (rf/reg-event-fx
+        :facets.codes/fetch-codes
+        (fn [_ [_ {:keys [ook/uri label] :as codelist}]]
+          (reset! concept-tree-request label)
+          {:dispatch [:facets.codes/success codelist (get concept-trees uri)]})))
+
+     (defn stub-dataset-fetch-success [datasets]
+       (rf/reg-event-fx
+        :datasets/fetch-datasets
+        (fn [_ [_ filters]]
+          {:dispatch [:results.datasets.request/success (datasets (transit/read-string filters))]})))
+
+     (def last-navigation (atom nil))
+
+     (defn stub-navigation
+       "Manually trigger the controller for the matched route,
+  which reitit would normally do"
+       []
+       (rf/reg-fx
+        :app/navigate!
+        (fn [{:keys [route query]}]
+          (reset! last-navigation [route query])
+          (condp = route
+            :ook.route/home (router/home-controller)
+            :ook.route/search (router/search-controller {:query query})))))
 
      (defn cleanup! []
        (.removeChild body test-div))))

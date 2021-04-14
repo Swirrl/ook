@@ -1,7 +1,6 @@
 (ns ook.filters.facets-test
   (:require
-   [cljs.test :refer-macros [deftest testing is async]]
-   [re-frame.core :as rf]
+   [cljs.test :refer-macros [deftest testing is]]
    [day8.re-frame.test :as rft]
    [ook.test.util.setup :as setup]
 
@@ -9,7 +8,7 @@
    [ook.test.util.query-helpers :as qh]
    [ook.reframe.views.filters :as filters]
 
-   [ook.reframe.events :as events]
+   [ook.reframe.events]
    [ook.reframe.events.filter-ui]
    [ook.reframe.subs]))
 
@@ -31,32 +30,9 @@
            :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :children nil}
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :children nil}]}]})
 
-(def codelist-request (atom nil))
-
-(defn stub-codelist-fetch-success []
-  (rf/reg-event-fx
-   :facets.codelists/fetch-codelists
-   [events/validation-interceptor]
-   (fn [_ [_ {:keys [name]}]]
-     (reset! codelist-request name)
-     {:dispatch [:facets.codelists/success name (get codelists name)]})))
-
-(def concept-tree-request (atom nil))
-
-(defn stub-code-fetch-success []
-  (rf/reg-event-fx
-   :facets.codes/fetch-codes
-   [events/validation-interceptor]
-   (fn [_ [_ {:keys [ook/uri label] :as codelist}]]
-     (reset! concept-tree-request label)
-     {:dispatch [:facets.codes/success codelist (get concept-trees uri)]})))
-
-(defn select-any-buttons []
-  (qh/find-all-text "any"))
-
 (deftest selecting-facets
   (rft/run-test-sync
-   (stub-codelist-fetch-success)
+   (setup/stub-codelist-fetch-success codelists)
    (setup/init! filters/configured-facets initial-state)
 
    (testing "clear facet selection button only shows when a facet is selected"
@@ -78,10 +54,10 @@
      (is (= [] (qh/all-selected-labels))))
 
    (testing "codelists are cached"
-     (is (= "Facet 2" @codelist-request))
+     (is (= "Facet 2" @setup/codelist-request))
      (eh/click-text "Facet 1")
      (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
-     (is (= "Facet 2" @codelist-request)))
+     (is (= "Facet 2" @setup/codelist-request)))
 
    (testing "cancelling facet selection works"
      (is (seq (qh/all-labels)))
@@ -92,8 +68,8 @@
 
 (deftest expanding-and-collapsing
   (rft/run-test-sync
-   (stub-codelist-fetch-success)
-   (stub-code-fetch-success)
+   (setup/stub-codelist-fetch-success codelists)
+   (setup/stub-code-fetch-success concept-trees)
    (setup/init! filters/configured-facets initial-state)
    (eh/click-text "Facet 2")
 
@@ -103,18 +79,18 @@
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "concept trees are cached"
-     (is (= "Codelist 2 Label" @concept-tree-request))
+     (is (= "Codelist 2 Label" @setup/concept-tree-request))
 
      ;; expand codelist 3
      (eh/click-expansion-toggle "Codelist 3 Label")
-     (is (= "Codelist 3 Label" @concept-tree-request))
+     (is (= "Codelist 3 Label" @setup/concept-tree-request))
 
      ;; collapse and re-expand codelist 2
      (eh/click-expansion-toggle "Codelist 2 Label")
      (eh/click-expansion-toggle "Codelist 2 Label")
 
      ;; codelist 2 tree is not re-fetched
-     (is (= "Codelist 3 Label" @concept-tree-request)))
+     (is (= "Codelist 3 Label" @setup/concept-tree-request)))
 
    (testing "collapsing a sub-tree works"
      (eh/click-expansion-toggle "2-1 child 2")
@@ -138,8 +114,8 @@
 
 (deftest selection
   (rft/run-test-sync
-   (stub-codelist-fetch-success)
-   (stub-code-fetch-success)
+   (setup/stub-codelist-fetch-success codelists)
+   (setup/stub-code-fetch-success concept-trees)
    (setup/init! filters/configured-facets initial-state)
    (eh/click-text "Facet 2")
 
