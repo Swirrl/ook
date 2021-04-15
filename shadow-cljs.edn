@@ -30,7 +30,8 @@
 
         ;; Cljs is compiled to ES5 by default. However, third-party NPM modules aren't
         :compiler-options {:force-library-injection ["es6/array/includes" "es6/object/values"]
-                           :clojure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
+                           :clojure-defines {re-frame.trace.trace-enabled?        true
+                                             day8.re-frame.tracing.trace-enabled? true}}}
 
   :tests {:target    :browser-test
           :test-dir  "target/test/cljs/browser-test"
