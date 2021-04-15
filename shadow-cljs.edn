@@ -19,7 +19,8 @@
         {:main {:entries [ook.main]
                 :init-fn ook.main/pre-init}}
 
-        :dev {:closure-defines {goog.DEBUG true}}
+        :dev {:closure-defines {goog.DEBUG true
+                                re-frame.trace.trace-enabled? true}}
 
         :devtools {:reload-strategy :full
                    ;; serve the public directory over http at port 8700
