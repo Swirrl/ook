@@ -212,12 +212,13 @@
                  ]}))
 
   ;; update single index
+  (require 'ook.index)
   (dev/with-system [system
                     ["drafter-client.edn"
                      "cogs-staging.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (ook.index/delete-index system "component")
-    (ook.index/create-index system "component")
-    (component-pipeline system))
+    (ook.index/delete-index system "dataset")
+    (ook.index/create-index system "dataset")
+    (dataset-pipeline system))
   )
