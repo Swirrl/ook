@@ -1,12 +1,12 @@
 (ns ook.reframe.views
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.views.filters :as filters]
+   [ook.reframe.views.facets :as facets]
    [ook.reframe.views.datasets :as datasets]))
 
 (defn search []
   [:<>
-   (filters/configured-facets)
+   (facets/configured-facets)
    (datasets/results)])
 
 (defn main []

@@ -6,7 +6,7 @@
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
-   [ook.reframe.views.filters :as filters]
+   [ook.reframe.views.facets :as facets]
 
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
@@ -14,26 +14,29 @@
 
 (def initial-state
   {:facets [{:name "Facet 1" :dimensions ["dim1" "dim2"]}
-            {:name "Facet 2" :dimensions ["dim3"]}]
+            {:name "Facet 2" :dimensions ["dim3"]}
+            {:name "Facet 3" :dimensions ["dim4"]}]
    :dataset-count 20})
 
 (def codelists
   {"Facet 1" [{:ook/uri "cl1" :label "Codelist 1 Label"}
               {:ook/uri "another-codelist" :label "Another codelist"}]
    "Facet 2" [{:ook/uri "cl2" :label "Codelist 2 Label"}
-              {:ook/uri "cl3" :label "Codelist 3 Label"}]})
+              {:ook/uri "cl3" :label "Codelist 3 Label"}]
+   "Facet 3" [{:ook/uri "no-codes" :label "Codelist no codes"}]})
 
 (def concept-trees
   {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1"}]
    "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :children nil}
           {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2"
            :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :children nil}
-                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :children nil}]}]})
+                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :children nil}]}]
+   "no-codes" []})
 
 (deftest selecting-facets
   (rft/run-test-sync
    (setup/stub-codelist-fetch-success codelists)
-   (setup/init! filters/configured-facets initial-state)
+   (setup/init! facets/configured-facets initial-state)
 
    (testing "clear facet selection button only shows when a facet is selected"
      (is (nil? (qh/cancel-facet-selection-button)))
@@ -70,7 +73,7 @@
   (rft/run-test-sync
    (setup/stub-codelist-fetch-success codelists)
    (setup/stub-code-fetch-success concept-trees)
-   (setup/init! filters/configured-facets initial-state)
+   (setup/init! facets/configured-facets initial-state)
    (eh/click-text "Facet 2")
 
    (testing "expanding a codelist fetches its concept tree and expands all children"
@@ -108,7 +111,17 @@
      (eh/click-text "Facet 1")
      (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
      (eh/click-expansion-toggle "Codelist 1 Label")
-     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels))))
+
+   (testing "a message is shown when a codelist has no codes"
+     (eh/click-text "Facet 3")
+     (eh/click-expansion-toggle "Codelist no codes")
+     (is (not (nil? (qh/query-text "No codes to show"))))
+     (is (qh/open? (qh/find-expand-toggle "Codelist no codes"))))
+
+   (testing "expansion toggle still toggles when codelist is empty"
+     (eh/click-expansion-toggle "Codelist no codes")
+     (is (qh/closed? (qh/find-expand-toggle "Codelist no codes")))))
 
   (setup/cleanup!))
 
@@ -116,7 +129,7 @@
   (rft/run-test-sync
    (setup/stub-codelist-fetch-success codelists)
    (setup/stub-code-fetch-success concept-trees)
-   (setup/init! filters/configured-facets initial-state)
+   (setup/init! facets/configured-facets initial-state)
    (eh/click-text "Facet 2")
 
    (testing "fetching codes does not change selection"

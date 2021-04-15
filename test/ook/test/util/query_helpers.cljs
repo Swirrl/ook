@@ -1,5 +1,6 @@
 (ns ook.test.util.query-helpers
-  (:require ["@testing-library/react" :as rt]))
+  (:require ["@testing-library/react" :as rt]
+            [ook.ui.icons :as icons]))
 
 (defn find-query
   ([selector]
@@ -50,6 +51,15 @@
   (-> (find-text label)
       .-parentNode
       (find-query "button")))
+
+(defn find-toggle-icon-path [expand-toggle]
+  (-> expand-toggle (find-query "svg path") (.getAttribute "d")))
+
+(defn open? [expand-toggle]
+  (= icons/down-path (find-toggle-icon-path expand-toggle)))
+
+(defn closed? [expand-toggle]
+  (= icons/up-path (find-toggle-icon-path expand-toggle)))
 
 (def code-label-query ".filters input[type='checkbox'] + label")
 

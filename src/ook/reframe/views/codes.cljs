@@ -1,4 +1,4 @@
-(ns ook.reframe.views.filters
+(ns ook.reframe.views.codes
   (:require
    [re-frame.core :as rf]
    [ook.ui.icons :as icons]
@@ -50,7 +50,9 @@
               :id uri
               :checked selected?
               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
-       (not used) (merge {:disabled true}))]))
+       ;; (not used)
+       false
+       (merge {:disabled true}))]))
 
 (declare code-tree)
 
@@ -69,8 +71,11 @@
 
 (defn- code-tree [tree]
   [:ul.list-group-flush
-   (for [{:keys [ook/uri label] :as code} tree]
-     ^{:key [uri label]} [code-item code])])
+   (if (seq tree)
+     (for [{:keys [ook/uri label] :as code} tree]
+       ^{:key [uri label]} [code-item code])
+     [:li.list-group-item.border-0.ms-1.text-muted
+      [:em "No codes to show"]])])
 
 (defn- codelist-item [{:keys [ook/uri label children] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
@@ -97,7 +102,7 @@
     (for [dim dimensions]
       ^{:key dim} [:li dim])]])
 
-(defn- codelist-selection [selected-facet]
+(defn codelist-selection [selected-facet]
   (when selected-facet
     (cond
       (= :loading selected-facet)
@@ -113,33 +118,3 @@
 
       (and (:codelists selected-facet) (empty? (:codelists selected-facet)))
       [no-codelist-message selected-facet])))
-
-(defn- facet-button [{:keys [name] :as facet} selected-facet]
-  [:button.btn.me-2
-   {:type "button"
-    :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
-    :on-click #(rf/dispatch [:ui.facets/set-current facet])}
-   name])
-
-(defn- cancel-facet-selection []
-  [:button.btn-close.border.border-dark
-   {:type "button"
-    :aria-label "Close filter selection"
-    :on-click #(rf/dispatch [:ui.facets/cancel-current-selection])}])
-
-(defn configured-facets []
-  (let [facets @(rf/subscribe [:facets/config])
-        selected-facet @(rf/subscribe [:ui.facets/current])
-        applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.card.my-4.filters
-     [:div.card-body
-      [:h2.h5.card-title.me-2.d-inline "Find data"]
-      [:span.text-muted "Add a filter"]
-      [:div.mt-3.d-flex.align-items-center.justify-content-between
-       [:div
-        (for [{:keys [name] :as facet} facets]
-          (when-not (get applied-facets name)
-            ^{:key name} [facet-button facet selected-facet]))]
-       (when selected-facet
-         [cancel-facet-selection])]
-      [codelist-selection selected-facet]]]))

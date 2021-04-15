@@ -67,7 +67,7 @@
  :ui.facets.current/toggle-codelist
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [children ook/uri] :as codelist}]]
-   {:fx [(if (seq children)
+   {:fx [(if children
            [:dispatch [:ui.facets.current/toggle-expanded uri]]
            [:dispatch [:facets.codes/fetch-codes codelist]])]}))
 
