@@ -42,8 +42,8 @@
   (let [conn (esu/get-connection endpoint)
         uris (util/box cube-uris)]
     (->> (esd/search conn "dataset" "_doc"
-                     {:query {:terms {:cube cube-uris}}
-                      :size (count cube-uris)})
+                     {:query {:terms {:cube uris}}
+                      :size (count uris)})
          clean-datasets-result)))
 
 (defn observation-query
@@ -144,9 +144,8 @@
   (for [{:keys [matching-observation-example] :as dataset} datasets]
     (let [facets (explain-facets facets matching-observation-example dimensions codelists codes)]
       (cond->
-        (dissoc dataset :matching-observation-example)
-        (seq facets)
-        (assoc :facets (remove nil? facets))))))
+       (dissoc dataset :matching-observation-example)
+        (seq facets) (assoc :facets facets)))))
 
 (defn for-facets [selections opts]
   (let [codelist-uris (mapcat keys (vals selections))

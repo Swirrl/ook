@@ -31,8 +31,7 @@
        " datasets match"])))
 
 (defn- matches-for-facet [facet-name ds-facets]
-  (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
-        codelists (->> facet :dimensions (mapcat :codelists) distinct)]
+  (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)]
     (for [{:keys [ook/uri label codes]} (:dimensions facet)]
       ^{:key [uri label]}
       [:p

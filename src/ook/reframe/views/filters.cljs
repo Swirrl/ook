@@ -41,7 +41,7 @@
    {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children code])}
    "all children"])
 
-(defn- checkbox-input [{:keys [ook/uri disabled?] :as option}]
+(defn- checkbox-input [{:keys [ook/uri used] :as option}]
   (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])]
     [:input.form-check-input.mx-2
      (cond-> {:type "checkbox"
@@ -50,7 +50,7 @@
               :id uri
               :checked selected?
               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
-       disabled? (merge {:disabled true}))]))
+       (not used) (merge {:disabled true}))]))
 
 (declare code-tree)
 
@@ -76,7 +76,7 @@
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [:li.list-group-item.border-0.pb-0
      [toggle-codelist-expanded-button codelist expanded?]
-     [checkbox-input codelist]
+     [checkbox-input (assoc codelist :used true)]
      [:label.form-check-label.d-inline {:for uri} label]
      [select-any-button codelist]
      (when expanded?

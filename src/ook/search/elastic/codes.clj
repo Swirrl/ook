@@ -57,11 +57,12 @@
   the result in the first place so that each individual map contains all the information it
   needs to fetch its own children."
   [results scheme]
-  (map (fn [result]
+  (map (fn [{id :_id source :_source}]
          {:scheme scheme
-          :ook/uri (-> result :_id)
-          :label (-> result :_source :label)
-          :children (-> result :_source :narrower)})
+          :ook/uri id
+          :label (:label source)
+          :children (:narrower source)
+          :used (-> source :used Boolean/parseBoolean)})
        results))
 
 (defn get-top-concepts [conn codelist-id]

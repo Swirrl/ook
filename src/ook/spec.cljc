@@ -39,11 +39,14 @@
                             :req-un [:ook/label]
                             :opt-un [:ook/matching-observation-count
                                      :ook/comment
+                                     :ook/publisher
                                      :dataset/facets]))
 
 (s/def :ook/label string?)
 (s/def :ook/comment string?)
 (s/def :ook/matching-observations number?)
+(s/def :ook/publisher (s/keys :req-un [:publisher/altlabel]))
+(s/def :publisher/altlabel string?)
 
 (s/def :dataset/facets (s/coll-of :dataset/facet))
 (s/def :dataset/facet (s/keys :req-un [:facet/name
