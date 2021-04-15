@@ -6,7 +6,8 @@
    [ook.util :as util]
    [ook.search.elastic.facets :as facets]
    [ook.search.elastic.components :as components]
-   [ook.search.elastic.codes :as codes]))
+   [ook.search.elastic.codes :as codes]
+   [ook.util :as u]))
 
 (defn- clean-datasets-result [result]
   (->> result :hits :hits
@@ -106,40 +107,46 @@
                      ((partial map first)))))
        distinct))
 
-(defn explain-dimensions [dimensions matching-observation-example codes codelists]
+(defn explain-dimensions [matching-observation-example dimensions codelist-lookup code-lookup]
+  (->> dimensions
+       (map (fn [dimension]
+              (let [code-uris (some-> matching-observation-example
+                                      (get (keyword (str (:ook/uri dimension) ".@id")))
+                                      util/box)
+                    matches (some->> code-uris
+                                     (map code-lookup)
+                                     (map (fn [code] (update code :scheme #(->> % util/box (map codelist-lookup))))))]
+                (when matches
+                  (-> dimension
+                      (select-keys [:ook/uri :label])
+                      (assoc :codes matches))))))
+       (remove nil?)))
+
+(defn explain-facets [facets matching-observation-example dimensions codelists codes]
   (let [code-lookup (util/id-lookup codes)
         codelist-lookup (util/id-lookup codelists)]
-    (->> dimensions
-         (map (fn [d]
-                (let [code-uris (some-> matching-observation-example
-                                        (get (keyword (str d ".@id")))
-                                        util/box)
-                      matches (some->> code-uris
-                                       (map code-lookup)
-                                       (partition-by :scheme)
-                                       (map (fn [codes]
-                                              (assoc (codelist-lookup (-> codes first :scheme))
-                                                     :examples
-                                                     (map #(dissoc % :scheme) codes)))))]
-                  (when matches {:ook/uri d :codelists matches}))))
+    (->> facets
+         (map (fn [facet]
+                (let [facet-dimensions (filter (fn [d] (contains? (set (:dimensions facet))
+                                                                  (:ook/uri d))) dimensions)
+                      dimensions (explain-dimensions matching-observation-example
+                                                     facet-dimensions
+                                                     codelist-lookup
+                                                     code-lookup)]
+                  (when (seq dimensions)
+                    {:name (:name facet)
+                     :dimensions dimensions}))))
          (remove nil?))))
-
-(defn explain-facets [facets matching-observation-example codes codelists]
-  (->> facets
-       (map (fn [{:keys [name dimensions]}]
-              (let [code-lookup (util/id-lookup codes)
-                    codelist-lookup (util/id-lookup codelists)
-                    dims (explain-dimensions dimensions matching-observation-example codes codelists)]
-                (when (seq dims) {:name name :dimensions dims}))))
-       (remove nil?)))
 
 (defn explain-match
   "Replace matching observation example with per facet, per dimension, codelist and code summary"
-  [datasets facets codelists codes]
+  [datasets facets dimensions codelists codes]
   (for [{:keys [matching-observation-example] :as dataset} datasets]
-    (let [facets (explain-facets facets matching-observation-example codes codelists)]
-      (cond-> (dissoc dataset :matching-observation-example)
-        (seq facets) (assoc :facets (remove nil? facets))))))
+    (let [facets (explain-facets facets matching-observation-example dimensions codelists codes)]
+      (cond->
+        (dissoc dataset :matching-observation-example)
+        (seq facets)
+        (assoc :facets (remove nil? facets))))))
 
 (defn for-facets [selections opts]
   (let [codelist-uris (mapcat keys (vals selections))
@@ -151,9 +158,10 @@
         datasets (util/join-by dataset-hits dataset-descriptions :ook/uri :cube)
         code-uris (code-uris-from-observation-hits observation-hits)
         facets (facets/get-facets-for-selections selections opts)
+        dimensions (components/get-components (mapcat :dimensions facets) opts)
         codelists (components/get-codelists codelist-uris opts)
         codes (codes/get-codes code-uris opts)]
-    (explain-match datasets facets codelists codes)))
+    (explain-match datasets facets dimensions codelists codes)))
 
 (defn total-count [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)

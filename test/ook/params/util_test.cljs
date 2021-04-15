@@ -8,7 +8,7 @@
           "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
           [{:name "Product"
             :dimensions [{:ook/uri "def/trade/property/dimension/product"
-                          :codelists [{:examples [{:ook/uri "def/trade/concept/product/B"}]}]}]}]))))
+                          :codes [{:ook/uri "def/trade/concept/product/B"}]}]}]))))
 
 (deftest absolute-uri-test
   (testing "reverses json-ld prefixing"

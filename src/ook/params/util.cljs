@@ -5,12 +5,8 @@
 (def base-uri "http://gss-data.org.uk/")
 (def pmd-uri "https://staging.gss-data.org.uk/")
 
-(defn- pair-dimensions-and-codes [{dim-uri :ook/uri codelists :codelists}]
-  (mapcat (fn [{:keys [examples]}]
-            (mapcat (fn [{code-uri :ook/uri}]
-                      [dim-uri code-uri])
-                    examples))
-          codelists))
+(defn- pair-dimensions-and-codes [{dim-uri :ook/uri codes :codes}]
+  (mapcat (fn [{code-uri :ook/uri}] [dim-uri code-uri]) codes))
 
 (defn absolute-uri [uri]
   (if (.startsWith uri "http")

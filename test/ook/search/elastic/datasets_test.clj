@@ -65,13 +65,15 @@
                         (keyword "area.@id") "canada"}}]
         facets [{:name "time" :dimensions ["date"]}
                 {:name "place" :dimensions ["area"]}]
+        dimensions [{:ook/uri "date" :label "Date"}
+                    {:ook/uri "area" :label "Area"}]
         codelists [{:ook/uri "years" :label "Years"}
                    {:ook/uri "countries" :label "Countries"}]
         codes [{:ook/uri "2019" :label "2019" :scheme "years"}
                {:ook/uri "2020" :label "2020" :scheme "years"}
                {:ook/uri "germany" :label "Germany" :scheme "countries"}
                {:ook/uri "canada" :label "Canada" :scheme "countries"}]
-        datasets (sut/explain-match dataset-hits facets codelists codes)]
+        datasets (sut/explain-match dataset-hits facets dimensions codelists codes)]
 
     (testing "removes :matching-observation-example"
       (is (= [nil nil]
@@ -81,55 +83,64 @@
       (is (= [[{:name "time"
                 :dimensions
                 [{:ook/uri "date"
-                  :codelists
-                  [{:ook/uri "years"
-                    :label "Years"
-                    :examples
-                    [{:ook/uri "2019"
-                      :label "2019"}]}]}]}
+                  :label "Date"
+                  :codes
+                  [{:ook/uri "2019"
+                    :label "2019"
+                    :scheme
+                    [{:ook/uri "years"
+                      :label "Years"}]}]}]}
                {:name "place"
                 :dimensions
                 [{:ook/uri "area"
-                  :codelists
-                  [{:ook/uri "countries"
-                    :label "Countries"
-                    :examples
-                    [{:ook/uri "germany"
-                      :label "Germany"}]}]}]}]
+                  :label "Area"
+                  :codes
+                  [{:ook/uri "germany"
+                    :label "Germany"
+                    :scheme
+                    [{:ook/uri "countries"
+                      :label "Countries"}]}]}]}]
 
               [{:name "time"
                 :dimensions
                 [{:ook/uri "date"
-                  :codelists
-                  [{:ook/uri "years"
-                    :label "Years"
-                    :examples
-                    [{:ook/uri "2020"
-                      :label "2020"}]}]}]}
+                  :label "Date"
+                  :codes
+                  [{:ook/uri "2020"
+                    :label "2020"
+                    :scheme
+                    [{:ook/uri "years"
+                      :label "Years"}]}]}]}
                {:name "place"
                 :dimensions
                 [{:ook/uri "area"
-                  :codelists
-                  [{:ook/uri "countries"
-                    :label "Countries"
-                    :examples
-                    [{:ook/uri "canada"
-                      :label "Canada"}]}]}]}]]
+                  :label "Area"
+                  :codes
+                  [{:ook/uri "canada"
+                    :label "Canada"
+                    :scheme
+                    [{:ook/uri "countries"
+                      :label "Countries"}]}]}]}]]
              (map :facets datasets)))))
 
   (testing "excludes codelist examples for dimensions or whole facets that have none"
     (let [dataset-hits [{:ook/uri "cube1" :matching-observation-example {(keyword "date.@id") "2019"}}]
           facets [{:name "time" :dimensions ["date" "another-dimension"]}
                   {:name "place" :dimensions ["area"]}]
+          dimensions [{:ook/uri "date" :label "Date"}
+                      {:ook/uri "area" :label "Area"}
+                      {:ook/uri "another-dimension" :label "Another Dimension"}]
           codelists [{:ook/uri "years" :label "Years"}]
           codes [{:ook/uri "2019" :label "2019" :scheme "years"}
                  {:ook/uri "2020" :label "2020" :scheme "years"}]
-          datasets (sut/explain-match dataset-hits facets codelists codes)]
+          datasets (sut/explain-match dataset-hits facets dimensions codelists codes)]
       (is (= [[{:name "time"
                 :dimensions
                 [{:ook/uri "date"
-                  :codelists [{:ook/uri "years"
-                               :label "Years"
-                               :examples
-                               [{:ook/uri "2019" :label "2019"}]}]}]}]]
+                  :label "Date"
+                  :codes
+                  [{:ook/uri "2019"
+                    :label "2019"
+                    :scheme [{:ook/uri "years"
+                              :label "Years"}]}]}]}]]
              (map :facets datasets))))))

@@ -39,10 +39,9 @@
                                    :matching-observation-count 123
                                    :facets [{:name "Facet 2"
                                              :dimensions [{:ook/uri "dim2"
-                                                           :codelists [{:ook/uri "cl2"
-                                                                        :label "Codelist 2 Label"
-                                                                        :examples [{:ook/uri "a-code"
-                                                                                     :label "Label for code"}]}]}]}])]})
+                                                           :label "Dimension 2 Label"
+                                                           :codes [{:ook/uri "a-code"
+                                                                    :label "Label for code"}]}]}])]})
 
 (deftest filtering-datasets
   (rft/run-test-sync
@@ -87,8 +86,8 @@
      (testing "adds current facet to results table"
        (is (= ["Publisher / Title / Description" "Facet 2" ""] (qh/datset-results-columns))))
 
-     (testing "shows matching codelists in the results table"
-       (is (= ["Codelist 2 LabelLabel for code"] (qh/column-x-contents 2))))
+     (testing "shows matching codes in the results table"
+       (is (= ["Dimension 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
      (testing "removes current facet from facet config"
        (is (= ["Facet 1"] (qh/all-available-facets)))))

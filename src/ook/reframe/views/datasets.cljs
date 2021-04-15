@@ -30,14 +30,14 @@
        [:strong total-dataset-count]
        " datasets match"])))
 
-(defn- codelists-for-facet [facet-name ds-facets]
+(defn- matches-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (mapcat :codelists) distinct)]
-    (for [{:keys [ook/uri label examples]} codelists]
+    (for [{:keys [ook/uri label codes]} (:dimensions facet)]
       ^{:key [uri label]}
       [:p
        [:span.me-1 label]
-       (for [{code-uri :ook/uri code-label :label} examples]
+       (for [{code-uri :ook/uri code-label :label} codes]
          ^{:key code-uri}
          [:span.badge.bg-light.text-dark.rounded-pill.me-1 code-label])])))
 
@@ -52,16 +52,16 @@
    (when (some :matching-observation-count data)
      [:th])])
 
-(defn- dataset-row [{:keys [label publisher comment ook/uri matching-observation-count facets]}
+(defn- dataset-row [{:keys [label publisher comment description ook/uri matching-observation-count facets]}
                     applied-facets]
   ^{:key uri}
   [:tr
    [:td.title-column
     [:span.text-muted.me-2 (:altlabel publisher)]
     [:strong label]
-    [:small.vertical-truncate comment]]
+    [:small.vertical-truncate (or comment description)]]
    (for [[facet-name _] applied-facets]
-     ^{:key [uri facet-name]} [:td (codelists-for-facet facet-name facets)])
+     ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
    (when matching-observation-count
      [:td
       [:small (str "Found " matching-observation-count " matching observations")]

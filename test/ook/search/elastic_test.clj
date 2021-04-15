@@ -73,35 +73,37 @@
               (is (= {:name "Alcohol Type"
                       :dimensions
                       [{:ook/uri "def/trade/property/dimension/alcohol-type"
-                        :codelists
-                        [{:ook/uri "def/trade/concept-scheme/alcohol-type"
-                          :label "Alcohol Type"
-                          :examples
-                          [{:ook/uri "def/trade/concept/alcohol-type/wine"
-                            :ook/type "skos:Concept"
-                            :label "Wine"
-                            :broader nil
-                            :narrower nil
-                            :used "true"
-                            :notation "wine"
-                            :priority "1"}]}]}]}
+                        :label "Alcohol Type"
+                        :codes
+                        [{:ook/uri "def/trade/concept/alcohol-type/wine"
+                          :ook/type "skos:Concept"
+                          :label "Wine"
+                          :broader nil
+                          :narrower nil
+                          :used "true"
+                          :notation "wine"
+                          :priority "1"
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/alcohol-type"
+                            :label "Alcohol Type"}]}]}]}
                      (description-for-facet "Alcohol Type")))
               (is (= {:name "Bulletin Type"
                       :dimensions
                       [{:ook/uri "def/trade/property/dimension/bulletin-type"
-                        :codelists
-                        [{:ook/uri "def/trade/concept-scheme/bulletin-type"
-                          :label "Bulletin Type"
-                          :examples
-                          [{:ook/uri
-                            "def/trade/concept/bulletin-type/total-wine-duty-receipts"
-                            :ook/type "skos:Concept"
-                            :label "Total Wine Duty receipts"
-                            :broader nil
-                            :narrower nil
-                            :used "true"
-                            :notation "total-wine-duty-receipts"
-                            :priority "8"}]}]}]}
+                        :label "Alcohol Bulletin Type"
+                        :codes
+                        [{:ook/uri
+                          "def/trade/concept/bulletin-type/total-wine-duty-receipts"
+                          :ook/type "skos:Concept"
+                          :label "Total Wine Duty receipts"
+                          :broader nil
+                          :narrower nil
+                          :used "true"
+                          :notation "total-wine-duty-receipts"
+                          :priority "8"
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type"
+                            :label "Bulletin Type"}]}]}]}
                      (description-for-facet "Bulletin Type")))
               (is (= nil
                      (description-for-facet "Date"))))))))))
