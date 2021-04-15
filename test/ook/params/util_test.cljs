@@ -1,5 +1,5 @@
 (ns ook.params.util-test
-  (:require [cljs.test :refer [deftest is]]
+  (:require [cljs.test :refer [deftest is testing]]
             [ook.params.util :as sut]))
 
 (deftest link-to-pmd-dataset
@@ -9,3 +9,12 @@
           [{:name "Product"
             :dimensions [{:ook/uri "def/trade/property/dimension/product"
                           :codelists [{:examples [{:ook/uri "def/trade/concept/product/B"}]}]}]}]))))
+
+(deftest absolute-uri-test
+  (testing "reverses json-ld prefixing"
+    (testing "adds base to gss-data URIs"
+      (is (= "http://gss-data.org.uk/example"
+             (sut/absolute-uri "example"))))
+    (testing "doesn't add base to absolute URIs"
+      (is (= "http://example.com"
+             (sut/absolute-uri "http://example.com"))))))

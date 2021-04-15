@@ -12,10 +12,15 @@
                     examples))
           codelists))
 
+(defn absolute-uri [uri]
+  (if (.startsWith uri "http")
+    uri
+    (str base-uri uri)))
+
 (defn- encode-pmd-style [[dim val]]
-  (str (url/url-encode (str base-uri dim))
+  (str (url/url-encode (absolute-uri dim))
        ","
-       (url/url-encode (str base-uri val))))
+       (url/url-encode (absolute-uri val))))
 
 (defn encode-filter-facets
   "Encodes filter facets in the form [dimension value] the same way
