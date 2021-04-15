@@ -34,7 +34,7 @@
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
         codelists (->> facet :dimensions (mapcat :codelists) distinct)]
     (for [{:keys [ook/uri label examples]} codelists]
-      ^{:key uri}
+      ^{:key [uri label]}
       [:p
        [:span.me-1 label]
        (for [{code-uri :ook/uri code-label :label} examples]
