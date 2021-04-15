@@ -117,9 +117,10 @@
                       :label "Canada"}]}]}]}]]
              (map :facets datasets)))))
 
-  (testing "excludes codelist examples for dimensions that have none"
+  (testing "excludes codelist examples for dimensions or whole facets that have none"
     (let [dataset-hits [{:ook/uri "cube1" :matching-observation-example {(keyword "date.@id") "2019"}}]
-          facets [{:name "time" :dimensions ["date" "another-dimension"]}]
+          facets [{:name "time" :dimensions ["date" "another-dimension"]}
+                  {:name "place" :dimensions ["area"]}]
           codelists [{:ook/uri "years" :label "Years"}]
           codes [{:ook/uri "2019" :label "2019" :scheme "years"}
                  {:ook/uri "2020" :label "2020" :scheme "years"}]
@@ -130,6 +131,5 @@
                   :codelists [{:ook/uri "years"
                                :label "Years"
                                :examples
-                               [{:ook/uri "2019" :label "2019"}]}]}
-                 {:ook/uri "another-dimension"}]}]]
+                               [{:ook/uri "2019" :label "2019"}]}]}]}]]
              (map :facets datasets))))))

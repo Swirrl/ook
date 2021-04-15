@@ -106,31 +106,40 @@
                      ((partial map first)))))
        distinct))
 
+(defn explain-dimensions [dimensions matching-observation-example codes codelists]
+  (let [code-lookup (util/id-lookup codes)
+        codelist-lookup (util/id-lookup codelists)]
+    (->> dimensions
+         (map (fn [d]
+                (let [code-uris (some-> matching-observation-example
+                                        (get (keyword (str d ".@id")))
+                                        util/box)
+                      matches (some->> code-uris
+                                       (map code-lookup)
+                                       (partition-by :scheme)
+                                       (map (fn [codes]
+                                              (assoc (codelist-lookup (-> codes first :scheme))
+                                                     :examples
+                                                     (map #(dissoc % :scheme) codes)))))]
+                  (when matches {:ook/uri d :codelists matches}))))
+         (remove nil?))))
+
+(defn explain-facets [facets matching-observation-example codes codelists]
+  (->> facets
+       (map (fn [{:keys [name dimensions]}]
+              (let [code-lookup (util/id-lookup codes)
+                    codelist-lookup (util/id-lookup codelists)
+                    dims (explain-dimensions dimensions matching-observation-example codes codelists)]
+                (when (seq dims) {:name name :dimensions dims}))))
+       (remove nil?)))
+
 (defn explain-match
   "Replace matching observation example with per facet, per dimension, codelist and code summary"
   [datasets facets codelists codes]
-  (let [code-lookup (util/id-lookup codes)
-        codelist-lookup (util/id-lookup codelists)]
-    (for [{:keys [matching-observation-example] :as dataset} datasets]
-      (-> dataset
-          (dissoc :matching-observation-example)
-          (assoc :facets
-                 (for [{:keys [name dimensions]} facets]
-                   {:name name
-                    :dimensions
-                    (for [d dimensions]
-                      (let [code-uris (some-> matching-observation-example
-                                              (get (keyword (str d ".@id")))
-                                              util/box)
-                            matches (some->> code-uris
-                                             (map code-lookup)
-                                             (partition-by :scheme)
-                                             (map (fn [codes]
-                                                    (assoc (codelist-lookup (-> codes first :scheme))
-                                                           :examples
-                                                           (map #(dissoc % :scheme) codes)))))]
-                        (cond-> {:ook/uri d}
-                          matches (assoc :codelists matches))))}))))))
+  (for [{:keys [matching-observation-example] :as dataset} datasets]
+    (let [facets (explain-facets facets matching-observation-example codes codelists)]
+      (cond-> (dissoc dataset :matching-observation-example)
+        (seq facets) (assoc :facets (remove nil? facets))))))
 
 (defn for-facets [selections opts]
   (let [codelist-uris (mapcat keys (vals selections))

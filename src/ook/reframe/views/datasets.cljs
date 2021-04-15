@@ -39,7 +39,7 @@
        [:span.me-1 label]
        (for [{code-uri :ook/uri code-label :label} examples]
          ^{:key code-uri}
-         [:span.badge.bg-secondary.rounded-pill.me-1 code-label])])))
+         [:span.badge.bg-light.text-dark.rounded-pill.me-1 code-label])])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
@@ -64,8 +64,7 @@
      [:td
       [:small (str "Found " matching-observation-count " matching observations")]
       [:div
-       [:a.btn.btn-secondary.btn-sm
-        {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
+       [:a {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
