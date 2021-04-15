@@ -46,18 +46,20 @@
 
 (defn- column-headers [data applied-facets]
   [:tr
-   [:th.title-column "Title / Description"]
+   [:th.title-column "Publisher / Title / Description"]
    (for [[facet-name _] applied-facets]
      ^{:key facet-name} [:th.text-nowrap facet-name (remove-facet-button facet-name)])
    (when (some :matching-observation-count data)
      [:th])])
 
-(defn- dataset-row [{:keys [label comment ook/uri matching-observation-count facets]} applied-facets]
+(defn- dataset-row [{:keys [label publisher comment ook/uri matching-observation-count facets]}
+                    applied-facets]
   ^{:key uri}
   [:tr
    [:td.title-column
+    [:span.text-muted.me-2 (:altlabel publisher)]
     [:strong label]
-    [:p.vertical-truncate comment]]
+    [:small.vertical-truncate comment]]
    (for [[facet-name _] applied-facets]
      ^{:key [uri facet-name]} [:td (codelists-for-facet facet-name facets)])
    (when matching-observation-count

@@ -85,7 +85,7 @@
        (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
      (testing "adds current facet to results table"
-       (is (= ["Title / Description" "Facet 2" ""] (qh/datset-results-columns))))
+       (is (= ["Publisher / Title / Description" "Facet 2" ""] (qh/datset-results-columns))))
 
      (testing "shows matching codelists in the results table"
        (is (= ["Codelist 2 LabelLabel for code"] (qh/column-x-contents 2))))
@@ -101,7 +101,7 @@
        (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles))))
 
      (testing "removes the column from the results table"
-       (is (= ["Title / Description"] (qh/datset-results-columns))))
+       (is (= ["Publisher / Title / Description"] (qh/datset-results-columns))))
 
      (testing "re-adds the facet to the list of possible ones to choose from"
        (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))))
