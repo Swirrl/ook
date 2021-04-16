@@ -18,6 +18,7 @@
 
       (testing "build-concept-tree"
         (is (= 30 (count tree)))
-        (is (every? #{:scheme :ook/uri :children :label} (keys (first tree))))
+        (is (= (-> tree first keys sort)
+               [:children :label :scheme :used :ook/uri]))
         (is (= ["1.2% to 5.5% ABV clearances" "Cider clearances"]
                (->> tree (map :label) sort (take 2))))))))
