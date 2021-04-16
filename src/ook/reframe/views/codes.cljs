@@ -76,7 +76,7 @@
 (defn- code-tree [tree]
   [:ul.list-group-flush
    (if (seq tree)
-     (for [{:keys [ook/uri scheme label] :as code} tree]
+     (for [{:keys [ook/uri scheme] :as code} tree]
        ^{:key [scheme uri]} [code-item code])
      [:li.list-group-item.border-0.ms-1.text-muted
       [:em "No codes to show"]])])

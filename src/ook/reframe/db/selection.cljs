@@ -16,10 +16,18 @@
     (add-codelist db uri)
     (add-codes db (:scheme option) [uri])))
 
+(defn dissoc-empty-schemes [selection]
+  (->> selection (remove (fn [[_ v]] (empty? v))) (into {})))
+
+(defn remove-code [db {:keys [ook/uri scheme]}]
+  (-> db
+      (update-in [:ui.facets/current :selection scheme] disj uri)
+      (update-in [:ui.facets/current :selection] dissoc-empty-schemes)))
+
 (defn- remove-from-selection [db {:keys [ook/uri] :as option}]
   (if (codelist? option)
     (update-in db [:ui.facets/current :selection] dissoc uri)
-    (update-in db [:ui.facets/current :selection (:scheme option)] disj uri)))
+    (remove-code db option)))
 
 (defn option-selected? [db {:keys [ook/uri scheme]}]
   (let [selection (-> db :ui.facets/current :selection)]

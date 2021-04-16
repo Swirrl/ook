@@ -23,6 +23,8 @@
     :fx [(when-not codelists
            [:dispatch [:ui.facets.current/get-codelists facet]])]}))
 
+
+
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
  [e/validation-interceptor]

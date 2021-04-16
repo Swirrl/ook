@@ -28,17 +28,17 @@
    "Facet 4" [{:ook/uri "deep-nested" :label "with nested codes"}]})
 
 (def concept-trees
-  {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1"}]
-   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :children nil}
-          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2"
-           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :children nil}
-                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :children nil}]}]
+  {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1" :used true}]
+   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :used true :children nil}
+          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2" :used true
+           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
+                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]
    "no-codes" []
-   "deep-nested" [{:scheme "cl4" :ook/uri "cl4-code1" :label "4-1 child 1" :children nil}
-                  {:scheme "cl5" :ook/uri "cl5-code1" :label "5-1 child 1"
-                   :children [{:scheme "cl5" :ook/uri "cl5-code3" :label "5-2 child 1" :children nil}
-                              {:scheme "cl5" :ook/uri "cl5-code4" :label "5-2 child 2"
-                               :children [{:scheme "cl5" :ook/uri "cl5-code5" :label "5-3 child 1" :children nil}]}]}]})
+   "deep-nested" [{:scheme "cl4" :ook/uri "cl4-code1" :label "4-1 child 1" :used true}
+                  {:scheme "cl5" :ook/uri "cl5-code1" :label "5-1 child 1" :used true
+                   :children [{:scheme "cl5" :ook/uri "cl5-code3" :label "5-2 child 1" :used true}
+                              {:scheme "cl5" :ook/uri "cl5-code4" :label "5-2 child 2" :used true
+                               :children [{:scheme "cl5" :ook/uri "cl5-code5" :label "5-3 child 1" :used true}]}]}]})
 
 (deftest selecting-facets
   (rft/run-test-sync
@@ -205,6 +205,13 @@
        (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
 
        (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= [] (qh/all-selected-labels))))))
+       (is (= [] (qh/all-selected-labels)))))
+
+   (testing "unused codes are not selectable"
+     (eh/click-text "Facet 2")
+     (is (= [] (qh/all-selected-labels)))
+     (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
+     (eh/click-text "2-2 child 2")
+     (is (= [] (qh/all-selected-labels)))))
 
   (setup/cleanup!))
