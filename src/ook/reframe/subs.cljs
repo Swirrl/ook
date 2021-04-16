@@ -55,9 +55,7 @@
  (fn [db _]
    (:results.datasets/data db)))
 
-
 ;;;;;; NAVIGATION
-
 
 (rf/reg-sub
  :app/current-route

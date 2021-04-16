@@ -21,7 +21,7 @@
 (s/def :ook/facet (s/keys :req-un [:facet/name]
                           :opt-un [:facet/selection]))
 (s/def :facet/name string?)
-(s/def :facet/selection (s/map-of :ook/uri (s/nilable (s/coll-of :ook/uri))))
+(s/def :facet/selection (s/nilable (s/map-of :ook/uri (s/nilable (s/coll-of :ook/uri)))))
 (s/def :ook/uri string?)
 
 (s/def :facet/codelist (s/keys :req [:ook/uri] :req-un [:ook/label]))
