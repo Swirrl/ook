@@ -101,14 +101,13 @@
  :facets.codelists/success
  [e/validation-interceptor]
  (fn [db [_ facet-name result]]
-   (let [old-facet (db/facet-by-name db facet-name)
+   (let [old-facet (-> db :facets/config (get facet-name))
          codelists (sort-by :ook/uri result)
-         facet-with-codelists (assoc old-facet :codelists codelists)
-         facets (->> db :facets/config (remove #(= (:name %) facet-name)))]
+         facet-with-codelists (assoc old-facet :codelists codelists)]
      (-> db
          (dissoc :ui.facets.current/loading)
          ;; cache the result so we don't need to re-request it
-         (assoc :facets/config (conj facets facet-with-codelists))
+         (assoc-in [:facets/config facet-name] facet-with-codelists)
          (assoc :ui.facets/current facet-with-codelists)
          (assoc-in [:ui.facets/current :expanded] #{})))))
 
@@ -116,19 +115,19 @@
  :facets.codes/success
  [e/validation-interceptor]
  (fn [db [_ codelist result]]
-   (let [old-facet (:ui.facets/current db)
-         old-codelist (->> old-facet :codelists (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
-         codelists (->> old-facet :codelists (remove #(= (:ook/uri %) (:ook/uri codelist))))
+   (let [current-facet (:ui.facets/current db)
+         old-codelist (->> current-facet :codelists (filter #(= (:ook/uri %) (:ook/uri codelist))) first)
+         codelists (->> current-facet :codelists (remove #(= (:ook/uri %) (:ook/uri codelist))))
          new-codelists (sort-by :ook/uri
                                 (conj codelists (assoc old-codelist :children result)))
-         facet-with-codelists (-> old-facet (assoc :codelists new-codelists))
-         facets (->> db :facets/config (remove #(= (:name %) (:name old-facet))))
+         facet-with-codelists (-> current-facet (assoc :codelists new-codelists))
          expanded (apply (fnil conj #{})
-                         (:expanded old-facet)
+                         (:expanded current-facet)
                          (-> (:ook/uri codelist) (cons (db/all-expandable-uris result)) set))]
      (-> db
+         ;; (update-in [db :ui.facets/current :codelists uri])
          ;; cache the result so we don't need to re-request it
-         (assoc :facets/config (conj facets (dissoc facet-with-codelists :selection :expanded)))
+         (assoc-in [:facets/config (:name current-facet)] (dissoc facet-with-codelists :selection :expanded))
          (assoc :ui.facets/current facet-with-codelists)
          (assoc-in [:ui.facets/current :expanded] expanded)))))
 
@@ -137,11 +136,3 @@
  [e/validation-interceptor]
  (fn [db [_ error]]
    (assoc db :ui.facets/current :error)))
-
-(rf/reg-event-db
- :ui.facets.current/set-loading
- [e/validation-interceptor]
- (fn [db _]
-   (if (:ui.facets.current/loading db)
-     (assoc db :ui.facets/current :loading)
-     db)))

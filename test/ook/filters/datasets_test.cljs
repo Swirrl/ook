@@ -13,8 +13,8 @@
    [ook.reframe.subs]))
 
 (def initial-state
-  {:facets [{:name "Facet 1" :dimensions ["dim1" "dim2"]}
-            {:name "Facet 2" :dimensions ["dim3"]}]
+  {:facets {"Facet 1" {:name "Facet 1" :dimensions ["dim1" "dim2"]}
+            "Facet 2" {:name "Facet 2" :dimensions ["dim3"]}}
    :dataset-count 2})
 
 (def ds1 {:ook/uri "ds1" :label "Dataset 1" :comment "Dataset 1 description"})

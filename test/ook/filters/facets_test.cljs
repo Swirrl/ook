@@ -13,10 +13,10 @@
    [ook.reframe.subs]))
 
 (def initial-state
-  {:facets [{:name "Facet 1" :dimensions ["dim1" "dim2"]}
-            {:name "Facet 2" :dimensions ["dim3"]}
-            {:name "Facet 3" :dimensions ["dim4"]}
-            {:name "Facet 4" :dimensions ["dim5"]}]
+  {:facets {"Facet 1" {:name "Facet 1" :dimensions ["dim1" "dim2"]}
+            "Facet 2" {:name "Facet 2" :dimensions ["dim3"]}
+            "Facet 3" {:name "Facet 3" :dimensions ["dim4"]}
+            "Facet 4" {:name "Facet 4" :dimensions ["dim5"]}}
    :dataset-count 20})
 
 (def codelists

@@ -4,14 +4,15 @@
             [ook.ui.layout :as layout]
             [ook.search.db :as db]
             [ook.params.parse :as p]
-            [ook.concerns.transit :as t]))
+            [ook.concerns.transit :as t]
+            [ook.util :as u]))
 
 ;; App entry handler
 
 (defmethod ig/init-key :ook.handler/main [_ {:keys [search/db]}]
   (fn [_request]
     (let [facets (db/get-facets db)]
-      (resp/response (layout/->html (layout/main {:facets facets
+      (resp/response (layout/->html (layout/main {:facets (u/lookup :name facets)
                                                   :dataset-count (db/dataset-count db)}))))))
 
 ;;; Internal transit API

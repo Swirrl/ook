@@ -16,7 +16,7 @@
 
 ;;;;;;; facets
 
-(s/def :facets/config (s/coll-of :ook/facet))
+(s/def :facets/config (s/map-of :facet/name :ook/facet))
 
 (s/def :ook/facet (s/keys :req-un [:facet/name]
                           :opt-un [:facet/selection]))
@@ -57,6 +57,10 @@
 (s/def :facet/name string?)
 (s/def :facet/dimensions (s/coll-of :facet/dimension))
 (s/def :facet/dimension (s/keys :req [:ook/uri]
-                                :opt-un [:facet/codelist]))
+                                :req-un [:ook/label]
+                                :opt-un [:facet/codes]))
+(s/def :facet/codes (s/coll-of :facet/code))
+(s/def :facet/code (s/keys :opt [:ook/uri]
+                           :opt-un [:ook/label]))
 
 (s/def :results.datasets/error map?)
