@@ -16,12 +16,14 @@
     "notation": {"@id": "skos:notation" },
     "broader": {"@id": "skos:broader", "@type": "@id"},
     "narrower": {"@id": "skos:narrower", "@type": "@id"},
+    "topConceptOf": {"@id": "skos:topConceptOf", "@type": "@id"},
     "priority": {"@id": "http://www.w3.org/ns/ui#sortPriority", "@type": "http://www.w3.org/2001/XMLSchema#integer" },
     "used": {"@id": "http://example.net/def/used", "@type": "http://www.w3.org/2001/XMLSchema#boolean"}
   },
   "label": {},
   "@type": {},
   "scheme": {},
+  "topConceptOf": {},
   "broader": { "@default": null, "@embed": "@never" },
   "narrower": { "@default": null, "@embed": "@never" }
 }

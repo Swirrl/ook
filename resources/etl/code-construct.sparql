@@ -12,6 +12,7 @@ CONSTRUCT {
         skos:notation ?notation;
         skos:broader ?broader;
 	skos:narrower ?narrower;
+	skos:topConceptOf ?toppedScheme;
         ui:sortPriority ?sort_priority;
 	<http://example.net/def/used> ?used;
     .
@@ -38,6 +39,10 @@ CONSTRUCT {
 
     OPTIONAL {
         ?code skos:narrower ?narrower;
+    }
+
+    OPTIONAL {
+        ?code skos:topConceptOf ?toppedScheme;
     }
 
     BIND (EXISTS {

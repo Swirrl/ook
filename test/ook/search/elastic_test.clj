@@ -80,6 +80,7 @@
                           :label "Wine"
                           :broader nil
                           :narrower nil
+                          :topConceptOf nil
                           :used "true"
                           :notation "wine"
                           :priority "1"
@@ -98,6 +99,7 @@
                           :label "Total Wine Duty receipts"
                           :broader nil
                           :narrower nil
+                          :topConceptOf nil
                           :used "true"
                           :notation "total-wine-duty-receipts"
                           :priority "8"

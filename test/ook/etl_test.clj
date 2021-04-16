@@ -34,6 +34,16 @@
         (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))
 
+(defn found?
+  "Checks to see if the doc has the value for the key.
+
+  You can be specify nil values to check for the existence of a
+  property in the index mapping as otherwise :missing-from-mapping
+  would be returned"
+  [doc key value]
+  (= value
+     (get doc key :missing-from-mapping)))
+
 (deftest dataset-pipeline-test
   (testing "Dataset pipeline schema"
     (with-system [system ["drafter-client.edn"
@@ -46,7 +56,7 @@
 
       (let [db (setup/get-db system)
             doc (first (db/all-datasets db))]
-        (are [key value] (= value (key doc))
+        (are [key value] (found? doc key value)
           :ook/uri "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
           :label "Alcohol Bulletin - Duty Receipts"
           :publisher {:ook/uri "https://www.gov.uk/government/organisations/hm-revenue-customs"
@@ -64,7 +74,7 @@
 
       (let [db (setup/get-db system)
             doc (first (db/get-components db ["def/trade/property/dimension/alcohol-type"]))]
-        (are [key value] (= value (key doc))
+        (are [key value] (found? doc key value)
           :ook/uri "def/trade/property/dimension/alcohol-type"
           :label "Alcohol Type"
           :codelist {:ook/uri "def/trade/concept-scheme/alcohol-type"
@@ -82,10 +92,11 @@
 
       (let [db (setup/get-db system)
             doc (first (db/get-codes db ["def/trade/concept/alcohol-type/beer"]))]
-        (are [key value] (= value (key doc))
+        (are [key value] (found? doc key value)
           :ook/uri "def/trade/concept/alcohol-type/beer"
           :label "Beer"
           :notation "beer"
           :used "false"
           :narrower nil
-          :broader nil)))))
+          :broader nil
+          :topConceptOf nil)))))

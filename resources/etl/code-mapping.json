@@ -8,6 +8,7 @@
       "notation": { "type": "keyword" },
       "broader": { "type": "keyword" },
       "narrower": { "type": "keyword" },
+      "topConceptOf": { "type": "keyword" },
       "priority": { "type": "integer" },
       "used": { "type": "boolean" }
     }
