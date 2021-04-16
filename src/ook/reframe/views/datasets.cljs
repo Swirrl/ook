@@ -63,9 +63,9 @@
      ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
    [:td
     (when matching-observation-count
-      [:small (str "Found " matching-observation-count " matching observations")]
-      [:div
-       [:a {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]])]])
+      [:<>
+       [:small (str "Found " matching-observation-count " matching observations")]
+       [:a.d-block {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]])]])
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]

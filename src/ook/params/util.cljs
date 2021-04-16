@@ -1,15 +1,17 @@
 (ns ook.params.util
   (:require [reitit.impl :as ri]
-            [cemerick.url :as url]))
+            [cemerick.url :as url]
+            [clojure.string :as str]))
 
 (def base-uri "http://gss-data.org.uk/")
 (def pmd-uri "https://staging.gss-data.org.uk/")
 
 (defn- pair-dimensions-and-codes [{dim-uri :ook/uri codes :codes}]
-  (mapcat (fn [{code-uri :ook/uri}] [dim-uri code-uri]) codes))
+  (when codes
+    (mapcat (fn [{code-uri :ook/uri}] [dim-uri code-uri]) codes)))
 
 (defn absolute-uri [uri]
-  (if (.startsWith uri "http")
+  (if (str/starts-with? uri "http")
     uri
     (str base-uri uri)))
 
@@ -25,10 +27,11 @@
   (->> filter-facets
        (mapcat :dimensions)
        (map pair-dimensions-and-codes)
+       (remove nil?)
        (map encode-pmd-style)))
 
 (defn link-to-pmd-dataset [id filter-facets]
-  (let [query-string (str (ri/query-string {:uri (str base-uri id)
-                                            :apply-filters true
-                                            :filter-facets (encode-filter-facets filter-facets)}))]
+  (let [filter-facets (encode-filter-facets filter-facets)
+        query-string (str (ri/query-string (cond-> {:uri (str base-uri id) :apply-filters true}
+                                             (seq filter-facets) (assoc :filter-facets filter-facets))))]
     (str pmd-uri "cube/explore?" query-string)))

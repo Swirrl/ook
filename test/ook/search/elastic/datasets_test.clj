@@ -123,7 +123,7 @@
                       :label "Countries"}]}]}]}]]
              (map :facets datasets)))))
 
-  (testing "excludes codelist examples for dimensions or whole facets that have none"
+  (testing "excludes code examples for dimensions or whole facets that have none"
     (let [dataset-hits [{:ook/uri "cube1" :matching-observation-example {(keyword "date.@id") "2019"}}]
           facets [{:name "time" :dimensions ["date" "another-dimension"]}
                   {:name "place" :dimensions ["area"]}]
@@ -143,4 +143,15 @@
                     :label "2019"
                     :scheme [{:ook/uri "years"
                               :label "Years"}]}]}]}]]
-             (map :facets datasets))))))
+             (map :facets datasets)))))
+
+  (testing "excludes codes from dimensions when there are no matches (no nested nils)"
+    (let [dataset-hits [{:ook/uri "cube1" :matching-observation-example {(keyword "date.@id") "2019"}}]
+          facets [{:name "time" :dimensions ["date"]}]
+          dimensions [{:ook/uri "date" :label "Date"}]
+          codelists [{:ook/uri "years" :label "Years"}]
+          codes []
+          datasets (sut/explain-match dataset-hits facets dimensions codelists codes)]
+      (is (= [{:name "time"
+                :dimensions [{:ook/uri "date" :label "Date"}]}]
+             (mapcat :facets datasets))))))

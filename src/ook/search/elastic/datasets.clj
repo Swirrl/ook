@@ -115,11 +115,11 @@
                                       util/box)
                     matches (some->> code-uris
                                      (map code-lookup)
+                                     (remove nil?)
                                      (map (fn [code] (update code :scheme #(->> % util/box (map codelist-lookup))))))]
                 (when matches
-                  (-> dimension
-                      (select-keys [:ook/uri :label])
-                      (assoc :codes matches))))))
+                  (cond-> (select-keys dimension [:ook/uri :label])
+                      (seq matches) (assoc :codes matches))))))
        (remove nil?)))
 
 (defn explain-facets [facets matching-observation-example dimensions codelists codes]
