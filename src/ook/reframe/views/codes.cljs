@@ -28,7 +28,10 @@
 
 (defn- toggle-codelist-expanded-button [codelist expanded?]
   [toggle-level-button
-   {:on-click #(rf/dispatch [:ui.facets.current/toggle-codelist codelist])}
+   {:on-click (fn []
+                (if (:children codelist)
+                  (rf/dispatch [:ui.facets.current/toggle-expanded (:ook/uri codelist)])
+                  (rf/dispatch [:facets.codes/fetch-codes codelist])))}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -37,9 +40,12 @@
    "any"])
 
 (defn- select-all-children-button [code]
-  [text-button
-   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :children code])}
-   "all children"])
+  (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
+    [text-button
+     {:on-click (fn [] (if all-selected?
+                    (rf/dispatch [:ui.facets.current/set-selection :remove-children code])
+                    (rf/dispatch [:ui.facets.current/set-selection :add-children code])))}
+     (if all-selected? "none" "all children")]))
 
 (defn- checkbox-input [{:keys [ook/uri used] :as option}]
   (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])]

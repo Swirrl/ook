@@ -57,19 +57,12 @@
  :ui.facets.current/set-selection
  [e/validation-interceptor]
  (fn [db [_ which {:keys [ook/uri] :as option}]]
-   (if (= :any which)
-     (-> db (selection/add-codelist uri) (db/collapse-children uri))
-     (selection/add-children db option))))
+   (condp = which
+     :any (-> db (selection/add-codelist uri) (db/collapse-children uri))
+     :add-children (selection/add-children db option)
+     :remove-children (selection/remove-children db option))))
 
 ;;;;; EXPANDING/COLLAPSING
-
-(rf/reg-event-fx
- :ui.facets.current/toggle-codelist
- [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [children ook/uri] :as codelist}]]
-   {:fx [(if children
-           [:dispatch [:ui.facets.current/toggle-expanded uri]]
-           [:dispatch [:facets.codes/fetch-codes codelist]])]}))
 
 (rf/reg-event-db
  :ui.facets.current/toggle-expanded

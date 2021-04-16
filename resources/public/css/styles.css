@@ -26,6 +26,7 @@
   vertical-align: top;
 }
 
-.expand-code-button:focus {
+.expand-code-button:focus,
+.expand-code-button ~ button:focus {
   box-shadow: none;
 }

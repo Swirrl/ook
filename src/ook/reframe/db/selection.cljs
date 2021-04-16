@@ -35,3 +35,8 @@
 (defn add-children [db {:keys [scheme ook/uri]}]
   (let [to-add (db/uri->child-uris db uri)]
     (add-codes db scheme to-add)))
+
+(defn remove-children [db {:keys [scheme ook/uri]}]
+  (let [to-remove (db/uri->child-uris db uri)]
+    (update-in db [:ui.facets/current :selection scheme]
+               #(apply (fnil disj #{}) % to-remove))))

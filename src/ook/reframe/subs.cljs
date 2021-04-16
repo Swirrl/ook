@@ -1,6 +1,7 @@
 (ns ook.reframe.subs
   (:require
    [re-frame.core :as rf]
+   [clojure.set :as set]
    [ook.reframe.db :as db]
    [ook.reframe.db.selection :as selection]))
 
@@ -32,6 +33,13 @@
  :ui.facets.current/code-expanded?
  (fn [db [_ uri]]
    (db/code-expanded? db uri)))
+
+(rf/reg-sub
+ :ui.facets.current/all-children-selected?
+ (fn [db [_ {:keys [scheme children]}]]
+   (let [child-uris (->> children (map :ook/uri) set)
+         current-selection (-> db :ui.facets/current :selection (get scheme))]
+     (set/subset? child-uris current-selection))))
 
 ;;;;;; FACETS
 

@@ -65,19 +65,19 @@
        (is (qh/disabled? (qh/apply-filter-button))))
 
      (testing "is not disabled when a codelist is selected"
-       (eh/click-select-toggle "Codelist 1 Label")
+       (eh/click-text "Codelist 1 Label")
        (is (not (qh/disabled? (qh/apply-filter-button)))))
 
      (testing "is not disabled when a code is selected"
-       (eh/click-expansion-toggle "Codelist 1 Label")
+       (eh/click (qh/find-expansion-toggle "Codelist 1 Label"))
        (is (= ["Codelist 1 Label" "1-1 child 1"] (qh/all-labels)))
-       (eh/click-select-toggle "1-1 child 1")
+       (eh/click-text "1-1 child 1")
        (is (not (qh/disabled? (qh/apply-filter-button))))))
 
    (testing "applying a facet"
      (eh/click-text "Facet 2")
-     (eh/click-select-toggle "Codelist 2 Label")
-     (eh/click-apply-filter)
+     (eh/click-text "Codelist 2 Label")
+     (eh/click (qh/apply-filter-button))
 
      (testing "fetches datasets"
        (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
@@ -93,7 +93,7 @@
        (is (= ["Facet 1"] (qh/all-available-facets)))))
 
    (testing "removing a facet"
-     (eh/remove-facet-column "Facet 2")
+     (eh/click (qh/remove-facet-button "Facet 2"))
 
      (testing "resets the dataset list"
        (is (= "Showing all datasets" (qh/dataset-count-text)))
@@ -107,8 +107,8 @@
 
    (testing "clearing all filters"
      (eh/click-text "Facet 1")
-     (eh/click-select-toggle "Codelist 1 Label")
-     (eh/click-apply-filter)
+     (eh/click-text "Codelist 1 Label")
+     (eh/click (qh/apply-filter-button))
 
      (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
             (qh/dataset-count-text)))

@@ -47,7 +47,7 @@
 
 ;;;;;;; OOK-specific UI helpers
 
-(defn find-expand-toggle [label]
+(defn find-expansion-toggle [label]
   (-> (find-text label)
       .-parentNode
       (find-query "button")))
@@ -70,13 +70,13 @@
   (all-text-content ".filters input[type='checkbox']:checked + label"))
 
 (defn expanded-labels-under-label [label]
-  (-> label find-text .-parentNode (all-text-content code-label-query)))
+  (-> label query-text .-parentNode (all-text-content code-label-query)))
 
 (defn select-any-button [label]
-  (-> label find-text .-parentNode (find-text "any")))
+  (-> label query-text .-parentNode (find-text "any")))
 
-(defn all-children-button [label]
-  (-> label find-text .-parentNode (find-text "all children")))
+(defn multi-select-button [label]
+  (some-> label query-text .-parentNode (find-query "button ~ button")))
 
 (defn cancel-facet-selection-button []
   (find-query ".filters button.btn-close"))

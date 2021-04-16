@@ -35,28 +35,3 @@
 
 (defn click-text [text]
   (click (qh/find-text text)))
-
-;;;;;;; OOK-specific UI helpers
-
-;;; Filter UI
-
-(defn cancel-facet-selection []
-  (click (qh/cancel-facet-selection-button)))
-
-(defn click-expansion-toggle [label]
-  (click (qh/find-expand-toggle label)))
-
-(defn click-select-any [label]
-  (click (qh/select-any-button label)))
-
-(defn click-select-toggle [label]
-  (click (qh/find-text label)))
-
-(defn click-select-all-children [label]
-  (click (qh/all-children-button label)))
-
-(defn click-apply-filter []
-  (click (qh/apply-filter-button)))
-
-(defn remove-facet-column [facet-name]
-  (click (qh/remove-facet-button facet-name)))
