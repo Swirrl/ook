@@ -26,12 +26,12 @@
    {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [facet {:keys [ook/uri] :as codelist} expanded?]
+(defn- toggle-codelist-expanded-button [current-facet {:keys [ook/uri] :as codelist} expanded?]
   [toggle-level-button
    {:on-click (fn []
                 (if (:children codelist)
                   (rf/dispatch [:ui.facets.current/toggle-expanded uri])
-                  (rf/dispatch [:facets.codes/fetch-codes facet uri])))}
+                  (rf/dispatch [:facets.codes/fetch-codes current-facet uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -83,10 +83,10 @@
      [:li.list-group-item.border-0.ms-1.text-muted
       [:em "No codes to show"]])])
 
-(defn- codelist-item [facet {:keys [ook/uri label children] :as codelist}]
+(defn- codelist-item [current-facet {:keys [ook/uri label children] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [:li.list-group-item.border-0.pb-0
-     [toggle-codelist-expanded-button facet codelist expanded?]
+     [toggle-codelist-expanded-button current-facet codelist expanded?]
      [checkbox-input (assoc codelist :used true)]
      [:label.form-check-label.d-inline {:for uri} label]
      [select-any-button codelist]
