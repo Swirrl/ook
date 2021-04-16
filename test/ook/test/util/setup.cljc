@@ -103,9 +103,9 @@
      (defn stub-code-fetch-success [concept-trees]
        (rf/reg-event-fx
         :facets.codes/fetch-codes
-        (fn [_ [_ {:keys [ook/uri label] :as codelist}]]
-          (reset! concept-tree-request label)
-          {:dispatch [:facets.codes/success codelist (get concept-trees uri)]})))
+        (fn [_ [_ facet codelist-uri]]
+          (reset! concept-tree-request codelist-uri)
+          {:dispatch [:facets.codes/success facet codelist-uri (get concept-trees codelist-uri)]})))
 
      (defn stub-dataset-fetch-success [datasets]
        (rf/reg-event-fx

@@ -10,7 +10,7 @@
 (rf/reg-sub
  :facets/config
  (fn [db _]
-   (->> db :facets/config (sort-by :name))))
+   (->> db :facets/config vals (sort-by :name))))
 
 (rf/reg-sub
  :datasets/count
@@ -57,6 +57,7 @@
 
 
 ;;;;;; NAVIGATION
+
 
 (rf/reg-sub
  :app/current-route

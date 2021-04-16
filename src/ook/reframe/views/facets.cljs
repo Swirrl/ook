@@ -26,7 +26,7 @@
       [:span.text-muted "Add a filter"]
       [:div.mt-3.d-flex.align-items-center.justify-content-between
        [:div
-        (for [[name facet] facets]
+        (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
             ^{:key name} [facet-button facet selected-facet]))]
        (when selected-facet

@@ -89,18 +89,18 @@
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "concept trees are cached"
-     (is (= "Codelist 2 Label" @setup/concept-tree-request))
+     (is (= "cl2" @setup/concept-tree-request))
 
      ;; expand codelist 3
      (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
-     (is (= "Codelist 3 Label" @setup/concept-tree-request))
+     (is (= "cl3" @setup/concept-tree-request))
 
      ;; collapse and re-expand codelist 2
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
 
      ;; codelist 2 tree is not re-fetched
-     (is (= "Codelist 3 Label" @setup/concept-tree-request)))
+     (is (= "cl3" @setup/concept-tree-request)))
 
    (testing "collapsing a sub-tree works"
      (eh/click (qh/find-expansion-toggle "2-1 child 2"))

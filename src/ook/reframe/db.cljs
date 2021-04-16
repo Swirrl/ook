@@ -28,7 +28,7 @@
     (set (mapcat walk tree))))
 
 (defn uri->child-uris [db uri]
-  (let [codelists (-> db :ui.facets/current :codelists)
+  (let [codelists (-> db :ui.facets/current :codelists vals)
         walk (fn walk* [node]
                (when-let [children (:children node)]
                  (if (= (:ook/uri node) uri)
@@ -37,7 +37,7 @@
     (set (mapcat walk codelists))))
 
 (defn uri->expandable-child-uris [db uri]
-  (let [codelists (-> db :ui.facets/current :codelists)
+  (let [codelists (-> db :ui.facets/current :codelists vals)
         walk (fn walk* [node]
                (when-let [children (:children node)]
                  (if (= (:ook/uri node) uri)
