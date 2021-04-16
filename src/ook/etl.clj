@@ -218,7 +218,7 @@
                      "cogs-staging.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (ook.index/delete-index system "dataset")
-    (ook.index/create-index system "dataset")
-    (dataset-pipeline system))
+    (ook.index/delete-index system "code")
+    (ook.index/create-index system "code")
+    (code-pipeline system))
   )

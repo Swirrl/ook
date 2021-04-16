@@ -43,10 +43,6 @@ CONSTRUCT {
     BIND (EXISTS {
       ?dimension qb:codeList ?scheme .
 
-      ?cube qb:structure/qb:components/qb:dimension ?dimension .
-          
-      ?obs qb:dataSet ?cube;
-           ?dimension ?code;
-           .
+      ?obs ?dimension ?code .
     } AS ?used)
 }
