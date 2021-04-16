@@ -36,14 +36,16 @@
 
 (s/def :results.datasets/data (s/or :state #{:loading :error} :results (s/coll-of :ook/dataset)))
 (s/def :ook/dataset (s/keys :req [:ook/uri]
-                            :req-un [:ook/label]
-                            :opt-un [:ook/matching-observation-count
+                            :opt-un [:ook/label
+                                     :ook/matching-observation-count
                                      :ook/comment
+                                     :ook/description
                                      :ook/publisher
                                      :dataset/facets]))
 
 (s/def :ook/label string?)
 (s/def :ook/comment string?)
+(s/def :ook/description string?)
 (s/def :ook/matching-observations number?)
 (s/def :ook/publisher (s/keys :req-un [:publisher/altlabel]))
 (s/def :publisher/altlabel string?)

@@ -56,16 +56,16 @@
   ^{:key uri}
   [:tr
    [:td.title-column
-    [:span.text-muted.me-2 (:altlabel publisher)]
-    [:strong label]
+    [:span.text-muted.me-2 (or (:altlabel publisher) "---")]
+    (if label [:strong label] [:em.text-muted "Missing label for " uri])
     [:small.vertical-truncate (or comment description)]]
    (for [[facet-name _] applied-facets]
      ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
-   (when matching-observation-count
-     [:td
+   [:td
+    (when matching-observation-count
       [:small (str "Found " matching-observation-count " matching observations")]
       [:div
-       [:a {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
+       [:a {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]])]])
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
