@@ -11,7 +11,7 @@
    [clojure.tools.logging :as log]
    [clojure.string :as s]
    [integrant.core :as ig])
-  (:import (java.io ByteArrayOutputStream)
+  (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
 
@@ -140,6 +140,27 @@
          result)))))
 
 (derive :ook.etl/load-synchronously :ook/const)
+
+
+;; Debugging
+
+(defn write-to-disk
+  "Pipeline function to print sequence values to disk (returning sequence for further processing)"
+  ([s]
+   (write-to-disk s (File/createTempFile "ook-etl-" ".tmp" (new File "/tmp"))))
+  ([s file]
+   (log/info "Writing to:" (.getAbsolutePath file))
+   (with-open [w (io/writer file)]
+     (doseq [x s]
+       (.write w (prn-str x))))
+   s))
+
+(defn wait
+  "Sleep to avoid overloading stardog with consecutive queries"
+  [s]
+  (log/info "sleeping")
+  (Thread/sleep 10000)
+  (log/info "waking"))
 
 
 ;; Pipeline
