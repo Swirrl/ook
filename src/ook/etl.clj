@@ -93,7 +93,7 @@
 (defn ->jsonld [statements]
   (with-open [output (ByteArrayOutputStream.)]
     (let [wtr (gio/rdf-writer (io/output-stream output) :format :jsonld)]
-      (gpr/add wtr statements))
+      (doall (gpr/add wtr statements)))
     (JsonUtils/fromString (str output))))
 
 (defn compact [context input]
