@@ -10,6 +10,7 @@
 
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
+   [ook.reframe.events.codes]
    [ook.reframe.subs]))
 
 (def initial-state
@@ -146,12 +147,23 @@
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= 1 (count (qh/all-selected-labels)))))
 
+   (testing "toggling selection works"
+     (eh/click-text "2-1 child 1")
+     (is (= ["2-1 child 1"] (qh/all-selected-labels)))
+
+     (eh/click-text "2-2 child 1")
+     (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
+
+     (eh/click-text "2-1 child 1")
+     (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+
    (testing "all codelists have an 'any' button"
      (is (not (nil? (qh/select-any-button "Codelist 2 Label"))))
      (is (not (nil? (qh/select-any-button "Codelist 3 Label")))))
 
    (testing "selecting any"
      (testing "collapses children"
+       (eh/click-text "Codelist 2 Label")
        (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
        (is (= 5 (count (qh/expanded-labels-under-label "Codelist 2 Label"))))
 

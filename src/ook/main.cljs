@@ -2,6 +2,7 @@
   (:require
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
+   [ook.reframe.events.codes]
    [ook.reframe.router :as router]
    [ook.reframe.subs]
    [ook.reframe.views :as views]

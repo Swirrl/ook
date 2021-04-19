@@ -31,7 +31,7 @@
    {:on-click (fn []
                 (if (:children codelist)
                   (rf/dispatch [:ui.facets.current/toggle-expanded uri])
-                  (rf/dispatch [:facets.codes/fetch-codes current-facet uri])))}
+                  (rf/dispatch [:facets.codes/get-codes current-facet uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -58,11 +58,17 @@
               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
        (not used) (merge {:disabled true}))]))
 
+(defn- nested-list [opts & children]
+  [:ul.list-group-flush opts (common/with-react-keys children)])
+
+(defn- nested-list-item [opts & children]
+  [:li.list-group-item.border-0.pb-0 opts (common/with-react-keys children)])
+
 (declare code-tree)
 
 (defn- code-item [{:keys [ook/uri label children] :as code}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
-    [:li.list-group-item.border-0.pb-0
+    [nested-list-item
      (when (seq children)
        [toggle-code-expanded-button code expanded?])
      [checkbox-input code]
@@ -74,28 +80,43 @@
           [code-tree children])])]))
 
 (defn- code-tree [tree]
-  [:ul.list-group-flush
-   (if (seq tree)
-     (for [{:keys [ook/uri scheme] :as code} tree]
-       ^{:key [scheme uri]} [code-item code])
-     [:li.list-group-item.border-0.ms-1.text-muted
-      [:em "No codes to show"]])])
+  [nested-list
+   (for [{:keys [ook/uri scheme] :as code} tree]
+     ^{:key [scheme uri]} [code-item code])])
+
+(defn- no-codes-message []
+  [nested-list
+   [nested-list-item {:class "text-muted"}
+    [:em "No codes to show"]]])
 
 (defn- codelist-item [current-facet {:keys [ook/uri label children] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
-    [:li.list-group-item.border-0.pb-0
+    [nested-list-item
      [toggle-codelist-expanded-button current-facet codelist expanded?]
      [checkbox-input (assoc codelist :used true)]
      [:label.form-check-label.d-inline {:for uri} label]
      [select-any-button codelist]
      (when expanded?
-       [code-tree children])]))
+       (cond
+         (= :loading children)
+         [nested-list [nested-list-item (common/loading-spinner)]]
+
+         (= :error children)
+         [nested-list
+          [nested-list-item
+           [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this codelist."]]]
+
+         (= :no-children children)
+         [no-codes-message]
+
+         :else
+         [code-tree children]))]))
 
 (defn- code-selection [{:keys [codelists] :as current-facet}]
   [:<>
    [:p.h6.mt-4 "Codelists"]
    [:form.mt-3
-    [:ul.list-group-flush.p-0
+    [nested-list {:class "p-0"}
      (for [{:keys [ook/uri label] :as codelist} (->> codelists vals (sort-by :ook/uri))]
        ^{:key [uri label]} [codelist-item current-facet codelist])]]])
 
@@ -110,10 +131,10 @@
   (when selected-facet
     (cond
       (= :loading selected-facet)
-      [common/loading-spinner]
+      [:div.mt-4.ms-1 [common/loading-spinner]]
 
       (= :error selected-facet)
-      [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this facet."]
+      [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codelists for this facet."]
 
       (seq (:codelists selected-facet))
       [:<>

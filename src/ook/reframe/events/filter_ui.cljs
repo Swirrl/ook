@@ -5,7 +5,6 @@
    [ook.reframe.db.selection :as selection]
    [ook.reframe.db.caching :as caching]
    [ajax.core :as ajax]
-   [ook.util :as u]
    [day8.re-frame.http-fx]
    [ook.spec]
    [ook.reframe.events :as e]))
@@ -40,22 +39,6 @@
    (if (:ui.facets.current/loading db)
      (assoc db :ui.facets/current :loading)
      db)))
-
-;; (rf/reg-event-fx
-;;   :ui.facets.current/get-codes
-;;   [e/validation-interceptor]
-;;   (fn [{:keys [db]} [_ codelist]]
-;;     {:db (assoc db :ui.facets.current.codes/loading true)
-;;      :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current.codes/set-loading]}]
-;;           [:dispatch [:facets.codes/fetch-codes codelist]]]}))
-
-;; (rf/reg-event-db
-;;  :ui.facets.current.codes/set-loading
-;;  [e/validation-interceptor]
-;;  (fn [db _]
-;;    (if (:ui.facets.current.codes/loading db)
-;;      (assoc db :ui.facets/current :loading)
-;;      db)))
 
 (rf/reg-event-fx
  :filters/add-current-facet
@@ -114,17 +97,6 @@
                  :on-success [:facets.codelists/success name]
                  :on-failure [:ui.facets.current/error]}}))
 
-(rf/reg-event-fx
- :facets.codes/fetch-codes
- [e/validation-interceptor]
- (fn [_ [_ facet codelist-uri]]
-   {:http-xhrio {:method :get
-                 :uri "/codes"
-                 :params {:codelist codelist-uri}
-                 :response-format (ajax/transit-response-format)
-                 :on-success [:facets.codes/success facet codelist-uri]
-                 :on-failure [:facets.codes/error]}}))
-
 (rf/reg-event-db
  :facets.codelists/success
  [e/validation-interceptor]
@@ -134,19 +106,6 @@
          (dissoc :ui.facets.current/loading)
          (assoc :ui.facets/current (-> updated-db :facets/config (get facet-name)))
          (assoc-in [:ui.facets/current :expanded] #{})))))
-
-(rf/reg-event-db
- :facets.codes/success
- [e/validation-interceptor]
- (fn [db [_ facet codelist-uri result]]
-   (let [updated-db (caching/cache-code-tree db (:name facet) codelist-uri result)
-         expanded (apply (fnil conj #{})
-                         (:expanded facet)
-                         (-> codelist-uri (cons (db/all-expandable-uris result)) set))
-         with-ui-state (-> updated-db :facets/config (get (:name facet))
-                           (assoc :expanded expanded)
-                           (assoc :selection (:selection facet)))]
-     (assoc updated-db :ui.facets/current with-ui-state))))
 
 (rf/reg-event-db
  :ui.facets.current/error

@@ -17,7 +17,7 @@
     (add-codes db (:scheme option) [uri])))
 
 (defn dissoc-empty-schemes [selection]
-  (->> selection (remove (fn [[_ v]] (empty? v))) (into {})))
+  (->> selection (remove (fn [[ _ v]] (empty? v))) (into {})))
 
 (defn remove-code [db {:keys [ook/uri scheme]}]
   (-> db

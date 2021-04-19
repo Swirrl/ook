@@ -10,6 +10,7 @@
 
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
+   [ook.reframe.events.codes]
    [ook.reframe.subs]))
 
 (def initial-state

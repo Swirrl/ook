@@ -15,16 +15,18 @@
 
 (defn all-expandable-uris [tree]
   (let [walk (fn walk* [node]
-               (when-let [children (:children node)]
-                 (cons (:ook/uri node)
-                       (mapcat walk* children))))]
+               (let [children (:children node)]
+                 (when (not= :no-children children)
+                   (cons (:ook/uri node)
+                         (mapcat walk* children)))))]
     (set (mapcat walk tree))))
 
 (defn all-uris [tree]
   (let [walk (fn walk* [node]
                (cons (:ook/uri node)
-                     (when-let [children (:children node)]
-                       (mapcat walk* children))))]
+                     (let [children (:children node)]
+                       (when (not= :no-children children)
+                         (mapcat walk* children)))))]
     (set (mapcat walk tree))))
 
 (defn uri->child-uris [db uri]
@@ -39,10 +41,11 @@
 (defn uri->expandable-child-uris [db uri]
   (let [codelists (-> db :ui.facets/current :codelists vals)
         walk (fn walk* [node]
-               (when-let [children (:children node)]
-                 (if (= (:ook/uri node) uri)
-                   (all-expandable-uris children)
-                   (mapcat walk* children))))]
+               (let [children (:children node)]
+                 (when (not= :no-children children)
+                   (if (= (:ook/uri node) uri)
+                     (all-expandable-uris children)
+                     (mapcat walk* children)))))]
     (set (mapcat walk codelists))))
 
 (defn code-expanded? [db uri]
