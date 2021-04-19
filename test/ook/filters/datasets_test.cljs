@@ -1,8 +1,10 @@
 (ns ook.filters.datasets-test
   (:require
    [cljs.test :refer-macros [deftest testing is]]
+   [re-frame.core :as rf]
    [day8.re-frame.test :as rft]
    [ook.test.util.setup :as setup]
+   [ook.reframe.router :as router]
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
@@ -36,6 +38,7 @@
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2"}]}]})
 (def datasets
   {nil initial-datasets
+   {} initial-datasets
    {"Facet 2" {"cl2" nil}} [(assoc ds1
                                    :matching-observation-count 123
                                    :facets [{:name "Facet 2"

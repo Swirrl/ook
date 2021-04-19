@@ -69,7 +69,7 @@
   [validation-interceptor]
   (fn [{:keys [db]} [_ filters]]
     {:db (assoc db :ui.datasets/loading true)
-     :fx [[:dispatch-later {:ms 300 :dispatch [:ui.datasets/set-loading]}]
+     :fx [[:dispatch-later {:ms 200 :dispatch [:ui.datasets/set-loading]}]
           [:dispatch [:http/fetch-datasets filters]]]}))
 
 (rf/reg-event-db
@@ -86,7 +86,7 @@
  (fn [_ [_ filters]]
    {:http-xhrio {:method :get
                  :uri "/datasets"
-                 :params (when filters {:filters filters})
+                 :params (when (seq filters) {:filters filters})
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-failure [:results.datasets.request/error]}}))
