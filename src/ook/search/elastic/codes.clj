@@ -65,16 +65,31 @@
           :used (-> source :used Boolean/parseBoolean)})
        results))
 
+(defn- no-broader-codes [conn codelist-id]
+  (seq (-> conn
+           (esd/search "code" "_doc"
+                       {:size 5000
+                        :query
+                        {:bool
+                         {:must {:term {:scheme codelist-id}}
+                          :must_not {:exists {:field :broader}}}}})
+           :hits :hits
+           (build-codes codelist-id))))
+
+(defn- specified-top-concepts [conn codelist-id]
+  (seq (-> conn
+           (esd/search "code" "_doc"
+                       {:size 5000
+                        :query
+                        {:bool
+                         {:must [{:term {:scheme codelist-id}}
+                                 {:term {:topConceptOf codelist-id}}]}}})
+           :hits :hits
+           (build-codes codelist-id))))
+
 (defn get-top-concepts [conn codelist-id]
-  (-> conn
-      (esd/search "code" "_doc"
-                  {:size 500
-                   :query
-                   {:bool
-                    {:must {:term {:scheme codelist-id}}
-                     :must_not {:exists {:field :broader}}}}})
-      :hits :hits
-      (build-codes codelist-id)))
+  (or (no-broader-codes conn codelist-id)
+      (specified-top-concepts conn codelist-id)))
 
 (declare find-narrower-concepts)
 

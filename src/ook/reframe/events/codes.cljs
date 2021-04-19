@@ -17,7 +17,7 @@
    {:db (-> db
             (update-in [:ui.facets/current :expanded] conj codelist-uri)
             (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
-    :fx [[:dispatch-later {:ms 200 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
+    :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
          [:dispatch [:facets.codes/fetch-codes facet codelist-uri]]]}))
 
 (rf/reg-event-db

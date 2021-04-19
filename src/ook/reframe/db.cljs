@@ -32,10 +32,11 @@
 (defn uri->child-uris [db uri]
   (let [codelists (-> db :ui.facets/current :codelists vals)
         walk (fn walk* [node]
-               (when-let [children (:children node)]
-                 (if (= (:ook/uri node) uri)
-                   (all-uris children)
-                   (mapcat walk* children))))]
+               (let [children (:children node)]
+                 (when (not= :no-children children)
+                   (if (= (:ook/uri node) uri)
+                     (all-uris children)
+                     (mapcat walk* children)))))]
     (set (mapcat walk codelists))))
 
 (defn uri->expandable-child-uris [db uri]
