@@ -47,16 +47,19 @@
                     (rf/dispatch [:ui.facets.current/set-selection :add-children code])))}
      (if all-selected? "none" "all children")]))
 
-(defn- checkbox-input [{:keys [ook/uri used] :as option}]
-  (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])]
-    [:input.form-check-input.mx-2
-     (cond-> {:type "checkbox"
-              :name "code"
-              :value uri
-              :id uri
-              :checked selected?
-              :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
-       (not used) (merge {:disabled true}))]))
+(defn- checkbox-input [{:keys [ook/uri label used] :as option}]
+  (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])
+        id (str (gensym uri))]
+    [:<>
+     [:input.form-check-input.mx-2
+      (cond-> {:type "checkbox"
+               :name "code"
+               :value uri
+               :id id
+               :checked selected?
+               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
+        (not used) (merge {:disabled true}))]
+     [:label.form-check-label.d-inline {:for id} label]]))
 
 (defn- nested-list [opts & children]
   [:ul.list-group-flush opts (common/with-react-keys children)])
@@ -72,7 +75,6 @@
      (when (seq children)
        [toggle-code-expanded-button code expanded?])
      [checkbox-input code]
-     [:label.form-check-label.d-inline {:for uri} label]
      (when (seq children)
        [:<>
         [select-all-children-button code]
@@ -94,7 +96,6 @@
     [nested-list-item
      [toggle-codelist-expanded-button current-facet codelist expanded?]
      [checkbox-input (assoc codelist :used true)]
-     [:label.form-check-label.d-inline {:for uri} label]
      [select-any-button codelist]
      (when expanded?
        (cond
