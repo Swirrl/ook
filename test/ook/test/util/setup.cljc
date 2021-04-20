@@ -63,6 +63,7 @@
        (reset-indicies! system)
 
        (with-cassette {:name :fixtures :recordable? not-localhost?}
+
          (etl/pipeline system)))
 
      (defn get-db [system]

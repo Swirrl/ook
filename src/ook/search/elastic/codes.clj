@@ -21,19 +21,19 @@
 ;;           index-by-codelist))))
 
 (defn get-codes* [conn uris]
-  (->> (esd/search conn "code" "_doc"
-                   {:query (q/ids "_doc" uris)
-                    :size (count uris)})
-       :hits :hits
-       (map :_source)
-       (map esu/normalize-keys)))
+  (esd/search conn "code" "_doc"
+              {:query (q/ids "_doc" uris)
+               :size (count uris)}))
 
 (defn get-codes
   "Find codes using their URIs."
   [uris {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
         uris (u/box uris)]
-    (get-codes* conn uris)))
+    (->> (get-codes* conn uris)
+         :hits :hits
+         (map :_source)
+         (map esu/normalize-keys))))
 
 
 ;; (defn- get-codes [conn query]
@@ -50,6 +50,7 @@
 ;;            (merge code (dimensions (:codelist code))))
 ;;          codes)))
 
+
 (defn- build-codes
   "Map the codes from the elasticsearch result format to a more succinct format used internally.
   The scheme is passed in as an argument and not taken from (-> result :_source :scheme) because
@@ -57,35 +58,35 @@
   the result in the first place so that each individual map contains all the information it
   needs to fetch its own children."
   [results scheme]
-  (map (fn [{id :_id source :_source}]
-         {:scheme scheme
-          :ook/uri id
-          :label (:label source)
-          :children (:narrower source)
-          :used (-> source :used Boolean/parseBoolean)})
-       results))
+  (->> results
+       :hits :hits
+       (map (fn [{id :_id source :_source}]
+              {:scheme scheme
+               :ook/uri id
+               :label (:label source)
+               :children (:narrower source)
+               :used (-> source :used Boolean/parseBoolean)}))
+       seq))
 
 (defn- no-broader-codes [conn codelist-id]
-  (seq (-> conn
-           (esd/search "code" "_doc"
-                       {:size 5000
-                        :query
-                        {:bool
-                         {:must {:term {:scheme codelist-id}}
-                          :must_not {:exists {:field :broader}}}}})
-           :hits :hits
-           (build-codes codelist-id))))
+  (-> conn
+      (esd/search "code" "_doc"
+                  {:size 5000
+                   :query
+                   {:bool
+                    {:must {:term {:scheme codelist-id}}
+                     :must_not {:exists {:field :broader}}}}})
+      (build-codes codelist-id)))
 
 (defn- specified-top-concepts [conn codelist-id]
-  (seq (-> conn
-           (esd/search "code" "_doc"
-                       {:size 5000
-                        :query
-                        {:bool
-                         {:must [{:term {:scheme codelist-id}}
-                                 {:term {:topConceptOf codelist-id}}]}}})
-           :hits :hits
-           (build-codes codelist-id))))
+  (-> conn
+      (esd/search "code" "_doc"
+                  {:size 5000
+                   :query
+                   {:bool
+                    {:must [{:term {:scheme codelist-id}}
+                            {:term {:topConceptOf codelist-id}}]}}})
+      (build-codes codelist-id)))
 
 (defn get-top-concepts [conn codelist-id]
   (or (no-broader-codes conn codelist-id)
@@ -93,23 +94,23 @@
 
 (declare find-narrower-concepts)
 
-(defn- build-sub-tree [conn code-uris]
+(defn- build-sub-tree [conn codelist-id code-uris]
   (doall
    (map (fn [code]
           (if (:children code)
-            (find-narrower-concepts conn code)
+            (find-narrower-concepts conn codelist-id code)
             code))
-        (get-codes* conn code-uris))))
+        (build-codes (get-codes* conn code-uris) codelist-id))))
 
-(defn- find-narrower-concepts [conn {:keys [children] :as concept}]
+(defn- find-narrower-concepts [conn codelist-id {:keys [children] :as concept}]
   (if (seq children)
-    (assoc concept :children (build-sub-tree conn children))
+    (assoc concept :children (build-sub-tree conn codelist-id children))
     concept))
 
 (defn build-concept-tree [codelist-id {:keys [elastic/endpoint]}]
   (if codelist-id
     (let [conn (esu/get-connection endpoint)]
       (doall
-       (map (partial find-narrower-concepts conn)
+       (map (partial find-narrower-concepts conn codelist-id)
             (get-top-concepts conn codelist-id))))
     []))
