@@ -42,5 +42,5 @@ CONSTRUCT {
   # code can be in multiple schemes so this is specified separately
   ?code skos:inScheme ?scheme .
 
-  OPTIONAL {?code skos:topConceptOf ?toppedScheme;}
+  OPTIONAL {?toppedScheme skos:hasTopConcept ?code}
 }

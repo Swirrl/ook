@@ -88,7 +88,7 @@
                           :label "Wine"
                           :broader nil
                           :narrower nil
-                          :topConceptOf nil
+                          :topConceptOf "def/trade/concept-scheme/alcohol-type"
                           :used "true"
                           :notation "wine"
                           :priority "1"
@@ -107,7 +107,7 @@
                           :label "Total Wine Duty receipts"
                           :broader nil
                           :narrower nil
-                          :topConceptOf nil
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type"
                           :used "true"
                           :notation "total-wine-duty-receipts"
                           :priority "8"

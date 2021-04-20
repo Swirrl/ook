@@ -99,4 +99,4 @@
           :used "true"
           :narrower nil
           :broader nil
-          :topConceptOf nil)))))
+          :topConceptOf "def/trade/concept-scheme/alcohol-type")))))

@@ -239,7 +239,8 @@
                      "cogs-staging.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (ook.index/delete-index system "code")
-    (ook.index/create-index system "code")
-    (code-pipeline system))
+    (let [system (assoc system :ook.etl/select-page-size 10000)]
+      (ook.index/delete-index system "code")
+      (ook.index/create-index system "code")
+      (code-pipeline system)))
   )
