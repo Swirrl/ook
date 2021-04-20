@@ -107,6 +107,20 @@ karma start --single-run
 
 This runs the cljs tests in a way that can be reported programatically for CI.
 
+## Deployment
+
+See the [deployment readme](./deploy/README.md).
+
+To load the data, ssh into the box and do:
+
+```
+cd /opt/ook
+export AUTH0_SECRET=XXX
+java -cp "ook.jar:lib/*" -Xmx3g clojure.main -m ook.index
+```
+
+It takes a couple of hours so you'll likely want to run this with gnu-screen/ tmux/ NOHUP so a drop in the connection doesn't kill the pipeline run.
+
 ## License
 
 Copyright © 2021 Swirrl
