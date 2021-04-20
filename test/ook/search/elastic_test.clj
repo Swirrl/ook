@@ -23,11 +23,19 @@
                    (map :label response)))))
 
         (testing "get-facets"
-          (let [facets (sut/get-facets db)]
-            (testing "Resolves parent-dimension to include itself and sub-properties"
-              (let [date (first (filter #(= "Date" (:name %)) facets))]
-                (is (= 3 (count (:dimensions date))))
-                (is (not (contains? date :parent-dimension)))))))
+          (testing "Resolves parent-dimension to add itself and sub-properties to dimensions"
+            (let [facets (sut/get-facets db)
+                  date (first (filter #(= "Date" (:name %)) facets))]
+              (is (= 3 (count (:dimensions date))))
+              (is (not (contains? date :parent-dimension)))))
+          (testing "Child dimensions don't replace any specific dimensions"
+            (let [system (assoc system :ook.search/facets [{:name "Date"
+                                                            :parent-dimension "sdmxd:refPeriod"
+                                                            :dimensions ["specific-time-dimension"]}])
+                  db (get-db system)
+                  facets (sut/get-facets db)
+                  date (first (filter #(= "Date" (:name %)) facets))]
+              (is (contains? (set (:dimensions date)) "specific-time-dimension")))))
 
         (testing "get-components"
           (let [components (sut/get-components db "def/trade/property/dimension/alcohol-type")]

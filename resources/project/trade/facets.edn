@@ -3,16 +3,18 @@
    :parent-dimension "def/trade/property/dimension/product"}
   {:name "Industry" ;; should this be further down the list?
    :parent-dimension "def/trade/property/dimension/industry"}
-  {:name "Reporter Geography" ;; should this be joined with def/trade/property/dimension/geography or sdmxd:refArea
-   :parent-dimension "def/trade/property/dimension/reporter-geography"}
-  {:name "Partner Geography"
-   :parent-dimension "def/trade/property/dimension/partner-geography"}
+  ;; {:name "Reporter Geography" ;; should this be joined with def/trade/property/dimension/geography or sdmxd:refArea
+  ;;  :parent-dimension "def/trade/property/dimension/reporter-geography"}
+  ;; {:name "Partner Geography"
+  ;;  :parent-dimension "def/trade/property/dimension/partner-geography"}
+  {:name "Geography"
+   :parent-dimension "sdmxd:refArea"}
   {:name "Flow"
    :parent-dimension "def/trade/property/dimension/flow-directions"}
   {:name "Date"
-   :parent-dimension "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod"}
+   :parent-dimension "sdmxd:refPeriod"}
   {:name "Measure"
-   :parent-dimension "http://purl.org/linked-data/cube#measureType"}
+   :parent-dimension "qb:measureType"}
   {:name "Basis"
    :parent-dimension "def/trade/property/dimension/international-trade-basis"}
   {:name "Seasonality"

@@ -10,20 +10,21 @@
        (map :_id)
        (into [])))
 
-(defn- replace-parent-dimension-with-dimensions [conn {:keys [parent-dimension] :as facet}]
+(defn- append-child-dimensions [conn {:keys [parent-dimension dimensions] :as facet}]
   (if parent-dimension
     (let [child-dimensions (find-child-dimensions conn parent-dimension)
-          dimensions (cons parent-dimension child-dimensions)]
+          extra-dimensions (cons parent-dimension child-dimensions)
+          all-dimensions (concat extra-dimensions dimensions)]
       (-> facet
           (dissoc :parent-dimension)
-          (assoc :dimensions dimensions)))
+          (assoc :dimensions all-dimensions)))
     facet))
 
 (defn get-facets
   "Resolves a facet configuration by looking up sub-properties"
   [{:keys [ook/facets elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
-    (map (partial replace-parent-dimension-with-dimensions conn) facets)))
+    (map (partial append-child-dimensions conn) facets)))
 
 (defn get-facets-for-selections
   "Gets only those facets that are included in the selections"
