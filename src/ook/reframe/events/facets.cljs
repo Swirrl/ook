@@ -1,7 +1,6 @@
 (ns ook.reframe.events.facets
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.db :as db]
    [ook.reframe.db.caching :as caching]
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
@@ -14,30 +13,13 @@
 (rf/reg-event-fx
  :ui.facets/set-current
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [codelists] :as facet}]]
-   ;; (if codelists
-   ;;   (let [])
-   ;;   {:db (let [with-ui-state (assoc facet :expanded #{})])
-   ;;    (assoc db :ui.facets/current with-ui-state)})
-   ;; if data already fetched --
-   ;;    set the cached data and apply the old facet
-   ;; else
-   ;;    fetch teh new data, cache it, set it, and also apply the old facet
-
-   (if codelists
-     {:db (assoc db :ui.facets/current facet)}
-     {:fx [;; [:dispatch [:filters/add-current-facet]]
-         ;; TODO -- not the right solution -- rearchitect to decouple getting current facet and applying it@
-           [:dispatch [:ui.facets.current/get-codelists facet]]]})
-
-   ;; {:db (if codelists
-   ;;        (assoc db :ui.facets/current facet)
-   ;;        db)
-   ;;  :fx [;; [:dispatch [:filters/add-current-facet]]
-   ;;       ;; TODO -- not the right solution -- rearchitect to decouple getting current facet and applying it@
-   ;;       (when-not codelists
-   ;;         [:dispatch [:ui.facets.current/get-codelists facet]])]}
-   ))
+ (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
+   (let [current-facet (:ui.facets/current db)]
+     (if codelists
+       {:db (assoc db :ui.facets/current next-facet)
+        :dispatch [:ui.filters/apply-facet current-facet]}
+       {:fx [[:dispatch [:ui.filters/apply-facet current-facet]]
+             [:dispatch [:ui.facets.current/get-codelists next-facet]]]}))))
 
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
