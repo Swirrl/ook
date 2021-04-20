@@ -17,8 +17,9 @@
    (let [current-facet (:ui.facets/current db)]
      (if codelists
        {:db (assoc db :ui.facets/current next-facet)
-        :dispatch [:ui.filters/apply-facet current-facet]}
-       {:fx [[:dispatch [:ui.filters/apply-facet current-facet]]
+        ;; :dispatch [:ui.filters/apply-facet current-facet]
+        }
+       {:fx [;; [:dispatch [:ui.filters/apply-facet current-facet]]
              [:dispatch [:ui.facets.current/get-codelists next-facet]]]}))))
 
 (rf/reg-event-fx
