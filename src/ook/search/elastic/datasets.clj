@@ -9,6 +9,8 @@
    [ook.search.elastic.codes :as codes]
    [ook.util :as u]))
 
+(def size-limit 500)
+
 (defn- clean-datasets-result [result]
   (->> result :hits :hits
        (map :_source)
@@ -17,7 +19,7 @@
 (defn all [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
       (esd/search "dataset" "_doc" {:query (q/match-all)
-                                    :size 500})
+                                    :size size-limit})
       clean-datasets-result))
 
 (defn get-datasets
@@ -33,7 +35,8 @@
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "dataset" "_doc"
-                     {:query {:terms {:component components}}})
+                     {:query {:terms {:component components}}
+                      :size size-limit})
          :hits :hits (map :_source))))
 
 (defn for-cubes
@@ -64,8 +67,9 @@
     {:collapse {:field "qb:dataSet.@id"}
      :fields dimensions
      :_source false
+     :size size-limit
      :query {:bool {:should criteria}}
-     :aggregations {:datasets {:terms {:field "qb:dataSet.@id"}}}}))
+     :aggregations {:datasets {:terms {:field "qb:dataSet.@id" :size size-limit}}}}))
 
 (defn find-observations
   "Finds observations with given dimensions and dimension-values. Groups results by dataset."
