@@ -7,7 +7,7 @@
    [reitit.frontend :as rt]))
 
 (defn home-controller []
-  (rf/dispatch [:filters/apply {}]))
+  (rf/dispatch [:filters/apply-filter-state {}]))
 
 (def home-route-data
   {:name :ook.route/home
@@ -17,7 +17,7 @@
 (defn search-controller [params]
   (let [filter-state (-> params :query :filters)]
     (if filter-state
-      (rf/dispatch [:filters/apply filter-state])
+      (rf/dispatch [:filters/apply-filter-state filter-state])
       (rf/dispatch [:app/navigate :ook.route/home]))))
 
 (def ^:private routes

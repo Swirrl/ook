@@ -13,6 +13,7 @@
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
    [ook.reframe.events.codes]
+   [ook.reframe.events.facets]
    [ook.reframe.subs]))
 
 (def initial-state
@@ -108,6 +109,15 @@
 
      (testing "re-adds the facet to the list of possible ones to choose from"
        (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))))
+
+   ;; (testing "switching facets applies the current facet, if there is one"
+   ;;   (eh/click-text "Facet 2")
+   ;;   (eh/click-text "Codelist 2 Label")
+
+   ;;   (eh/click-text "Facet 1")
+
+   ;;   (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+   ;;   (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
    (testing "clearing all filters"
      (eh/click-text "Facet 1")

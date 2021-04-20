@@ -34,17 +34,33 @@
  :filters/reset
  [validation-interceptor]
  (fn [_ _]
-   {:fx [[:dispatch [:filters/apply {}]]
+   {:fx [[:dispatch [:filters/apply-filter-state {}]]
          [:dispatch [:app/navigate :ook.route/home]]]}))
 
-;;;;;; FILTERS
+;;;;;; UI MANAGEMENT
 
 (rf/reg-event-fx
- :filters/remove-facet
+ :ui.datasets/remove-facet
  [validation-interceptor]
  (fn [{:keys [db]} [_ facet-name]]
    {:db (update db :facets/applied dissoc facet-name)
     :dispatch [:app/navigate :ook.route/search]}))
+
+(rf/reg-event-fx
+ :datasets/get-datasets
+ [validation-interceptor]
+ (fn [{:keys [db]} [_ filters]]
+   {:db (assoc db :ui.datasets/loading true)
+    :fx [[:dispatch-later {:ms 200 :dispatch [:ui.datasets/set-loading]}]
+         [:dispatch [:http/fetch-datasets filters]]]}))
+
+(rf/reg-event-db
+ :ui.datasets/set-loading
+ [validation-interceptor]
+ (fn [db _]
+   (if (:ui.datasets/loading db)
+     (assoc db :results.datasets/data :loading)
+     db)))
 
 ;;; HTTP REQUESTS/RESPONSES
 
@@ -65,22 +81,6 @@
        (assoc :results.datasets/data :error))))
 
 (rf/reg-event-fx
-  :datasets/get-datasets
-  [validation-interceptor]
-  (fn [{:keys [db]} [_ filters]]
-    {:db (assoc db :ui.datasets/loading true)
-     :fx [[:dispatch-later {:ms 200 :dispatch [:ui.datasets/set-loading]}]
-          [:dispatch [:http/fetch-datasets filters]]]}))
-
-(rf/reg-event-db
-  :ui.datasets/set-loading
-  [validation-interceptor]
-  (fn [db _]
-    (if (:ui.datasets/loading db)
-      (assoc db :results.datasets/data :loading)
-      db)))
-
-(rf/reg-event-fx
  :http/fetch-datasets
  [validation-interceptor]
  (fn [_ [_ filters]]
@@ -92,13 +92,13 @@
                  :on-failure [:results.datasets.request/error]}}))
 
 (rf/reg-event-fx
- :filters/apply
+ :filters/apply-filter-state
  [validation-interceptor]
  (fn [{db :db} [_ filter-state]]
-   {:dispatch [:datasets/get-datasets filter-state]
-    :db (-> db
+   {:db (-> db
             (assoc :facets/applied (p/deserialize-filter-state filter-state))
-            (dissoc :ui.facets/current))}))
+            (dissoc :ui.facets/current))
+    :dispatch [:datasets/get-datasets filter-state]}))
 
 ;;;; NAVIGATION
 

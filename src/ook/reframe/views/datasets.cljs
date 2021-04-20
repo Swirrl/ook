@@ -10,7 +10,7 @@
 (defn- remove-facet-button [facet-name]
   [:button.btn-close.border.btn-xs.ms-2.align-middle
    {:type "button"
-    :on-click #(rf/dispatch [:filters/remove-facet facet-name])}])
+    :on-click #(rf/dispatch [:ui.datasets/remove-facet facet-name])}])
 
 (defn- dataset-count-message [data]
   (let [dataset-count (count data)

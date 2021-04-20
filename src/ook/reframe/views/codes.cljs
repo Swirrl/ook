@@ -4,11 +4,11 @@
    [ook.ui.icons :as icons]
    [ook.ui.common :as common]))
 
-(defn- apply-filter-button [{:keys [codelists selection]}]
+(defn- apply-filter-button [{:keys [codelists selection] :as facet}]
   [:button.btn.btn-primary.mt-3
    {:type "button"
     :disabled (or (not (seq codelists)) (not (seq selection)))
-    :on-click #(rf/dispatch [:filters/add-current-facet])}
+    :on-click #(rf/dispatch [:ui.filters/apply-facet facet])}
    "Apply filter"])
 
 (defn- text-button [opts & children]

@@ -26,7 +26,7 @@
  (fn [db [_ codelist-uri]]
    (if (get-in db [:ui.facets.current.codes/loading codelist-uri])
      (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :loading)
-     db)))
+     db))):filters/apply
 
 ;; HTTP REQUEST
 
@@ -41,7 +41,7 @@
                  :on-success [:facets.codes/success facet codelist-uri]
                  :on-failure [:facets.codes/error codelist-uri]}}))
 
-;; HTTP RESPONSE HANDLER
+;; HTTP RESPONSE HANDLERS
 
 (rf/reg-event-db
  :facets.codes/success

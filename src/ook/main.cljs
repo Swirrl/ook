@@ -3,6 +3,7 @@
    [ook.reframe.events]
    [ook.reframe.events.filter-ui]
    [ook.reframe.events.codes]
+   [ook.reframe.events.facets]
    [ook.reframe.router :as router]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
