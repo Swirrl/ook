@@ -10,7 +10,7 @@
 (rf/reg-sub
  :facets/config
  (fn [db _]
-   (->> db :facets/config vals (sort-by :name))))
+   (->> db :facets/config vals (sort-by :sort-priority))))
 
 (rf/reg-sub
  :datasets/count

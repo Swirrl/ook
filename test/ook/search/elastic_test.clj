@@ -30,6 +30,7 @@
               (is (not (contains? date :parent-dimension)))))
           (testing "Child dimensions don't replace any specific dimensions"
             (let [system (assoc system :ook.search/facets [{:name "Date"
+                                                            :sort-priority 4
                                                             :parent-dimension "sdmxd:refPeriod"
                                                             :dimensions ["specific-time-dimension"]}])
                   db (get-db system)
