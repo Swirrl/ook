@@ -1,10 +1,8 @@
 (ns ook.filters.datasets-test
   (:require
    [cljs.test :refer-macros [deftest testing is]]
-   [re-frame.core :as rf]
    [day8.re-frame.test :as rft]
    [ook.test.util.setup :as setup]
-   [ook.reframe.router :as router]
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
@@ -50,8 +48,9 @@
 
 (deftest filtering-datasets
   (rft/run-test-sync
-   (setup/stub-dataset-fetch-success datasets)
+
    (setup/stub-navigation)
+   (setup/stub-dataset-fetch-success datasets)
    (setup/stub-codelist-fetch-success codelists)
    (setup/stub-code-fetch-success concept-trees)
    (setup/init! views/search initial-state)
@@ -63,6 +62,7 @@
 
      (testing "shows when a facet is selected"
        (eh/click-text "Facet 1")
+
        (is (not (nil? (qh/apply-filter-button)))))
 
      (testing "is disabled when no codes or codelists are selected"
@@ -80,6 +80,7 @@
        (is (not (qh/disabled? (qh/apply-filter-button))))))
 
    (testing "applying a facet"
+     (eh/click-text "Codelist 1 Label")
      (eh/click-text "Facet 2")
      (eh/click-text "Codelist 2 Label")
      (eh/click (qh/apply-filter-button))
@@ -110,14 +111,14 @@
      (testing "re-adds the facet to the list of possible ones to choose from"
        (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))))
 
-   ;; (testing "switching facets applies the current facet, if there is one"
-   ;;   (eh/click-text "Facet 2")
-   ;;   (eh/click-text "Codelist 2 Label")
+   (testing "switching facets applies the current facet, if there is one"
+     (eh/click-text "Facet 2")
+     (eh/click-text "Codelist 2 Label")
 
-   ;;   (eh/click-text "Facet 1")
+     (eh/click-text "Facet 1")
 
-   ;;   (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
-   ;;   (is (= ["Dataset 1"] (qh/all-dataset-titles))))
+     (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+     (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
    (testing "clearing all filters"
      (eh/click-text "Facet 1")
@@ -133,6 +134,6 @@
        (is (= [:ook.route/home nil] @setup/last-navigation)))
 
      (testing "resets dataset list"
-       (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles))))))
+       (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles)))))
 
-  (setup/cleanup!))
+   (setup/cleanup!)))

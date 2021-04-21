@@ -11,14 +11,14 @@
 ;; UI MANAGEMENT
 
 (rf/reg-event-fx
- :facets.codes/get-codes
+ :ui.facets.codes/get-codes
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ facet codelist-uri]]
    {:db (-> db
             (update-in [:ui.facets/current :expanded] conj codelist-uri)
             (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
     :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
-         [:dispatch [:facets.codes/fetch-codes facet codelist-uri]]]}))
+         [:dispatch [:http/fetch-codes facet codelist-uri]]]}))
 
 (rf/reg-event-db
  :ui.facets.current.codes/set-loading
@@ -31,7 +31,7 @@
 ;; HTTP REQUEST
 
 (rf/reg-event-fx
- :facets.codes/fetch-codes
+ :http/fetch-codes
  [e/validation-interceptor]
  (fn [_ [_ facet codelist-uri]]
    {:http-xhrio {:method :get

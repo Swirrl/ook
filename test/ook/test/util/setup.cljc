@@ -63,7 +63,6 @@
        (reset-indicies! system)
 
        (with-cassette {:name :fixtures :recordable? not-localhost?}
-
          (etl/pipeline system)))
 
      (defn get-db [system]
@@ -86,15 +85,17 @@
        ;; app db (sets it to {}) between each test run, which fails the validation
        (s/def :ook.spec/db map?)
 
-       (.appendChild body test-div)
        (rf/dispatch-sync [:init/initialize-db initial-state])
+       (router/home-controller)
+
+       (.appendChild body test-div)
        (rdom/render [component-fn] test-div))
 
      (def codelist-request (atom nil))
 
      (defn stub-codelist-fetch-success [codelists]
        (rf/reg-event-fx
-        :facets.codelists/fetch-codelists
+        :http/fetch-codelists
         (fn [_ [_ {:keys [name]}]]
           (reset! codelist-request name)
           {:dispatch [:facets.codelists/success name (get codelists name)]})))
@@ -103,7 +104,7 @@
 
      (defn stub-code-fetch-success [concept-trees]
        (rf/reg-event-fx
-        :facets.codes/fetch-codes
+        :http/fetch-codes
         (fn [_ [_ facet codelist-uri]]
           (reset! concept-tree-request codelist-uri)
           {:dispatch [:facets.codes/success facet codelist-uri (get concept-trees codelist-uri)]})))

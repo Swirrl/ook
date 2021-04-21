@@ -7,20 +7,19 @@
    [ook.spec]
    [ook.reframe.events :as e]))
 
-
 ;; UI MANAGEMENT
 
 (rf/reg-event-fx
  :ui.facets/set-current
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
-   (let [current-facet (:ui.facets/current db)]
+   (let [{:keys [selection] :as current-facet} (:ui.facets/current db)]
      (if codelists
-       {:db (assoc db :ui.facets/current next-facet)
-        ;; :dispatch [:ui.filters/apply-facet current-facet]
-        }
-       {:fx [;; [:dispatch [:ui.filters/apply-facet current-facet]]
-             [:dispatch [:ui.facets.current/get-codelists next-facet]]]}))))
+       (cond-> {:db (assoc db :ui.facets/current next-facet)}
+         (seq selection) (merge {:dispatch [:facets/apply-facet current-facet]}))
+       {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
+             (when (seq selection)
+               [:dispatch [:facets/apply-facet current-facet]])]}))))
 
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
@@ -28,7 +27,7 @@
  (fn [{:keys [db]} [_ facet]]
    {:db (assoc db :ui.facets.current/loading true)
     :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
-         [:dispatch [:facets.codelists/fetch-codelists facet]]]}))
+         [:dispatch [:http/fetch-codelists facet]]]}))
 
 (rf/reg-event-db
  :ui.facets.current/set-loading
@@ -45,17 +44,25 @@
    (dissoc db :ui.facets/current)))
 
 (rf/reg-event-fx
- :ui.filters/apply-facet
+ :facets/apply-facet
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [name selection]}]]
    {:db (cond-> db
           (seq selection) (assoc-in [:facets/applied name] selection))
     :dispatch [:app/navigate :ook.route/search]}))
 
+(rf/reg-event-fx
+  :ui.filters/apply-current-facet
+  [e/validation-interceptor]
+  (fn [{:keys [db]} _]
+    (let [current-facet (:ui.facets/current db)]
+      {:db (dissoc db :ui.facets/current)
+       :dispatch [:facets/apply-facet current-facet]})))
+
 ;; HTTP REQUEST
 
 (rf/reg-event-fx
- :facets.codelists/fetch-codelists
+ :http/fetch-codelists
  [e/validation-interceptor]
  (fn [_ [_ {:keys [name dimensions]}]]
    {:http-xhrio {:method :get

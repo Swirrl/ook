@@ -1,5 +1,6 @@
 (ns ook.reframe.events.filter-ui
   (:require
+   [day8.re-frame.tracing :refer-macros [fn-traced]]
    [re-frame.core :as rf]
    [ook.reframe.db :as db]
    [ook.reframe.db.selection :as selection]
@@ -28,7 +29,7 @@
 (rf/reg-event-db
  :ui.facets.current/toggle-expanded
  [e/validation-interceptor]
- (fn [db [_ uri]]
+ (fn-traced [db [_ uri]]
    (let [uri+children (cons uri (db/uri->expandable-child-uris db uri))
          expanded? (db/code-expanded? db uri)
          update-fn (if expanded? disj (fnil conj #{}))]

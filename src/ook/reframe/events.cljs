@@ -95,9 +95,7 @@
  :filters/apply-filter-state
  [validation-interceptor]
  (fn [{db :db} [_ filter-state]]
-   {:db (-> db
-            (assoc :facets/applied (p/deserialize-filter-state filter-state))
-            (dissoc :ui.facets/current))
+   {:db (assoc db :facets/applied (p/deserialize-filter-state filter-state))
     :dispatch [:datasets/get-datasets filter-state]}))
 
 ;;;; NAVIGATION

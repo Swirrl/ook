@@ -6,8 +6,8 @@
 
 (defn search []
   [:<>
-   (facets/configured-facets)
-   (datasets/results)])
+   [facets/configured-facets]
+   [datasets/results]])
 
 (defn main []
   (let [current-route @(rf/subscribe [:app/current-route])]

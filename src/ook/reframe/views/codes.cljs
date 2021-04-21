@@ -4,11 +4,11 @@
    [ook.ui.icons :as icons]
    [ook.ui.common :as common]))
 
-(defn- apply-filter-button [{:keys [codelists selection] :as facet}]
+(defn- apply-filter-button [{:keys [codelists selection]}]
   [:button.btn.btn-primary.mt-3
    {:type "button"
     :disabled (or (not (seq codelists)) (not (seq selection)))
-    :on-click #(rf/dispatch [:ui.filters/apply-facet facet])}
+    :on-click #(rf/dispatch [:ui.filters/apply-current-facet])}
    "Apply filter"])
 
 (defn- text-button [opts & children]
@@ -31,7 +31,7 @@
    {:on-click (fn []
                 (if (:children codelist)
                   (rf/dispatch [:ui.facets.current/toggle-expanded uri])
-                  (rf/dispatch [:facets.codes/get-codes current-facet uri])))}
+                  (rf/dispatch [:ui.facets.codes/get-codes current-facet uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -56,7 +56,7 @@
                :name "code"
                :value uri
                :id id
-               :checked selected?
+               :checked (and used selected?)
                :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
         (not used) (merge {:disabled true}))]
      [:label.form-check-label.d-inline {:for id} label]]))

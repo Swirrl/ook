@@ -138,6 +138,8 @@
   (rft/run-test-sync
    (setup/stub-codelist-fetch-success codelists)
    (setup/stub-code-fetch-success concept-trees)
+   (setup/stub-dataset-fetch-success {})
+   (setup/stub-navigation)
    (setup/init! facets/configured-facets initial-state)
    (eh/click-text "Facet 2")
 
@@ -188,20 +190,26 @@
      (eh/click-text "2-1 child 2")
      (is (= ["2-1 child 2"] (qh/all-selected-labels))))
 
+   (testing "unused codes are not selectable"
+     (eh/click-text "2-1 child 2")
+     (is (= [] (qh/all-selected-labels)))
+     (eh/click-text "2-2 child 2")
+     (is (= [] (qh/all-selected-labels))))
+
    (testing "selecting 'all children'"
-     (testing "selects all the children"
-       (is (= ["2-1 child 2"] (qh/all-selected-labels)))
+     (testing "selects all the children that are used"
        (eh/click (qh/multi-select-button "2-1 child 2"))
-       (is (= ["2-1 child 2" "2-2 child 1" "2-2 child 2"] (qh/all-selected-labels))))
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
      (testing "unselects parent codelist if it was selected"
        (eh/click-text "Codelist 2 Label")
 
        (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
        (eh/click (qh/multi-select-button "2-1 child 2"))
-       (is (= ["2-2 child 1" "2-2 child 2"] (qh/all-selected-labels))))
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
      (testing "selects all children of all levels for deeply nested code trees"
+       (eh/click-text "2-2 child 1")
        (eh/click-text "Facet 4")
        (eh/click (qh/find-expansion-toggle "with nested codes"))
 
@@ -218,13 +226,6 @@
        (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
 
        (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= [] (qh/all-selected-labels)))))
-
-   (testing "unused codes are not selectable"
-     (eh/click-text "Facet 2")
-     (is (= [] (qh/all-selected-labels)))
-     (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (eh/click-text "2-2 child 2")
-     (is (= [] (qh/all-selected-labels)))))
+       (is (= [] (qh/all-selected-labels))))))
 
   (setup/cleanup!))
