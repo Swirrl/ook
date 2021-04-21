@@ -10,51 +10,44 @@
        (map :_id)
        (into [])))
 
-(defn- replace-parent-dimension-with-dimensions [conn {:keys [parent-dimension] :as facet}]
+(defn- append-child-dimensions [conn {:keys [parent-dimension dimensions] :as facet}]
   (if parent-dimension
     (let [child-dimensions (find-child-dimensions conn parent-dimension)
-          dimensions (cons parent-dimension child-dimensions)]
+          extra-dimensions (cons parent-dimension child-dimensions)
+          all-dimensions (concat extra-dimensions dimensions)]
       (-> facet
           (dissoc :parent-dimension)
-          (assoc :dimensions dimensions)))
+          (assoc :dimensions all-dimensions)))
     facet))
 
 (defn get-facets
   "Resolves a facet configuration by looking up sub-properties"
   [{:keys [ook/facets elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
-    (map (partial replace-parent-dimension-with-dimensions conn) facets)))
+    (map (partial append-child-dimensions conn) facets)))
 
-(defn apply-selections
-  "Applies components (replacing ids with docs) and selections (by filtering) to configured facets"
-  [facets components selections]
-  {:post [(do
-            "Facet selection has no dimensions"
-            (not (empty? (mapcat :dimensions %))))]}
-  (let [->component (util/id-lookup components)
-        matches-codelists? (fn [codelists]
-                             (fn [c]
-                               ((set codelists)
-                                (get-in c [:codelist :ook/uri]))))]
-    (map (fn [facet]
-           (let [selected-codelists (selections (:name facet))]
-             (update facet :dimensions
-                     (fn [ds] (->>
-                               ds
-                               (map ->component)
-                               (filter (matches-codelists? selected-codelists)))))))
-         facets)))
+(defn get-facets-for-selections
+  "Gets only those facets that are included in the selections"
+  [selections opts]
+  (filter (fn [f] (contains? selections (:name f))) (get-facets opts)))
 
-(defn selections-for-dataset [facet-selections dataset]
-  (let [filter-to-dataset (partial filter (fn [dimension] ((set (:component dataset)) (:ook/uri dimension))))]
-    (->> facet-selections
-         (map (fn [facet] (update facet :dimensions filter-to-dataset)))
-         (filter (fn [facet] (not-empty (:dimensions facet) ))))))
+(defn- join-code-selections
+  "Combines two (possibly empty) vectors of code URIs (i.e. for a common dimension).
+  If either is empty (i.e. any code could match) then the overall result is empty (the wildcard makes
+  the specifications redundant). If both are non-empty then the set union is returned."
+  [codes-a codes-b]
+  (if (or (empty? codes-a)
+          (empty? codes-b))
+    []
+    (distinct (concat codes-a codes-b))))
 
-(defn apply-facets
-  "Returns a list of datasets that match the facet selections"
-  [datasets components facets selections]
-  (let [facet-selections (apply-selections facets components selections)]
-    (->> datasets
-         (map (fn [dataset] (assoc dataset :facets (selections-for-dataset facet-selections dataset))))
-         (filter (fn [dataset] (not-empty (:facets dataset)))))))
+(defn dimension-selections
+  "Given a map from facet name to a map from codelist to a (possibly empty) vector of codes,
+  return a map from dimension to a (possibly empty) vector of codes (merging across facets)"
+  [codelist-selections dimensions-lookup]
+  (->> (for [[facet selection] codelist-selections]
+         (for [[codelist codes] selection]
+           (for [dimension (dimensions-lookup codelist)]
+             {dimension codes})))
+       flatten
+       (apply merge-with join-code-selections)))

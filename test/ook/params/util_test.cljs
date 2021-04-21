@@ -1,12 +1,30 @@
 (ns ook.params.util-test
-  (:require [cljs.test :refer [deftest is]]
+  (:require [cljs.test :refer [deftest is testing]]
             [ook.params.util :as sut]))
 
 (deftest link-to-pmd-dataset
-  (is (= "https://staging.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fhmrc-alcohol-bulletin%2Falcohol-bulletin-clearances-catalog-entry&filters-drawer=open&filter-facets=http%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fproperty%252Fdimension%252Falcohol-type%2Chttp%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fconcept%252Falcohol-type%252Fmade-wine&filter-facets=http%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fproperty%252Fdimension%252Fbulletin-type%2Chttp%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fconcept%252Fbulletin-type%252Ftotal-made-wine-clearances"
-         (sut/link-to-pmd-dataset
-          "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-clearances-catalog-entry"
-          [{:value "def/trade/concept/alcohol-type/made-wine"
-            :dimension "def/trade/property/dimension/alcohol-type"}
-           {:value "def/trade/concept/bulletin-type/total-made-wine-clearances"
-            :dimension "def/trade/property/dimension/bulletin-type"}]))))
+  (testing "works for matches with all expected data"
+    (is (= "https://staging.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&filter-facets=http%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fproperty%252Fdimension%252Fproduct%2Chttp%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fconcept%252Fproduct%252FB"
+           (sut/link-to-pmd-dataset
+             "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
+             [{:name "Product"
+               :dimensions [{:ook/uri "def/trade/property/dimension/product"
+                             :codes [{:ook/uri "def/trade/concept/product/B"}]}]}]))))
+
+  (testing "does not include filter facet params for facets with no matching codes"
+    (is (= "https://staging.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id&apply-filters=true"
+           (sut/link-to-pmd-dataset
+             "data/dataset-id"
+             [{:name "Facet"
+               :dimensions [{:ook/uri "some/dim"
+                             ;; no matching codes!
+                             }]}])))))
+
+(deftest absolute-uri-test
+  (testing "reverses json-ld prefixing"
+    (testing "adds base to gss-data URIs"
+      (is (= "http://gss-data.org.uk/example"
+             (sut/absolute-uri "example"))))
+    (testing "doesn't add base to absolute URIs"
+      (is (= "http://example.com"
+             (sut/absolute-uri "http://example.com"))))))

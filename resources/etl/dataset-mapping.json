@@ -1,14 +1,20 @@
 {
-    "mappings": {
-        "properties": {
-            "@type": { "type": "keyword" },
-            "family": { "type": "keyword" },
-            "cube": { "type": "keyword" },
-            "publisher": { "type": "keyword" },
-            "label": { "type": "text" },
-            "comment": { "type": "text" },
-            "description": { "type": "text" },
-            "component": { "type": "keyword" }
-        }
+  "mappings": {
+    "properties": {
+      "@id": { "type": "keyword" },
+      "@type": { "type": "keyword" },
+      "family": { "type": "keyword" },
+      "cube": { "type": "keyword" },
+      "publisher": { "type": "nested", "properties": {
+        "@id": {"type": "keyword"},
+        "label": {"type": "text"},
+        "altlabel": {"type": "text"}
+      }},
+      "label": { "type": "text" },
+      "comment": { "type": "text" },
+      "description": { "type": "text" },
+      "markdown_description": { "type": "text" },
+      "component": { "type": "keyword" }
     }
+  }
 }

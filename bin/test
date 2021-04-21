@@ -5,5 +5,5 @@
 
 docker-compose up -d elasticsearch-test
 clojure -A:dev:test
-docker-compose stop elasticsearch-test
+#docker-compose stop elasticsearch-test
 

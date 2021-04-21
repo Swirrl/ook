@@ -32,3 +32,6 @@
 
 (defn press-enter [target]
   (send-keys target "{enter}"))
+
+(defn click-text [text]
+  (click (qh/find-text text)))

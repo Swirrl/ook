@@ -34,125 +34,69 @@
  :filters/reset
  [validation-interceptor]
  (fn [_ _]
-   {:fx [[:dispatch [:filters/apply []]]
+   {:fx [[:dispatch [:filters/apply-filter-state {}]]
          [:dispatch [:app/navigate :ook.route/home]]]}))
 
-;;;;;; FILTERS
-
-(rf/reg-event-db
- :ui.facets/set-current
- [validation-interceptor]
- (fn [db [_ {:keys [codelists] :as facet}]]
-   (if facet
-     (let [with-selection (assoc facet :selection (->> codelists (map :ook/uri) set))]
-       (assoc db :ui.facets/current with-selection))
-     (dissoc db :ui.facets/current))))
-
-(rf/reg-event-db
- :ui.facets.current/toggle-selection
- [validation-interceptor]
- (fn [db [_ val]]
-   (let [selected? (-> db :ui.facets/current :selection (get val))
-         update-fn (if selected? disj conj)]
-     (update-in db [:ui.facets/current :selection] update-fn val))))
+;;;;;; UI MANAGEMENT
 
 (rf/reg-event-fx
- :filters/add-current-facet
+ :ui.datasets/remove-facet
  [validation-interceptor]
- (fn [{:keys [db]} _]
-   (let [current-facet (:ui.facets/current db)
-         selection (seq (:selection current-facet))]
-     {:db (cond-> db
-            selection (assoc-in [:facets/applied (:name current-facet)] selection))
-      :dispatch [:app/navigate :ook.route/search]})))
+ (fn [{:keys [db]} [_ facet-name]]
+   {:db (update db :facets/applied dissoc facet-name)
+    :dispatch [:app/navigate :ook.route/search]}))
+
+(rf/reg-event-fx
+ :datasets/get-datasets
+ [validation-interceptor]
+ (fn [{:keys [db]} [_ filters]]
+   {:db (assoc db :ui.datasets/loading true)
+    :fx [[:dispatch-later {:ms 200 :dispatch [:ui.datasets/set-loading]}]
+         [:dispatch [:http/fetch-datasets filters]]]}))
 
 (rf/reg-event-db
- :filters/remove-facet
+ :ui.datasets/set-loading
  [validation-interceptor]
- (fn [db [_ facet-name]]
-   (update db :facets/applied dissoc facet-name)))
-
-;;;;; UI STATE MANAGEMENT
-
-;; (rf/reg-event-db :ui.codes/query-change (fn [db [_ new-query]]
-;;                                           (assoc db :ui.codes/query new-query)))
-
-;; (rf/reg-event-db :ui.codes/toggle-selection (fn [db [_ val]]
-;;                                               (update-in db [:ui.codes/selection val] not)))
-
-;; (rf/reg-event-db :ui.codes/set-selection (fn [db [_ selection]]
-;;                                            (assoc db :ui.codes/selection selection)))
-
-;; (rf/reg-event-db :ui.codes.selection/reset (fn [db _]
-;;                                              (dissoc db :ui.codes/selection)))
-
-;; (rf/reg-event-db :results.datasets/reset (fn [db _]
-;;                                            (dissoc db :results.datasets/data :ui.codes/selection)))
+ (fn [db _]
+   (if (:ui.datasets/loading db)
+     (assoc db :results.datasets/data :loading)
+     db)))
 
 ;;; HTTP REQUESTS/RESPONSES
-
-;; (rf/reg-event-db :results.codes.request/success (fn [db [_ query result]]
-;;                                                   (assoc db
-;;                                                          :results.codes/data result
-;;                                                          :results.codes/query query)))
-
-;; (rf/reg-event-db :results.codes.request/error (fn [db [_ error]]
-;;                                                 (assoc db :results.codes/error error)))
 
 (rf/reg-event-db
  :results.datasets.request/success
  [validation-interceptor]
  (fn [db [_ result]]
    (-> db
-       (dissoc :results.codes/error)
+       (dissoc :ui.datasets/loading)
        (assoc :results.datasets/data result))))
 
 (rf/reg-event-db
  :results.datasets.request/error
  [validation-interceptor]
- (fn [db [_ result]]
-   (assoc db :results.datasets/error result)))
-
-;;;;; HTTP REQUESTS
-
-;; (rf/reg-event-fx :codes/submit-search (fn [_ [_ query]]
-;;                                         {:http-xhrio {:method :get
-;;                                                       :uri "/get-codes"
-;;                                                       :params {:q query}
-;;                                                       :response-format (ajax/transit-response-format)
-;;                                                       :on-success [:results.codes.request/success query]
-;;                                                       :on-failure [:results.codes.request/errror]}
-;;                                          :fx [[:dispatch [:ui.codes/query-change query]]
-;;                                               [:dispatch [:results.datasets/reset]]]}))
-
-;; (rf/reg-event-fx :filters/apply-code-selection (fn [_ [_ facets]]
-;;                                                  {:http-xhrio {:method :get
-;;                                                                :uri "/apply-filters"
-;;                                                                :params {:facet facets}
-;;                                                                :response-format (ajax/transit-response-format)
-;;                                                                :on-success [:results.datasets.request/success]
-;;                                                                :on-failure [:results.datasets.request/errror]}
-;;                                                   :dispatch [:ui.codes/set-selection (zipmap (u/box facets) (repeat true))]}))
+ (fn [db [_ error]]
+   (-> db
+       (dissoc :ui.datasets/loading)
+       (assoc :results.datasets/data :error))))
 
 (rf/reg-event-fx
- :datasets/fetch-datasets
+ :http/fetch-datasets
  [validation-interceptor]
- (fn [_ [_ facets]]
+ (fn [_ [_ filters]]
    {:http-xhrio {:method :get
                  :uri "/datasets"
-                 :params (when facets {:facet facets})
+                 :params (when (seq filters) {:filters filters})
                  :response-format (ajax/transit-response-format)
                  :on-success [:results.datasets.request/success]
                  :on-failure [:results.datasets.request/error]}}))
 
 (rf/reg-event-fx
- :filters/apply
+ :filters/apply-filter-state
  [validation-interceptor]
- (fn [{db :db} [_ facets]]
-   {:dispatch [:datasets/fetch-datasets facets]
-    :db (-> db
-            (assoc :facets/applied (p/parse-named-facets facets))
-            (dissoc :ui.facets/current))}))
+ (fn [{db :db} [_ filter-state]]
+   {:db (assoc db :facets/applied (p/deserialize-filter-state filter-state))
+    :dispatch [:datasets/get-datasets filter-state]}))
 
 ;;;; NAVIGATION
 

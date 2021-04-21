@@ -11,7 +11,7 @@
    [clojure.tools.logging :as log]
    [clojure.string :as s]
    [integrant.core :as ig])
-  (:import (java.io ByteArrayOutputStream)
+  (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
 
@@ -93,7 +93,7 @@
 (defn ->jsonld [statements]
   (with-open [output (ByteArrayOutputStream.)]
     (let [wtr (gio/rdf-writer (io/output-stream output) :format :jsonld)]
-      (gpr/add wtr statements))
+      (doall (gpr/add wtr statements)))
     (JsonUtils/fromString (str output))))
 
 (defn compact [context input]
@@ -140,6 +140,27 @@
          result)))))
 
 (derive :ook.etl/load-synchronously :ook/const)
+
+
+;; Debugging
+
+(defn write-to-disk
+  "Pipeline function to print sequence values to disk (returning sequence for further processing)"
+  ([s]
+   (write-to-disk s (File/createTempFile "ook-etl-" ".tmp" (new File "/tmp"))))
+  ([s file]
+   (log/info "Writing to:" (.getAbsolutePath file))
+   (with-open [w (io/writer file)]
+     (doseq [x s]
+       (.write w (prn-str x))))
+   s))
+
+(defn wait
+  "Sleep to avoid overloading stardog with consecutive queries"
+  [s]
+  (log/info "sleeping")
+  (Thread/sleep 10000)
+  (log/info "waking"))
 
 
 ;; Pipeline
@@ -212,12 +233,14 @@
                  ]}))
 
   ;; update single index
+  (require 'ook.index)
   (dev/with-system [system
                     ["drafter-client.edn"
                      "cogs-staging.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (ook.index/delete-index system "component")
-    (ook.index/create-index system "component")
-    (component-pipeline system))
+    (let [system (assoc system :ook.etl/select-page-size 10000)]
+      (ook.index/delete-index system "code")
+      (ook.index/create-index system "code")
+      (code-pipeline system)))
   )

@@ -1,38 +1,36 @@
 {:ook.search/facets
  [{:name "Product"
-   :dimensions ["def/trade/property/dimension/product"
-                "def/trade/property/dimension/sitc-4"
-                "data/gss_data/trade/ons_pinkbook#dimension/pink-book-services"
-                "data/gss_data/trade/ons_cpa#dimension/cpa-2008"
-                "data/gss_data/trade/ons_mrets#dimension/mrets-product"
+   :sort-priority 1
+   :parent-dimension "def/trade/property/dimension/product"
+   :dimensions ["def/trade/property/dimension/sitc-4"
+                "data/gss_data/trade/ons-pink-book-trade-in-services#dimension/pink-book-services"
                 "data/gss_data/trade/ons-balance-of-payments#dimension/bop-services"
-                "data/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply#dimension/service-account"]}
+                "data/gss_data/trade/ons_cpa#dimension/cpa-2008"]}
   {:name "Industry"
-   :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/industry"
-                "def/trade/property/dimension/industry-section"
+   :sort-priority 2
+   :parent-dimension "def/trade/property/dimension/industry"
+   :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports#dimension/trade-industry"
+                "data/gss_data/trade/ons-international-trade-in-services-by-subnational-areas-of-the-uk#dimension/industry-grouping"
                 "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/sector"
                 "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/subsector"
                 "def/trade/property/dimension/sic-2007"
-                "def/trade/property/dimension/ons-functional-category"
-                "data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/service-account"]}
+                "def/trade/property/dimension/ons-functional-category"]}
   {:name "Geography"
-   :dimensions ["data/gss_data/trade/ons-uk-trade-in-services-by-industry-country-and-service-type-exports/pcn#dimension/country"
-                "data/gss_data/trade/ons-uk-sa-trade-in-goods#dimension/ons-partner-geography"
-                "data/gss_data/trade/ons-reuk-service#dimension/nuts-geography"
-                "data/gss_data/trade/ons_cpa#dimension/ons-partner-geography"
-                "def/trade/property/dimension/country-of-ownership"
-                "data/gss_data/trade/ons-quarterly-country-and-regional-gdp#dimension/reference-area"
-                "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
+   :parent-dimension "sdmxd:refArea"
+   :sort-priority 3
+   :dimensions ["data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/uk-region"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/country"
-                "def/trade/property/dimension/country-area"
-                "data/gss_data/trade/ons_mrets#dimension/trade-area"
-                "data/gss_data/trade/ons-exports-of-services-by-country-by-modes-of-supply#dimension/country"]}
+                "data/gss_data/trade/ons_mrets#dimension/trade-area"]}
   {:name "Flow"
+   :sort-priority 4
    :parent-dimension "def/trade/property/dimension/flow-directions"}
   {:name "Date"
+   :sort-priority 5
    :parent-dimension "sdmxd:refPeriod"}
   {:name "Basis"
+   :sort-priority 6
    :parent-dimension "def/trade/property/dimension/international-trade-basis"}
   {:name "Seasonality"
+   :sort-priority 7
    :parent-dimension "def/trade/property/dimension/seasonal-adjustments"}]}

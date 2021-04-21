@@ -1,16 +1,28 @@
 (ns ook.concerns.transit
+  (:refer-clojure :exclude [read-string])
   (:require
    ;; NOTE This require is sneaky -- it loads either transit-clj or transit-cljs,
-   ;; depending on the environment, which have methods called the same thing but
-   ;; with different signatures
+   ;; depending on the environment, which have functions with the same name but
+   ;; different signatures
    [cognitect.transit :as transit])
-  #?(:clj (:import (java.io ByteArrayOutputStream))))
+  #?(:clj (:import (java.io ByteArrayOutputStream ByteArrayInputStream))))
 
-#?(:cljs (defn read-string [encoded-string]
-           (transit/read (transit/reader :json) encoded-string)))
+(defn read-string [encoded-string]
+  #?(:clj
+     (let [stream (ByteArrayInputStream. (.getBytes encoded-string))
+           reader (transit/reader stream :json)]
+       (transit/read reader))
 
-#?(:clj (defn write-string [unencoded-string]
-          (let [stream (ByteArrayOutputStream.)
-                writer (transit/writer stream :json)]
-            (transit/write writer unencoded-string)
-            (str stream))))
+     :cljs
+     (transit/read (transit/reader :json) encoded-string)))
+
+(defn write-string [unencoded-string]
+  #?(:clj
+     (let [stream (ByteArrayOutputStream. 4096)
+           writer (transit/writer stream :json)]
+       (transit/write writer unencoded-string)
+       (str stream))
+
+     :cljs
+     (let [writer (transit/writer :json)]
+       (transit/write writer unencoded-string))))

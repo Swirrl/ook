@@ -64,14 +64,12 @@ Then compile the cljs to JS and watch for changes:
 yarn  watch
 ```
 
-or, if you also want the devcards and tests:
+or, if you also want the tests:
 ```bash
 yarn watch-all
 ```
 
-With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
-
-Tests are run and watched at `localhost:8021`.
+With the shadow-cljs watcher running, cljs tests are run and watched at `localhost:8021`.
 
 ## Fixtures
 
@@ -108,6 +106,20 @@ karma start --single-run
 ```
 
 This runs the cljs tests in a way that can be reported programatically for CI.
+
+## Deployment
+
+See the [deployment readme](./deploy/README.md).
+
+To load the data, ssh into the box and do:
+
+```
+cd /opt/ook
+export AUTH0_SECRET=XXX
+java -cp "ook.jar:lib/*" -Xmx3g clojure.main -m ook.index
+```
+
+It takes a couple of hours so you'll likely want to run this with gnu-screen/ tmux/ NOHUP so a drop in the connection doesn't kill the pipeline run.
 
 ## License
 

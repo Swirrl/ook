@@ -1,19 +1,16 @@
 (ns ook.reframe.views.datasets
   (:require [re-frame.core :as rf]
             [ook.util :as u]
-            [ook.params.util :as pu]))
+            [ook.params.util :as pu]
+            [ook.ui.common :as common]))
 
 (defn- total-observations [data]
-  (reduce + (map :matching-observations data)))
-
-(defn- remove-facet [facet-name]
-  (rf/dispatch [:filters/remove-facet facet-name])
-  (rf/dispatch [:app/navigate :ook.route/search]))
+  (reduce + (map :matching-observation-count data)))
 
 (defn- remove-facet-button [facet-name]
   [:button.btn-close.border.btn-xs.ms-2.align-middle
    {:type "button"
-    :on-click #(remove-facet facet-name)}])
+    :on-click #(rf/dispatch [:ui.datasets/remove-facet facet-name])}])
 
 (defn- dataset-count-message [data]
   (let [dataset-count (count data)
@@ -27,66 +24,75 @@
       (= dataset-count total-dataset-count)
       [:p.my-4 "Showing all datasets"]
 
-      (empty? data)
-      [:div.d-flex.align-items-center
-       [:strong "No datasets matched the applied filters."]
-       [:button.btn.btn-link.mx-1.p-0
-        {:type "button"
-         :on-click #(rf/dispatch [:filters/reset])}
-        "Clear filters"]
-       [:span "to reset and make a new selection."]]
-
       :else
       [:p.my-4
        [:strong dataset-count] " of "
        [:strong total-dataset-count]
        " datasets match"])))
 
-(defn- codelists-for-facet [facet-name ds-facets]
-  (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)
-        codelists (->> facet :dimensions (map :codelist) distinct)]
-    (for [{:keys [ook/uri label]} codelists]
-      ^{:key uri} [:p.badge.bg-secondary.me-1 label])))
+(defn- matches-for-facet [facet-name ds-facets]
+  (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)]
+    (for [{:keys [ook/uri label codes]} (:dimensions facet)]
+      ^{:key [uri label]}
+      [:p
+       [:span.me-1 label]
+       (for [{code-uri :ook/uri code-label :label} codes]
+         ^{:key code-uri}
+         [:span.badge.bg-light.text-dark.rounded-pill.me-1 code-label])])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
 
 (defn- column-headers [data applied-facets]
   [:tr
-   [:th.title-column "Title / Description"]
+   [:th.title-column "Publisher / Title / Description"]
    (for [[facet-name _] applied-facets]
      ^{:key facet-name} [:th.text-nowrap facet-name (remove-facet-button facet-name)])
-   (when (some :matching-observations data)
+   (when (some :matching-observation-count data)
      [:th])])
 
-(defn- dataset-row [{:keys [label comment ook/uri matching-observations facets]} applied-facets]
+(defn- dataset-row [{:keys [label publisher comment description ook/uri matching-observation-count facets]}
+                    applied-facets]
   ^{:key uri}
   [:tr
    [:td.title-column
-    [:strong label]
-    [:p.vertical-truncate comment]]
+    [:span.text-muted.me-2 (or (:altlabel publisher) "---")]
+    (if label [:strong label] [:em.text-muted "Missing label for " uri])
+    [:small.vertical-truncate (or comment description)]]
    (for [[facet-name _] applied-facets]
-     ^{:key [uri facet-name]} [:td (codelists-for-facet facet-name facets)])
-   (when matching-observations
-     [:td
-      [:small (str "Found " matching-observations " matching observations")]
-      [:div
-       [:a.btn.btn-secondary.btn-sm
-        {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]]])])
+     ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
+   [:td
+    (when matching-observation-count
+      [:<>
+       [:small (str "Found " matching-observation-count " matching observations")]
+       [:a.d-block {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]])]])
 
-(defn- dataset-table [data applied-facets]
-  (when (seq data)
-    [:div.ook-datasets
-     [:table.table
-      [:thead (column-headers data applied-facets)]
-      [:tbody (for [ds data]
-                (dataset-row ds applied-facets))]]]))
+(defn- dataset-table [data]
+  (let [applied-facets @(rf/subscribe [:facets/applied])]
+    [:<>
+     (dataset-count-message data)
+     [:div.ook-datasets
+      [:table.table
+       [:thead (column-headers data applied-facets)]
+       [:tbody (for [ds data]
+                 (dataset-row ds applied-facets))]]]]))
+
+(defn- no-matches-message []
+  [:div.d-flex.align-items-center
+   [:strong "No datasets matched the applied filters. "]
+   [:a.btn-link.mx-1
+    {:role "button"
+     :on-click #(rf/dispatch [:filters/reset])}
+    "Clear filters"]
+   [:span " to reset and make a new selection."]])
 
 (defn results []
-  (if @(rf/subscribe [:results.datasets/error])
-    (error-message)
-    (let [data @(rf/subscribe [:results.datasets/data])
-          applied-facets @(rf/subscribe [:facets/applied])]
-      [:<>
-       (dataset-count-message data)
-       (dataset-table data applied-facets)])))
+  (when-let [data @(rf/subscribe [:results.datasets/data])]
+    (cond
+      (= :loading data) [common/loading-spinner]
+
+      (= :error data) [error-message]
+
+      (seq data) [dataset-table data]
+
+      :else [no-matches-message])))
