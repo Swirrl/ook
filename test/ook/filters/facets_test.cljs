@@ -44,7 +44,9 @@
 
 (deftest selecting-facets
   (rft/run-test-sync
-   (setup/stub-codelist-fetch-success codelists)
+
+   (setup/stub-side-effects {:codelists codelists :concept-trees concept-trees})
+
    (setup/init! facets/configured-facets initial-state)
 
    (testing "clear facet selection button only shows when a facet is selected"
@@ -80,9 +82,10 @@
 
 (deftest expanding-and-collapsing
   (rft/run-test-sync
-   (setup/stub-codelist-fetch-success codelists)
-   (setup/stub-code-fetch-success concept-trees)
+
+   (setup/stub-side-effects {:codelists codelists :concept-trees concept-trees})
    (setup/init! facets/configured-facets initial-state)
+
    (eh/click-text "Facet 2")
 
    (testing "expanding a codelist fetches its concept tree and expands all children"
@@ -136,10 +139,7 @@
 
 (deftest selecting-codes
   (rft/run-test-sync
-   (setup/stub-codelist-fetch-success codelists)
-   (setup/stub-code-fetch-success concept-trees)
-   (setup/stub-dataset-fetch-success {})
-   (setup/stub-navigation)
+   (setup/stub-side-effects {:codelists codelists :concept-trees concept-trees})
    (setup/init! facets/configured-facets initial-state)
    (eh/click-text "Facet 2")
 

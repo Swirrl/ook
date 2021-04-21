@@ -129,5 +129,11 @@
             :ook.route/home (router/home-controller)
             :ook.route/search (router/search-controller {:query query})))))
 
+     (defn stub-side-effects [{:keys [concept-trees codelists datasets]}]
+       (stub-navigation)
+       (stub-dataset-fetch-success (or datasets {}))
+       (stub-codelist-fetch-success (or codelists {}))
+       (stub-code-fetch-success (or concept-trees {})))
+
      (defn cleanup! []
        (.removeChild body test-div))))

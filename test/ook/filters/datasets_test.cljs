@@ -49,10 +49,7 @@
 (deftest filtering-datasets
   (rft/run-test-sync
 
-   (setup/stub-navigation)
-   (setup/stub-dataset-fetch-success datasets)
-   (setup/stub-codelist-fetch-success codelists)
-   (setup/stub-code-fetch-success concept-trees)
+   (setup/stub-side-effects {:datasets datasets :codelists codelists :concept-trees concept-trees})
    (setup/init! views/search initial-state)
 
    (testing "apply filter button"
