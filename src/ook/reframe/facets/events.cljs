@@ -1,16 +1,14 @@
-(ns ook.reframe.events.facets
+(ns ook.reframe.facets.events
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.db.caching :as caching]
    [ajax.core :as ajax]
-   [day8.re-frame.http-fx]
-   [ook.spec]
+   [ook.reframe.codes.db.caching :as caching]
    [ook.reframe.events :as e]))
 
-;; UI MANAGEMENT
+;;; CLICK HANDLERS
 
 (rf/reg-event-fx
- :ui.facets/set-current
+ :ui.event/set-current
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
    (let [{:keys [selection] :as current-facet} (:ui.facets/current db)]
@@ -20,6 +18,14 @@
        {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
              (when (seq selection)
                [:dispatch [:facets/apply-facet current-facet]])]}))))
+
+(rf/reg-event-db
+ :ui.event/cancel-current-selection
+ [e/validation-interceptor]
+ (fn [db _]
+   (dissoc db :ui.facets/current)))
+
+;;; GETTING CODELISTS
 
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
@@ -37,11 +43,7 @@
      (assoc db :ui.facets/current :loading)
      db)))
 
-(rf/reg-event-db
- :ui.facets/cancel-current-selection
- [e/validation-interceptor]
- (fn [db _]
-   (dissoc db :ui.facets/current)))
+;;; APPLYING A FACET
 
 (rf/reg-event-fx
  :facets/apply-facet
@@ -51,15 +53,7 @@
           (seq selection) (assoc-in [:facets/applied name] selection))
     :dispatch [:app/navigate :ook.route/search]}))
 
-(rf/reg-event-fx
-  :ui.filters/apply-current-facet
-  [e/validation-interceptor]
-  (fn [{:keys [db]} _]
-    (let [current-facet (:ui.facets/current db)]
-      {:db (dissoc db :ui.facets/current)
-       :dispatch [:facets/apply-facet current-facet]})))
-
-;; HTTP REQUEST
+;;; HTTP REQUESTS & RESPONSES
 
 (rf/reg-event-fx
  :http/fetch-codelists
@@ -69,13 +63,13 @@
                  :uri "/codelists"
                  :params {:dimension dimensions}
                  :response-format (ajax/transit-response-format)
-                 :on-success [:facets.codelists/success name]
-                 :on-failure [:ui.facets.current/error]}}))
+                 :on-success [:http.codelists/success name]
+                 :on-failure [:http.codelists/error]}}))
 
 ;; HTTP RESPONSE HANDLERS
 
 (rf/reg-event-db
- :facets.codelists/success
+ :http.codelists/success
  [e/validation-interceptor]
  (fn [db [_ facet-name result]]
    (let [updated-db (caching/cache-codelist db facet-name result)]
@@ -84,7 +78,7 @@
          (assoc :ui.facets/current (-> updated-db :facets/config (get facet-name)))))))
 
 (rf/reg-event-db
- :ui.facets.current/error
+ :http.codelists/error
  [e/validation-interceptor]
  (fn [db [_ error]]
    (assoc db :ui.facets/current :error)))

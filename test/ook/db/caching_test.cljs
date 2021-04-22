@@ -1,6 +1,6 @@
 (ns ook.db.caching-test
   (:require [cljs.test :refer [deftest is testing]]
-            [ook.reframe.db.caching :as sut]))
+            [ook.reframe.codes.db.caching :as sut]))
 
 (def initial-db
   {:facets/config {"facet 1" {:name "facet 1"}}})

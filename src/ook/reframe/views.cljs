@@ -1,8 +1,8 @@
 (ns ook.reframe.views
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.views.facets :as facets]
-   [ook.reframe.views.datasets :as datasets]))
+   [ook.reframe.facets.view :as facets]
+   [ook.reframe.datasets.view :as datasets]))
 
 (defn search []
   [:<>

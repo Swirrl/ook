@@ -1,17 +1,33 @@
-(ns ook.reframe.events.codes
+(ns ook.reframe.codes.events
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.db :as db]
-   [ook.reframe.db.caching :as caching]
+   [ook.reframe.codes.db.caching :as caching]
    [ajax.core :as ajax]
-   [day8.re-frame.http-fx]
-   [ook.spec]
+   [ook.reframe.db :as db]
+   [ook.reframe.codes.db.selection :as selection]
    [ook.reframe.events :as e]))
 
-;; UI MANAGEMENT
+;;; CLICK HANDLERS
 
 (rf/reg-event-fx
- :ui.facets.codes/get-codes
+ :ui.event/apply-current-facet
+ [e/validation-interceptor]
+ (fn [{:keys [db]} _]
+   (let [current-facet (:ui.facets/current db)]
+     {:db (dissoc db :ui.facets/current)
+      :dispatch [:facets/apply-facet current-facet]})))
+
+(rf/reg-event-db
+ :ui.event/toggle-disclosure
+ [e/validation-interceptor]
+ (fn [db [_ uri]]
+   (let [uri+children (cons uri (db/uri->expandable-child-uris db uri))
+         expanded? (db/code-expanded? db uri)
+         update-fn (if expanded? disj (fnil conj #{}))]
+     (update-in db [:ui.facets/current :expanded] #(apply update-fn % uri+children)))))
+
+(rf/reg-event-fx
+ :ui.event/get-codes
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ facet codelist-uri]]
    {:db (-> db
@@ -21,14 +37,31 @@
          [:dispatch [:http/fetch-codes facet codelist-uri]]]}))
 
 (rf/reg-event-db
+  :ui.event/set-selection
+ [e/validation-interceptor]
+ (fn [db [_ which {:keys [ook/uri] :as option}]]
+   (condp = which
+     :any (-> db (selection/add-codelist uri) (db/collapse-children uri))
+     :add-children (selection/add-children db option)
+     :remove-children (selection/remove-children db option))))
+
+(rf/reg-event-db
+ :ui.event/toggle-selection
+ [e/validation-interceptor]
+ (fn [db [_ option]]
+   (selection/toggle db option)))
+
+;;; UI MANAGEMENT
+
+(rf/reg-event-db
  :ui.facets.current.codes/set-loading
  [e/validation-interceptor]
  (fn [db [_ codelist-uri]]
    (if (get-in db [:ui.facets.current.codes/loading codelist-uri])
      (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :loading)
-     db))):filters/apply
+     db)))
 
-;; HTTP REQUEST
+;;; HTTP REQUESTS & RESPONSES
 
 (rf/reg-event-fx
  :http/fetch-codes
@@ -38,13 +71,11 @@
                  :uri "/codes"
                  :params {:codelist codelist-uri}
                  :response-format (ajax/transit-response-format)
-                 :on-success [:facets.codes/success facet codelist-uri]
-                 :on-failure [:facets.codes/error codelist-uri]}}))
-
-;; HTTP RESPONSE HANDLERS
+                 :on-success [:http.codes/success facet codelist-uri]
+                 :on-failure [:http.codes/error codelist-uri]}}))
 
 (rf/reg-event-db
- :facets.codes/success
+ :http.codes/success
  [e/validation-interceptor]
  (fn [db [_ facet codelist-uri result]]
    (let [children (if (seq result) result :no-children)
@@ -60,7 +91,7 @@
          (assoc :ui.facets/current facet-with-ui-state)))))
 
 (rf/reg-event-db
-  :facets.codes/error
-  [e/validation-interceptor]
-  (fn [db [_ codelist-uri]]
-    (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :error)))
+ :http.codes/error
+ [e/validation-interceptor]
+ (fn [db [_ codelist-uri]]
+   (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :error)))

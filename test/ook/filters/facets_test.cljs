@@ -6,12 +6,9 @@
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
-   [ook.reframe.views.facets :as facets]
+   [ook.reframe.facets.view :as facets]
 
    [ook.reframe.events]
-   [ook.reframe.events.filter-ui]
-   [ook.reframe.events.codes]
-   [ook.reframe.events.facets]
    [ook.reframe.subs]))
 
 (def initial-state

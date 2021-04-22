@@ -1,4 +1,4 @@
-(ns ook.reframe.db.caching
+(ns ook.reframe.codes.db.caching
   (:require
    [ook.util :as u]
    [ook.reframe.db :as db]))

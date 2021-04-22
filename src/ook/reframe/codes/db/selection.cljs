@@ -1,4 +1,4 @@
-(ns ook.reframe.db.selection
+(ns ook.reframe.codes.db.selection
   (:require [ook.reframe.db :as db]))
 
 (defn- codelist? [option]

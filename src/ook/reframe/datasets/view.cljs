@@ -1,4 +1,4 @@
-(ns ook.reframe.views.datasets
+(ns ook.reframe.datasets.view
   (:require [re-frame.core :as rf]
             [ook.util :as u]
             [ook.params.util :as pu]
@@ -10,7 +10,7 @@
 (defn- remove-facet-button [facet-name]
   [:button.btn-close.border.btn-xs.ms-2.align-middle
    {:type "button"
-    :on-click #(rf/dispatch [:ui.datasets/remove-facet facet-name])}])
+    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}])
 
 (defn- dataset-count-message [data]
   (let [dataset-count (count data)
@@ -84,7 +84,7 @@
    [:strong "No datasets matched the applied filters. "]
    [:a.btn-link.mx-1
     {:role "button"
-     :on-click #(rf/dispatch [:filters/reset])}
+     :on-click #(rf/dispatch [:ui.event/clear-filters])}
     "Clear filters"]
    [:span " to reset and make a new selection."]])
 

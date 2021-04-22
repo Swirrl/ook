@@ -1,20 +1,20 @@
-(ns ook.reframe.views.facets
+(ns ook.reframe.facets.view
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.views.codes :as codes]))
+   [ook.reframe.codes.view :as codes]))
 
 (defn- facet-button [{:keys [name] :as facet} selected-facet]
   [:button.btn.me-2
    {:type "button"
     :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
-    :on-click #(rf/dispatch [:ui.facets/set-current facet])}
+    :on-click #(rf/dispatch [:ui.event/set-current facet])}
    name])
 
 (defn- cancel-facet-selection []
   [:button.btn-close.border.border-dark
    {:type "button"
     :aria-label "Close filter selection"
-    :on-click #(rf/dispatch [:ui.facets/cancel-current-selection])}])
+    :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
 
 (defn configured-facets []
   (let [facets @(rf/subscribe [:facets/config])

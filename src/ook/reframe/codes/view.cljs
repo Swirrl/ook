@@ -1,4 +1,4 @@
-(ns ook.reframe.views.codes
+(ns ook.reframe.codes.view
   (:require
    [re-frame.core :as rf]
    [ook.ui.icons :as icons]
@@ -8,7 +8,7 @@
   [:button.btn.btn-primary.mt-3
    {:type "button"
     :disabled (or (not (seq codelists)) (not (seq selection)))
-    :on-click #(rf/dispatch [:ui.filters/apply-current-facet])}
+    :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
    "Apply filter"])
 
 (defn- text-button [opts & children]
@@ -23,28 +23,28 @@
 
 (defn- toggle-code-expanded-button [{:keys [ook/uri]} expanded?]
   [toggle-level-button
-   {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])}
+   {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
    expanded?])
 
 (defn- toggle-codelist-expanded-button [current-facet {:keys [ook/uri] :as codelist} expanded?]
   [toggle-level-button
    {:on-click (fn []
                 (if (:children codelist)
-                  (rf/dispatch [:ui.facets.current/toggle-expanded uri])
-                  (rf/dispatch [:ui.facets.codes/get-codes current-facet uri])))}
+                  (rf/dispatch [:ui.event/toggle-disclosure uri])
+                  (rf/dispatch [:ui.event/get-codes current-facet uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
   [text-button
-   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :any codelist])}
+   {:on-click #(rf/dispatch [:ui.event/set-selection :any codelist])}
    "any"])
 
 (defn- select-all-children-button [code]
   (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
     [text-button
      {:on-click (fn [] (if all-selected?
-                    (rf/dispatch [:ui.facets.current/set-selection :remove-children code])
-                    (rf/dispatch [:ui.facets.current/set-selection :add-children code])))}
+                    (rf/dispatch [:ui.event/set-selection :remove-children code])
+                    (rf/dispatch [:ui.event/set-selection :add-children code])))}
      (if all-selected? "none" "all children")]))
 
 (defn- checkbox-input [{:keys [ook/uri label used] :as option}]
@@ -57,7 +57,7 @@
                :value uri
                :id id
                :checked (and used selected?)
-               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
+               :on-change #(rf/dispatch [:ui.event/toggle-selection option])}
         (not used) (merge {:disabled true}))]
      [:label.form-check-label.d-inline {:for id} label]]))
 
@@ -115,6 +115,7 @@
 
 (defn- code-selection [{:keys [codelists] :as current-facet}]
   [:<>
+   [apply-filter-button current-facet]
    [:p.h6.mt-4 "Codelists"]
    [:form.mt-3
     [nested-list {:class "p-0"}
@@ -138,9 +139,7 @@
       [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codelists for this facet."]
 
       (seq (:codelists selected-facet))
-      [:<>
-       [apply-filter-button selected-facet]
-       [code-selection selected-facet]]
+      [code-selection selected-facet]
 
       (and (:codelists selected-facet) (empty? (:codelists selected-facet)))
       [no-codelist-message selected-facet])))

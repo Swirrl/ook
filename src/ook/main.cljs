@@ -1,10 +1,11 @@
 (ns ook.main
   (:require
    [ook.reframe.events]
-   [ook.reframe.events.filter-ui]
-   [ook.reframe.events.codes]
-   [ook.reframe.events.facets]
+   [ook.reframe.facets.events]
+   [ook.reframe.codes.events]
+   [ook.reframe.datasets.events]
    [ook.reframe.router :as router]
+   [day8.re-frame.http-fx]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
    [ook.concerns.transit :as t]
