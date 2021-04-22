@@ -34,11 +34,13 @@ CONSTRUCT {
 
     OPTIONAL {?code skos:narrower ?narrower;}
 
-    BIND (EXISTS {
-      ?code skos:inScheme ?scheme2 .
-      ?dimension qb:codeList ?scheme2 .
-      [] ?dimension ?code .
-    } AS ?used)
+    # BIND (EXISTS {
+    #   ?code skos:inScheme ?scheme2 .
+    #   ?dimension qb:codeList ?scheme2 .
+    #   [] ?dimension ?code .
+    # } AS ?used)
+
+    BIND(true as ?used)
   }
 
   # code can be in multiple schemes so this is specified separately
