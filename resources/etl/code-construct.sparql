@@ -35,7 +35,9 @@ CONSTRUCT {
     OPTIONAL {?code skos:narrower ?narrower;}
 
     BIND (EXISTS {
-      [] ?p ?code .
+      ?code skos:inScheme ?scheme2 .
+      ?dimension qb:codeList ?scheme2 .
+      [] ?dimension ?code .
     } AS ?used)
   }
 
