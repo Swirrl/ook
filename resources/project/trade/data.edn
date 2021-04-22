@@ -1,4 +1,8 @@
 {:ook.etl/target-datasets
- {:sparql "PREFIX gdp: <http://gss-data.org.uk/def/gdp#>
-           SELECT ?dataset WHERE { ?dataset gdp:family gdp:trade . }"
+ {:sparql "
+PREFIX gdp: <http://gss-data.org.uk/def/gdp#>
+SELECT ?dataset WHERE {
+  VALUES ?trade { gdp:trade gdp:Trade }
+  ?dataset gdp:family ?trade .
+}"
   :client #ig/ref :drafter-client/client}}
