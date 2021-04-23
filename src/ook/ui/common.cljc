@@ -9,3 +9,6 @@
              (map (fn [v]
                     (with-meta v {:key (gensym "react")}))
                   children))))
+
+(defn error-message [message]
+  [:div.alert.alert-danger.mt-3 message])

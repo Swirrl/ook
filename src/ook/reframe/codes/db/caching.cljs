@@ -1,7 +1,6 @@
 (ns ook.reframe.codes.db.caching
   (:require
-   [ook.util :as u]
-   [ook.reframe.db :as db]))
+   [ook.util :as u]))
 
 (defn cache-codelist
   "This is an optimization to save requests. Dimensions are replaced with codelists

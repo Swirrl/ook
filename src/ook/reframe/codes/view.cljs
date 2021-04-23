@@ -105,7 +105,7 @@
          (= :error children)
          [nested-list
           [nested-list-item
-           [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this codelist."]]]
+           [common/error-message "Sorry, there was an error fetching the codes for this codelist."]]]
 
          (= :no-children children)
          [no-codes-message]
@@ -113,33 +113,25 @@
          :else
          [code-tree children]))]))
 
-(defn- code-selection [{:keys [codelists] :as current-facet}]
-  [:<>
-   [apply-filter-button current-facet]
-   [:p.h6.mt-4 "Codelists"]
-   [:form.mt-3
-    [nested-list {:class "p-0"}
-     (for [{:keys [ook/uri label] :as codelist} (->> codelists vals (sort-by :ook/uri))]
-       ^{:key [uri label]} [codelist-item current-facet codelist])]]])
+(defn- code-selection []
+  (let [{:keys [codelists] :as current-facet} @(rf/subscribe [:ui.facets/current])]
+    [:<>
+     [apply-filter-button current-facet]
+     [:p.h6.mt-4 "Codelists"]
+     [:form.mt-3
+      [nested-list {:class "p-0"}
+       (for [{:keys [ook/uri label] :as codelist} (->> codelists vals (sort-by :ook/uri))]
+         ^{:key [uri label]} [codelist-item current-facet codelist])]]]))
 
-(defn- no-codelist-message [{:keys [dimensions]}]
-  [:<>
-   [:p.h6.mt-4 "No codelists for dimensions: "]
-   [:ul
-    (for [dim dimensions]
-      ^{:key dim} [:li dim])]])
+(defn codelist-selection [selected-facet-status]
+  (when selected-facet-status
+    (condp = selected-facet-status
+      :loading [:div.mt-4.ms-1 [common/loading-spinner]]
 
-(defn codelist-selection [selected-facet]
-  (when selected-facet
-    (cond
-      (= :loading selected-facet)
-      [:div.mt-4.ms-1 [common/loading-spinner]]
+      :error [common/error-message "Sorry, there was an error fetching the codelists for this facet."]
 
-      (= :error selected-facet)
-      [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codelists for this facet."]
+      :success/empty [:p.h6.mt-4 "No codelists for facet"]
 
-      (seq (:codelists selected-facet))
-      [code-selection selected-facet]
+      :success/ready [code-selection]
 
-      (and (:codelists selected-facet) (empty? (:codelists selected-facet)))
-      [no-codelist-message selected-facet])))
+      [common/error-message "Sorry, something went wrong."])))

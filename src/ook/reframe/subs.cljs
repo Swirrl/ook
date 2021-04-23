@@ -20,6 +20,16 @@
 ;;;;;; EPHEMERAL UI STATE
 
 (rf/reg-sub
+ :ui.facets.current/status
+ (fn [db _]
+   (:ui.facets.current/status db)))
+
+(rf/reg-sub
+ :ui.facets.current/name
+ (fn [db _]
+   (some-> db :ui.facets/current :name)))
+
+(rf/reg-sub
  :ui.facets/current
  (fn [db _]
    (:ui.facets/current db)))

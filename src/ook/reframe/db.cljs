@@ -59,3 +59,11 @@
 (defn collapse-children [db uri]
   (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]
     (update-in db [:ui.facets/current :expanded] #(apply disj % to-collapse))))
+
+(defn current-facet-status [])
+
+(defn set-current-facet [db facet]
+  (let [status (if (empty? (:codelists facet)) :success/empty :success/ready)]
+    (-> db
+        (assoc :ui.facets/current facet)
+        (assoc :ui.facets.current/status status))))

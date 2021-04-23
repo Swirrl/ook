@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [ajax.core :as ajax]
+   [ook.reframe.db :as db]
    [ook.reframe.codes.db.caching :as caching]
    [ook.reframe.events :as e]))
 
@@ -13,7 +14,7 @@
  (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
    (let [{:keys [selection] :as current-facet} (:ui.facets/current db)]
      (if codelists
-       (cond-> {:db (assoc db :ui.facets/current next-facet)}
+       (cond-> {:db (db/set-current-facet db next-facet)}
          (seq selection) (merge {:dispatch [:facets/apply-facet current-facet]}))
        {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
              (when (seq selection)
@@ -23,7 +24,7 @@
  :ui.event/cancel-current-selection
  [e/validation-interceptor]
  (fn [db _]
-   (dissoc db :ui.facets/current)))
+   (dissoc db :ui.facets/current :ui.facets.current/status)))
 
 ;;; GETTING CODELISTS
 
@@ -31,7 +32,7 @@
  :ui.facets.current/get-codelists
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ facet]]
-   {:db (assoc db :ui.facets.current/loading true)
+   {:db (assoc db :facets.current/loading true)
     :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
          [:dispatch [:http/fetch-codelists facet]]]}))
 
@@ -39,8 +40,8 @@
  :ui.facets.current/set-loading
  [e/validation-interceptor]
  (fn [db _]
-   (if (:ui.facets.current/loading db)
-     (assoc db :ui.facets/current :loading)
+   (if (:facets.current/loading db)
+     (assoc db :ui.facets.current/status :loading)
      db)))
 
 ;;; APPLYING A FACET
@@ -71,14 +72,16 @@
 (rf/reg-event-db
  :http.codelists/success
  [e/validation-interceptor]
- (fn [db [_ facet-name result]]
-   (let [updated-db (caching/cache-codelist db facet-name result)]
+ (fn [db [_ facet-name response]]
+   (let [status (if (empty? response) :success/empty :success/ready)
+         updated-db (caching/cache-codelist db facet-name response)]
      (-> updated-db
-         (dissoc :ui.facets.current/loading)
+         (dissoc :facets.current/loading)
+         (assoc :ui.facets.current/status status)
          (assoc :ui.facets/current (-> updated-db :facets/config (get facet-name)))))))
 
 (rf/reg-event-db
  :http.codelists/error
  [e/validation-interceptor]
  (fn [db [_ error]]
-   (assoc db :ui.facets/current :error)))
+   (assoc db :ui.facets.current/status :error)))

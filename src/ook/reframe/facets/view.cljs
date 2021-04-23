@@ -3,10 +3,10 @@
    [re-frame.core :as rf]
    [ook.reframe.codes.view :as codes]))
 
-(defn- facet-button [{:keys [name] :as facet} selected-facet]
+(defn- facet-button [{:keys [name] :as facet} selected-facet-name]
   [:button.btn.me-2
    {:type "button"
-    :class (if (= name (:name selected-facet)) "btn-dark" "btn-outline-dark")
+    :class (if (= name selected-facet-name) "btn-dark" "btn-outline-dark")
     :on-click #(rf/dispatch [:ui.event/set-current facet])}
    name])
 
@@ -18,7 +18,8 @@
 
 (defn configured-facets []
   (let [facets @(rf/subscribe [:facets/config])
-        selected-facet @(rf/subscribe [:ui.facets/current])
+        selected-facet-status @(rf/subscribe [:ui.facets.current/status])
+        selected-facet-name @(rf/subscribe [:ui.facets.current/name])
         applied-facets @(rf/subscribe [:facets/applied])]
     [:div.card.my-4.filters
      [:div.card-body
@@ -28,7 +29,7 @@
        [:div
         (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
-            ^{:key name} [facet-button facet selected-facet]))]
-       (when selected-facet
+            ^{:key name} [facet-button facet selected-facet-name]))]
+       (when (= :success/ready selected-facet-status)
          [cancel-facet-selection])]
-      [codes/codelist-selection selected-facet]]]))
+      [codes/codelist-selection selected-facet-status]]]))
