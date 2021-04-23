@@ -40,11 +40,6 @@
    (some->> db :ui.facets/current :codelists vals (sort-by :ook/uri))))
 
 (rf/reg-sub
- :ui.facets/current
- (fn [db _]
-   (:ui.facets/current db)))
-
-(rf/reg-sub
  :ui.facets.current/option-selected?
  (fn [db [_ option]]
    (selection/option-selected? db option)))

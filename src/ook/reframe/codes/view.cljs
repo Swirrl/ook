@@ -27,10 +27,10 @@
    {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [{:keys [ook/uri] :as codelist} expanded?]
+(defn- toggle-codelist-expanded-button [{:keys [ook/uri children]} expanded?]
   [toggle-level-button
    {:on-click (fn []
-                (if (:children codelist)
+                (if children
                   (rf/dispatch [:ui.event/toggle-disclosure uri])
                   (rf/dispatch [:ui.event/get-codes uri])))}
    expanded?])

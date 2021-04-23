@@ -30,6 +30,6 @@
         (for [{:keys [name] :as facet} facets]
           (when-not (get applied-facets name)
             ^{:key name} [facet-button facet selected-facet-name]))]
-       (when (= :success/ready selected-facet-status)
+       (when (or (= :success/ready selected-facet-status) (= :success/empty selected-facet-status))
          [cancel-facet-selection])]
       [codes/codelist-selection selected-facet-status]]]))

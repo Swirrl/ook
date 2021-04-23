@@ -1,6 +1,5 @@
 (ns ook.reframe.db
-  (:require [ook.params.util :as pu]
-            [reitit.core :as rt]
+  (:require [reitit.core :as rt]
             [ook.reframe.router :as router]
             [ook.concerns.transit :as t]))
 
@@ -52,15 +51,9 @@
 (defn code-expanded? [db uri]
   (-> db :ui.facets/current :expanded (get uri) boolean))
 
-(defn facet-by-name [db name]
-   ;; would be easier if facet configs were indexed by name.. maybe change that?
-  (->> db :facets/config (filter #(= (:name %) name)) first))
-
 (defn collapse-children [db uri]
   (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]
     (update-in db [:ui.facets/current :expanded] #(apply disj % to-collapse))))
-
-(defn current-facet-status [])
 
 (defn set-current-facet [db facet]
   (let [status (if (empty? (:codelists facet)) :success/empty :success/ready)]

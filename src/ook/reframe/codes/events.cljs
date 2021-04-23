@@ -15,7 +15,8 @@
  (fn [{:keys [db]} _]
    (let [current-facet (:ui.facets/current db)]
      {:db (dissoc db :ui.facets/current)
-      :dispatch [:facets/apply-facet current-facet]})))
+      :fx [[:dispatch [:ui.event/cancel-current-selection]]
+           [:dispatch [:facets/apply-facet current-facet]]]})))
 
 (rf/reg-event-db
  :ui.event/toggle-disclosure
