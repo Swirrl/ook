@@ -90,7 +90,11 @@
        (is (= ["Dimension 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
      (testing "removes current facet from facet config"
-       (is (= ["Facet 1"] (qh/all-available-facets)))))
+       (is (= ["Facet 1"] (qh/all-available-facets))))
+
+     (testing "removes current facet chrome from ui"
+       (is (nil? (qh/apply-filter-button)))
+       (is (nil? (qh/query-text "Codelists")))))
 
    (testing "removing a facet"
      (eh/click (qh/remove-facet-button "Facet 2"))

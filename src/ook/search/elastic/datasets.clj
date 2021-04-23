@@ -90,7 +90,7 @@
     (esd/search conn "observation" "_doc"
                 (observation-query dimension-selections))))
 
-(defn- datasets-from-observation-hits
+(defn datasets-from-observation-hits
   "Parses observation-query results to return a sequence of datasets."
   [observation-hits]
   (let [examples (->> observation-hits :hits :hits
@@ -111,7 +111,7 @@
     (map (fn [[id match-description]] (merge {:ook/uri id} match-description))
          (merge-with merge buckets examples))))
 
-(defn- code-uris-from-observation-hits
+(defn code-uris-from-observation-hits
   "Parses observation-query results to return a sequence of code-uris."
   [observation-hits]
   (->> observation-hits :hits :hits
