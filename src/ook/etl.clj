@@ -15,6 +15,43 @@
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
 
+;; Pipeline debugging
+
+(defn write-to-disk
+  "Pipeline function to print sequence values to disk (returning sequence for further processing)"
+  ([s]
+   (write-to-disk s (File/createTempFile "ook-etl-" ".tmp" (new File "/tmp"))))
+  ([s file]
+   (log/info "Writing to:" (.getAbsolutePath file))
+   (with-open [w (io/writer file)]
+     (if (seq? s)
+       (doseq [x s]
+         (.write w (prn-str x)))
+       (.write w (prn-str s))))
+   s))
+
+(defn wait
+  "Sleep to avoid overloading stardog with consecutive queries"
+  [& _]
+  (log/info "Sleeping for 15s")
+  (Thread/sleep 15000)
+  (log/info "Waking"))
+
+
+;; Error recovery
+
+(defmacro with-retry
+  "If an exception is raised by the expression, it is retried once after waiting 30s"
+  [expr]
+  `(try
+    (doall ~expr)
+    (catch Exception e#
+      (log/warn "Caught Exception: " (.toString e#))
+      (wait)
+      (log/info "Retrying")
+      (doall ~expr))))
+
+
 ;; Query utilities
 
 (defn query
@@ -23,7 +60,7 @@
   ([client query & opts]
    (let [args (concat [client query] opts);
          response (apply dci/post-query-live args)]
-     (:body (doall response)))))
+     (:body response))))
 
 (defn insert-values-clause
   "Adds a VALUES clause to a sparql query string with the URIs provided"
@@ -142,25 +179,7 @@
 (derive :ook.etl/load-synchronously :ook/const)
 
 
-;; Debugging
 
-(defn write-to-disk
-  "Pipeline function to print sequence values to disk (returning sequence for further processing)"
-  ([s]
-   (write-to-disk s (File/createTempFile "ook-etl-" ".tmp" (new File "/tmp"))))
-  ([s file]
-   (log/info "Writing to:" (.getAbsolutePath file))
-   (with-open [w (io/writer file)]
-     (doseq [x s]
-       (.write w (prn-str x))))
-   s))
-
-(defn wait
-  "Sleep to avoid overloading stardog with consecutive queries"
-  [s]
-  (log/info "sleeping")
-  (Thread/sleep 10000)
-  (log/info "waking"))
 
 
 ;; Pipeline
@@ -171,9 +190,10 @@
     (doseq [[var-name & uris] (subject-pages system page-query)]
       (log/info "Processing page")
       (if uris
-        (->> (extract system construct-query var-name uris)
-             (transform jsonld-frame)
-             (load-documents system index))
+        (with-retry
+          (->> (extract system construct-query var-name uris)
+               (transform jsonld-frame)
+               (load-documents system index)))
         (log/warn (str "No compatible (" index ") subjects found!"))))
     (log/info (str "Pipeline Complete: " index))))
 
@@ -243,4 +263,29 @@
       (ook.index/delete-index system "code")
       (ook.index/create-index system "code")
       (code-pipeline system)))
+
+
+  ;; recreate mid-pipeline error
+  (dev/with-system [system
+                    ["drafter-client.edn"
+                     "cogs-staging.edn"
+                     "elasticsearch-development.edn"
+                     "project/trade/data.edn"]]
+    (let [subject-query (slurp (io/resource "etl/observation-select.sparql"))
+          target-datasets (:ook.etl/target-datasets system)
+          client (:drafter-client/client system)
+          subject-query (insert-values-clause subject-query "dataset" target-datasets)
+          [var-name & uris] (first (select-paged client subject-query 50000 6250000))
+          construct-query (slurp (io/resource "etl/observation-construct.sparql"))
+          jsonld-frame (slurp (io/resource "etl/observation-frame.json"))
+          index "observation"]
+      (if uris
+        (->> (extract system construct-query var-name uris)
+             (transform jsonld-frame)
+             ;;(load-documents system index)
+             )
+        (log/warn (str "No compatible (" index ") subjects found!")))
+))
+
+
   )
