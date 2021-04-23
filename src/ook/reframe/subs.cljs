@@ -30,6 +30,16 @@
    (some-> db :ui.facets/current :name)))
 
 (rf/reg-sub
+ :ui.facets.current/selection
+ (fn [db _]
+   (some-> db :ui.facets/current :selection)))
+
+(rf/reg-sub
+ :ui.facets.current/codelists
+ (fn [db _]
+   (some->> db :ui.facets/current :codelists vals (sort-by :ook/uri))))
+
+(rf/reg-sub
  :ui.facets/current
  (fn [db _]
    (:ui.facets/current db)))

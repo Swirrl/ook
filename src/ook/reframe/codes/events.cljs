@@ -29,12 +29,13 @@
 (rf/reg-event-fx
  :ui.event/get-codes
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ facet codelist-uri]]
-   {:db (-> db
-            (update-in [:ui.facets/current :expanded] conj codelist-uri)
-            (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
-    :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
-         [:dispatch [:http/fetch-codes facet codelist-uri]]]}))
+ (fn [{:keys [db]} [_ codelist-uri]]
+   (let [facet (:ui.facets/current db)]
+     {:db (-> db
+              (update-in [:ui.facets/current :expanded] conj codelist-uri)
+              (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
+      :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
+           [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
 
 (rf/reg-event-db
   :ui.event/set-selection

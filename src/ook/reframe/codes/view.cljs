@@ -4,12 +4,13 @@
    [ook.ui.icons :as icons]
    [ook.ui.common :as common]))
 
-(defn- apply-filter-button [{:keys [codelists selection]}]
-  [:button.btn.btn-primary.mt-3
-   {:type "button"
-    :disabled (or (not (seq codelists)) (not (seq selection)))
-    :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
-   "Apply filter"])
+(defn- apply-filter-button []
+  (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
+    [:button.btn.btn-primary.mt-3
+     {:type "button"
+      :disabled (empty? current-selection)
+      :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
+     "Apply filter"]))
 
 (defn- text-button [opts & children]
   [:button.btn.btn-link.mx-1.p-0.align-baseline
@@ -26,12 +27,12 @@
    {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [current-facet {:keys [ook/uri] :as codelist} expanded?]
+(defn- toggle-codelist-expanded-button [{:keys [ook/uri] :as codelist} expanded?]
   [toggle-level-button
    {:on-click (fn []
                 (if (:children codelist)
                   (rf/dispatch [:ui.event/toggle-disclosure uri])
-                  (rf/dispatch [:ui.event/get-codes current-facet uri])))}
+                  (rf/dispatch [:ui.event/get-codes uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -91,10 +92,10 @@
    [nested-list-item {:class "text-muted"}
     [:em "No codes to show"]]])
 
-(defn- codelist-item [current-facet {:keys [ook/uri label children] :as codelist}]
+(defn- codelist-item [{:keys [ook/uri children] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [nested-list-item
-     [toggle-codelist-expanded-button current-facet codelist expanded?]
+     [toggle-codelist-expanded-button codelist expanded?]
      [checkbox-input (assoc codelist :used true)]
      [select-any-button codelist]
      (when expanded?
@@ -114,14 +115,14 @@
          [code-tree children]))]))
 
 (defn- code-selection []
-  (let [{:keys [codelists] :as current-facet} @(rf/subscribe [:ui.facets/current])]
+  (let [codelists @(rf/subscribe [:ui.facets.current/codelists])]
     [:<>
-     [apply-filter-button current-facet]
+     [apply-filter-button]
      [:p.h6.mt-4 "Codelists"]
      [:form.mt-3
       [nested-list {:class "p-0"}
-       (for [{:keys [ook/uri label] :as codelist} (->> codelists vals (sort-by :ook/uri))]
-         ^{:key [uri label]} [codelist-item current-facet codelist])]]]))
+       (for [{:keys [ook/uri label] :as codelist} codelists]
+         ^{:key [uri label]} [codelist-item codelist])]]]))
 
 (defn codelist-selection [selected-facet-status]
   (when selected-facet-status
