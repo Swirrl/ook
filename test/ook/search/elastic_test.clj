@@ -17,7 +17,7 @@
         (testing "all datasets"
           (let [response (sut/all-datasets db)]
             (is (= 2 (count response)))
-            (is (every? true? (map #(every? % [:comment :label :ook/uri :cube]) response)))
+            (is (every? true? (map #(every? % [:comment :label :ook/uri]) response)))
             (is (= ["Alcohol Bulletin - Duty Receipts"
                     "Alcohol Bulletin - Production"]
                    (map :label response)))))
@@ -64,11 +64,8 @@
                                ["def/trade/concept/alcohol-type/wine"]}}
                   dataset (first (sut/get-datasets-for-facets db selections))]
               (are [field value] (= value (field dataset))
-                :description "Monthly Duty Receipts statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs
- Table of historic wine, made wine, spirits, beer and cider Duty Receipts"
-                :publisher {:ook/uri "https://www.gov.uk/government/organisations/hm-revenue-customs"
-                            :label "HM Revenue & Customs"
-                            :altlabel "HMRC"})))
+                :comment "Monthly Duty Receipts statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs"
+                :publisher {:altlabel "HMRC"})))
 
           (testing "describes which codes match for each facet"
             (let [selections {"Alcohol Type" {"def/trade/concept-scheme/alcohol-type" ["def/trade/concept/alcohol-type/wine"]}
