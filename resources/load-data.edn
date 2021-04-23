@@ -2,5 +2,5 @@
  {:ook.concerns.elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
   :drafter-client/client #ig/ref :drafter-client/client
   :ook.etl/target-datasets #ig/ref :ook.etl/target-datasets
-  :ook.etl/select-page-size #env ["OOK_ETL_SELECT_PAGE_SIZE" 10000]
+  :ook.etl/select-page-size #env ["OOK_ETL_SELECT_PAGE_SIZE" 50000]
   :oot.etl/load-page-size #env ["OOK_ETL_LOAD_PAGE_SIZE" 10000]}}
