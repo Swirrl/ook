@@ -56,7 +56,7 @@
                  :uri "/datasets"
                  :params (when (seq filters) {:filters filters})
                  :response-format (ajax/transit-response-format)
-                 :on-success [:http.datsets/success]
+                 :on-success [:http.datasets/success]
                  :on-failure [:http.datasets/error]}}))
 
 (rf/reg-event-db

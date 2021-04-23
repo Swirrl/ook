@@ -3,9 +3,14 @@
    [ook.util :as u]
    [ook.reframe.db :as db]))
 
-(defn cache-codelist [db facet-name codelists]
+(defn cache-codelist
+  "This is an optimization to save requests. Dimensions are replaced with codelists
+  in the front-end app state the first time a facet is selected in the ui."
+  [db facet-name codelists]
   (let [indexed-codelists (u/id-lookup codelists)]
-    (assoc-in db [:facets/config facet-name :codelists] indexed-codelists)))
+    (-> db
+        (assoc-in [:facets/config facet-name :codelists] indexed-codelists)
+        (update-in [:facets/config facet-name] dissoc :dimensions))))
 
 (defn cache-code-tree
   "Update the right codelist nested inside the facet config to store its children"

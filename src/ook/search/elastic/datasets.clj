@@ -16,11 +16,23 @@
        (map :_source)
        (map esu/normalize-keys)))
 
+(defn- select-description [dataset]
+  (cond-> dataset
+    (:comment dataset) (dissoc dataset :description)))
+
+(defn- select-relevant-fields [dataset]
+  (-> dataset
+      select-description
+      (select-keys [:label :description :comment :publisher
+                    :ook/uri :matching-observation-count :facets])
+      (update :publisher select-keys [:altlabel])))
+
 (defn all [{:keys [elastic/endpoint]}]
-  (-> (esu/get-connection endpoint)
-      (esd/search "dataset" "_doc" {:query (q/match-all)
-                                    :size size-limit})
-      clean-datasets-result))
+  (->> (esd/search (esu/get-connection endpoint)
+                   "dataset" "_doc" {:query (q/match-all)
+                                     :size size-limit})
+       clean-datasets-result
+       (map select-relevant-fields)))
 
 (defn get-datasets
   "Find datasets using their URIs."
@@ -39,7 +51,7 @@
                       :size size-limit})
          :hits :hits (map :_source))))
 
-(defn for-cubes
+(defn- for-cubes
   "Find datasets for cube URIs"
   [cube-uris {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
@@ -49,7 +61,7 @@
                       :size (count uris)})
          clean-datasets-result)))
 
-(defn observation-query
+(defn- observation-query
   "Creates a query for finding observations with selected dimensions and dimension-values.
 
   Provides counts by dataset and collapses to a few example observations for each dataset."
@@ -71,14 +83,14 @@
      :query {:bool {:should criteria}}
      :aggregations {:datasets {:terms {:field "qb:dataSet.@id" :size size-limit}}}}))
 
-(defn find-observations
+(defn- find-observations
   "Finds observations with given dimensions and dimension-values. Groups results by dataset."
   [dimension-selections {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (esd/search conn "observation" "_doc"
                 (observation-query dimension-selections))))
 
-(defn datasets-from-observation-hits
+(defn- datasets-from-observation-hits
   "Parses observation-query results to return a sequence of datasets."
   [observation-hits]
   (let [examples (->> observation-hits :hits :hits
@@ -99,7 +111,7 @@
     (map (fn [[id match-description]] (merge {:ook/uri id} match-description))
          (merge-with merge buckets examples))))
 
-(defn code-uris-from-observation-hits
+(defn- code-uris-from-observation-hits
   "Parses observation-query results to return a sequence of code-uris."
   [observation-hits]
   (->> observation-hits :hits :hits
@@ -123,7 +135,7 @@
                                      (map (fn [code] (update code :scheme #(->> % util/box (map codelist-lookup))))))]
                 (when matches
                   (cond-> (select-keys dimension [:ook/uri :label])
-                      (seq matches) (assoc :codes matches))))))
+                    (seq matches) (assoc :codes matches))))))
        (remove nil?)))
 
 (defn explain-facets [facets matching-observation-example dimensions codelists codes]
@@ -164,7 +176,8 @@
         dimensions (components/get-components (mapcat :dimensions facets) opts)
         codelists (components/get-codelists codelist-uris opts)
         codes (codes/get-codes code-uris opts)]
-    (explain-match datasets facets dimensions codelists codes)))
+    (->> (explain-match datasets facets dimensions codelists codes)
+         (map select-relevant-fields))))
 
 (defn total-count [{:keys [elastic/endpoint]}]
   (-> (esu/get-connection endpoint)
