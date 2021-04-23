@@ -2,15 +2,20 @@
   (:require [re-frame.core :as rf]
             [ook.util :as u]
             [ook.params.util :as pu]
-            [ook.ui.common :as common]))
+            [ook.ui.common :as common]
+            [ook.ui.icons :as icons]))
 
 (defn- total-observations [data]
   (reduce + (map :matching-observation-count data)))
 
+(defn- small-icon-button [opts icon]
+  [:button.border.btn-xs.bg-white.ms-2.p-0.align-middle opts icon])
+
 (defn- remove-facet-button [facet-name]
-  [:button.btn-close.border.btn-xs.ms-2.align-middle
+  [small-icon-button
    {:type "button"
-    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}])
+    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
+   icons/close])
 
 (defn- dataset-count-message [data]
   (let [dataset-count (count data)
@@ -43,11 +48,23 @@
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
 
+(defn- edit-facet-button [facet-name]
+  [small-icon-button
+   {:type "button"
+    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
+   icons/edit])
+
+(defn- facet-column-header [facet-name]
+  [:th.text-nowrap
+   facet-name
+   (edit-facet-button facet-name)
+   [remove-facet-button facet-name]])
+
 (defn- column-headers [data applied-facets]
   [:tr
    [:th.title-column "Publisher / Title / Description"]
    (for [[facet-name _] applied-facets]
-     ^{:key facet-name} [:th.text-nowrap facet-name (remove-facet-button facet-name)])
+     ^{:key facet-name}[facet-column-header facet-name])
    (when (some :matching-observation-count data)
      [:th])])
 

@@ -89,8 +89,8 @@
      (testing "shows matching codes in the results table"
        (is (= ["Dimension 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
-     (testing "removes current facet from facet config"
-       (is (= ["Facet 1"] (qh/all-available-facets))))
+     (testing "marks applied facet as editable"
+       (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets))))
 
      (testing "removes current facet chrome from ui"
        (is (nil? (qh/apply-filter-button)))

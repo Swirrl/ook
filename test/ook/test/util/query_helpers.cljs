@@ -102,4 +102,4 @@
   (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
 
 (defn remove-facet-button [facet-name]
-  (some-> (query-text facet-name) .-parentNode (find-query "button")))
+  (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))
