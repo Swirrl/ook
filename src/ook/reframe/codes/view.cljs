@@ -1,15 +1,16 @@
-(ns ook.reframe.views.codes
+(ns ook.reframe.codes.view
   (:require
    [re-frame.core :as rf]
    [ook.ui.icons :as icons]
    [ook.ui.common :as common]))
 
-(defn- apply-filter-button [{:keys [codelists selection]}]
-  [:button.btn.btn-primary.mt-3
-   {:type "button"
-    :disabled (or (not (seq codelists)) (not (seq selection)))
-    :on-click #(rf/dispatch [:ui.filters/apply-current-facet])}
-   "Apply filter"])
+(defn- apply-filter-button []
+  (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
+    [:button.btn.btn-primary.mt-3
+     {:type "button"
+      :disabled (empty? current-selection)
+      :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
+     "Apply filter"]))
 
 (defn- text-button [opts & children]
   [:button.btn.btn-link.mx-1.p-0.align-baseline
@@ -23,28 +24,28 @@
 
 (defn- toggle-code-expanded-button [{:keys [ook/uri]} expanded?]
   [toggle-level-button
-   {:on-click #(rf/dispatch [:ui.facets.current/toggle-expanded uri])}
+   {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [current-facet {:keys [ook/uri] :as codelist} expanded?]
+(defn- toggle-codelist-expanded-button [{:keys [ook/uri children]} expanded?]
   [toggle-level-button
    {:on-click (fn []
-                (if (:children codelist)
-                  (rf/dispatch [:ui.facets.current/toggle-expanded uri])
-                  (rf/dispatch [:ui.facets.codes/get-codes current-facet uri])))}
+                (if children
+                  (rf/dispatch [:ui.event/toggle-disclosure uri])
+                  (rf/dispatch [:ui.event/get-codes uri])))}
    expanded?])
 
 (defn- select-any-button [codelist]
   [text-button
-   {:on-click #(rf/dispatch [:ui.facets.current/set-selection :any codelist])}
+   {:on-click #(rf/dispatch [:ui.event/set-selection :any codelist])}
    "any"])
 
 (defn- select-all-children-button [code]
   (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
     [text-button
      {:on-click (fn [] (if all-selected?
-                    (rf/dispatch [:ui.facets.current/set-selection :remove-children code])
-                    (rf/dispatch [:ui.facets.current/set-selection :add-children code])))}
+                    (rf/dispatch [:ui.event/set-selection :remove-children code])
+                    (rf/dispatch [:ui.event/set-selection :add-children code])))}
      (if all-selected? "none" "all children")]))
 
 (defn- checkbox-input [{:keys [ook/uri label used] :as option}]
@@ -57,7 +58,7 @@
                :value uri
                :id id
                :checked (and used selected?)
-               :on-change #(rf/dispatch [:ui.facets.current/toggle-selection option])}
+               :on-change #(rf/dispatch [:ui.event/toggle-selection option])}
         (not used) (merge {:disabled true}))]
      [:label.form-check-label.d-inline {:for id} label]]))
 
@@ -91,10 +92,10 @@
    [nested-list-item {:class "text-muted"}
     [:em "No codes to show"]]])
 
-(defn- codelist-item [current-facet {:keys [ook/uri label children] :as codelist}]
+(defn- codelist-item [{:keys [ook/uri children] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
     [nested-list-item
-     [toggle-codelist-expanded-button current-facet codelist expanded?]
+     [toggle-codelist-expanded-button codelist expanded?]
      [checkbox-input (assoc codelist :used true)]
      [select-any-button codelist]
      (when expanded?
@@ -105,7 +106,7 @@
          (= :error children)
          [nested-list
           [nested-list-item
-           [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codes for this codelist."]]]
+           [common/error-message "Sorry, there was an error fetching the codes for this codelist."]]]
 
          (= :no-children children)
          [no-codes-message]
@@ -113,34 +114,25 @@
          :else
          [code-tree children]))]))
 
-(defn- code-selection [{:keys [codelists] :as current-facet}]
-  [:<>
-   [:p.h6.mt-4 "Codelists"]
-   [:form.mt-3
-    [nested-list {:class "p-0"}
-     (for [{:keys [ook/uri label] :as codelist} (->> codelists vals (sort-by :ook/uri))]
-       ^{:key [uri label]} [codelist-item current-facet codelist])]]])
+(defn- code-selection []
+  (let [codelists @(rf/subscribe [:ui.facets.current/codelists])]
+    [:<>
+     [apply-filter-button]
+     [:p.h6.mt-4 "Codelists"]
+     [:form.mt-3
+      [nested-list {:class "p-0"}
+       (for [{:keys [ook/uri label] :as codelist} codelists]
+         ^{:key [uri label]} [codelist-item codelist])]]]))
 
-(defn- no-codelist-message [{:keys [dimensions]}]
-  [:<>
-   [:p.h6.mt-4 "No codelists for dimensions: "]
-   [:ul
-    (for [dim dimensions]
-      ^{:key dim} [:li dim])]])
+(defn codelist-selection [selected-facet-status]
+  (when selected-facet-status
+    (condp = selected-facet-status
+      :loading [:div.mt-4.ms-1 [common/loading-spinner]]
 
-(defn codelist-selection [selected-facet]
-  (when selected-facet
-    (cond
-      (= :loading selected-facet)
-      [:div.mt-4.ms-1 [common/loading-spinner]]
+      :error [common/error-message "Sorry, there was an error fetching the codelists for this facet."]
 
-      (= :error selected-facet)
-      [:div.alert.alert-danger.mt-3 "Sorry, there was an error fetching the codelists for this facet."]
+      :success/empty [:p.h6.mt-4 "No codelists for facet"]
 
-      (seq (:codelists selected-facet))
-      [:<>
-       [apply-filter-button selected-facet]
-       [code-selection selected-facet]]
+      :success/ready [code-selection]
 
-      (and (:codelists selected-facet) (empty? (:codelists selected-facet)))
-      [no-codelist-message selected-facet])))
+      [common/error-message "Sorry, something went wrong."])))

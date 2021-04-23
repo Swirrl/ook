@@ -1,4 +1,4 @@
-(ns ook.ui.error-boundary
+(ns ook.reframe.error-boundary
   (:require [reagent.core :as r]))
 
 (defn error-boundary [& _]
@@ -14,7 +14,7 @@
                           [:div
                            [:strong "Sorry!"]
                            [:p [:span "Something went wrong. "
-                                [:button.as-link {:on-click #(reset! error nil)}
+                                [:button.btn.btn-link.p-0.align-baseline {:on-click #(reset! error nil)}
                                  "Try again"]]]]
 
                           (into [:<>] children)))})))

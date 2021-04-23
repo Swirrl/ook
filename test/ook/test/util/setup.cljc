@@ -12,7 +12,10 @@
        :cljs [[reagent.dom :as rdom]
               [re-frame.core :as rf]
               [ook.reframe.router :as router]
-              [ook.concerns.transit :as transit]])))
+              [ook.concerns.transit :as transit]
+              [ook.reframe.facets.events]
+              [ook.reframe.codes.events]
+              [ook.reframe.datasets.events]])))
 
 #?(:clj
    (do
@@ -98,7 +101,7 @@
         :http/fetch-codelists
         (fn [_ [_ {:keys [name]}]]
           (reset! codelist-request name)
-          {:dispatch [:facets.codelists/success name (get codelists name)]})))
+          {:dispatch [:http.codelists/success name (get codelists name)]})))
 
      (def concept-tree-request (atom nil))
 
@@ -107,13 +110,13 @@
         :http/fetch-codes
         (fn [_ [_ facet codelist-uri]]
           (reset! concept-tree-request codelist-uri)
-          {:dispatch [:facets.codes/success facet codelist-uri (get concept-trees codelist-uri)]})))
+          {:dispatch [:http.codes/success facet codelist-uri (get concept-trees codelist-uri)]})))
 
      (defn stub-dataset-fetch-success [datasets]
        (rf/reg-event-fx
         :http/fetch-datasets
         (fn [_ [_ filters]]
-          {:dispatch [:results.datasets.request/success (get datasets (transit/read-string filters) [])]})))
+          {:dispatch [:http.datasets/success (get datasets (transit/read-string filters) [])]})))
 
      (def last-navigation (atom nil))
 

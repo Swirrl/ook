@@ -3,7 +3,7 @@
    [re-frame.core :as rf]
    [clojure.set :as set]
    [ook.reframe.db :as db]
-   [ook.reframe.db.selection :as selection]))
+   [ook.reframe.codes.db.selection :as selection]))
 
 ;;;;;; INITIAL, PERMANENT STATE
 
@@ -20,9 +20,24 @@
 ;;;;;; EPHEMERAL UI STATE
 
 (rf/reg-sub
- :ui.facets/current
+ :ui.facets.current/status
  (fn [db _]
-   (:ui.facets/current db)))
+   (:ui.facets.current/status db)))
+
+(rf/reg-sub
+ :ui.facets.current/name
+ (fn [db _]
+   (some-> db :ui.facets/current :name)))
+
+(rf/reg-sub
+ :ui.facets.current/selection
+ (fn [db _]
+   (some-> db :ui.facets/current :selection)))
+
+(rf/reg-sub
+ :ui.facets.current/codelists
+ (fn [db _]
+   (some->> db :ui.facets/current :codelists vals (sort-by :ook/uri))))
 
 (rf/reg-sub
  :ui.facets.current/option-selected?

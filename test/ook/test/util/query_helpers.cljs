@@ -99,7 +99,7 @@
   (all-text-content ".ook-datasets th"))
 
 (defn all-available-facets []
-  (-> (find-text "Add a filter") .-nextElementSibling (all-text-content "button")))
+  (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
 
 (defn remove-facet-button [facet-name]
   (some-> (query-text facet-name) .-parentNode (find-query "button")))

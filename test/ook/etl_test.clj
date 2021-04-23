@@ -59,9 +59,7 @@
         (are [key value] (found? doc key value)
           :ook/uri "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
           :label "Alcohol Bulletin - Duty Receipts"
-          :publisher {:ook/uri "https://www.gov.uk/government/organisations/hm-revenue-customs"
-                      :label "HM Revenue & Customs"
-                      :altlabel "HMRC"})))))
+          :publisher {:altlabel "HMRC"})))))
 
 (deftest component-pipeline-test
   (testing "Component pipeline schema"

@@ -6,19 +6,17 @@
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
-   [ook.reframe.views.facets :as facets]
+   [ook.reframe.facets.view :as facets]
 
    [ook.reframe.events]
-   [ook.reframe.events.filter-ui]
-   [ook.reframe.events.codes]
-   [ook.reframe.events.facets]
    [ook.reframe.subs]))
 
 (def initial-state
   {:facets {"Facet 1" {:name "Facet 1" :sort-priority 1 :dimensions ["dim1" "dim2"]}
             "Facet 2" {:name "Facet 2" :sort-priority 2 :dimensions ["dim3"]}
             "Facet 3" {:name "Facet 3" :sort-priority 3 :dimensions ["dim4"]}
-            "Facet 4" {:name "Facet 4" :sort-priority 4 :dimensions ["dim5"]}}
+            "Facet 4" {:name "Facet 4" :sort-priority 4 :dimensions ["dim5"]}
+            "Facet 5" {:name "Facet 5" :sort-priority 4 :dimensions ["dim5"]}}
    :dataset-count 20})
 
 (def codelists
@@ -27,7 +25,8 @@
    "Facet 2" [{:ook/uri "cl2" :label "Codelist 2 Label"}
               {:ook/uri "cl3" :label "Codelist 3 Label"}]
    "Facet 3" [{:ook/uri "no-codes" :label "Codelist no codes"}]
-   "Facet 4" [{:ook/uri "deep-nested" :label "with nested codes"}]})
+   "Facet 4" [{:ook/uri "deep-nested" :label "with nested codes"}]
+   "Facet 5" []})
 
 (def concept-trees
   {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1" :used true}]
@@ -58,7 +57,7 @@
 
    (testing "selecting a facet fetches the codelists"
      (eh/click-text "Facet 1")
-     (is (not (nil? (qh/find-text "Codelists"))))
+     (is (not (nil? (qh/query-text "Codelists"))))
      (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
 
      (eh/click-text "Facet 2")
@@ -73,10 +72,17 @@
      (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
      (is (= "Facet 2" @setup/codelist-request)))
 
-   (testing "cancelling facet selection works"
-     (is (seq (qh/all-labels)))
-     (eh/click (qh/cancel-facet-selection-button))
-     (is (empty? (qh/all-labels)))))
+   (testing "cancelling facet selection"
+     (testing "works for a facet with codelists"
+       (is (seq (qh/all-labels)))
+       (eh/click (qh/cancel-facet-selection-button))
+       (is (empty? (qh/all-labels))))
+
+     (testing "works for a facet with no codelists"
+       (eh/click-text "Facet 5")
+       (is (not (nil? (qh/query-text "No codelists for facet"))))
+       (eh/click (qh/cancel-facet-selection-button))
+       (is (nil? (qh/query-text "No codelists for facet"))))))
 
   (setup/cleanup!))
 
