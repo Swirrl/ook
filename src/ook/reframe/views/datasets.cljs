@@ -71,6 +71,8 @@
   (let [applied-facets @(rf/subscribe [:facets/applied])]
     [:<>
      (dataset-count-message data)
+     (when (not (empty? applied-facets))
+       [:p "For each dataset we show one example of a code that matches each facet. Empty cells indicate that the dataset doesn't match the criteria."])
      [:div.ook-datasets
       [:table.table
        [:thead (column-headers data applied-facets)]
