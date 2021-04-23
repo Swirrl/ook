@@ -35,7 +35,8 @@
 (s/def :datasets/count number?)
 
 (s/def :results.datasets/data (s/or :state #{:loading :error} :results (s/coll-of :ook/dataset)))
-(s/def :ook/dataset (s/keys :req [:ook/uri :ook/label]
+(s/def :ook/dataset (s/keys :req [:ook/uri]
+                            :req-un [:ook/label]
                             :opt-un [:ook/matching-observation-count
                                      :ook/comment
                                      :ook/description
