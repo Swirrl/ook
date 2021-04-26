@@ -139,4 +139,7 @@
        (stub-code-fetch-success (or concept-trees {})))
 
      (defn cleanup! []
+       (reset! codelist-request nil)
+       (reset! concept-tree-request nil)
+       (reset! last-navigation nil)
        (.removeChild body test-div))))

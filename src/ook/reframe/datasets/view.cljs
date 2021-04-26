@@ -48,16 +48,9 @@
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
 
-(defn- edit-facet-button [facet-name]
-  [small-icon-button
-   {:type "button"
-    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
-   icons/edit])
-
 (defn- facet-column-header [facet-name]
   [:th.text-nowrap
    facet-name
-   (edit-facet-button facet-name)
    [remove-facet-button facet-name]])
 
 (defn- column-headers [data applied-facets]

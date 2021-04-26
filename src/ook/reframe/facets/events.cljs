@@ -9,22 +9,42 @@
 ;;; CLICK HANDLERS
 
 (rf/reg-event-fx
- :ui.event/set-current
+ :ui.event/select-facet
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
-   (let [{:keys [selection] :as current-facet} (:ui.facets/current db)]
-     (if codelists
-       (cond-> {:db (db/set-current-facet db next-facet)}
-         (seq selection) (merge {:dispatch [:facets/apply-facet current-facet]}))
-       {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
-             (when (seq selection)
-               [:dispatch [:facets/apply-facet current-facet]])]}))))
+   (let [current-facet (:ui.facets/current db)]
+     {:fx [(when-not codelists [:dispatch [:ui.facets.current/get-codelists next-facet]])
+           [:dispatch [:ui.facets/set-current next-facet]]
+           [:dispatch [:facets/apply-facet current-facet]]]})))
 
 (rf/reg-event-db
  :ui.event/cancel-current-selection
  [e/validation-interceptor]
  (fn [db _]
    (dissoc db :ui.facets/current :ui.facets.current/status)))
+
+;; (rf/reg-event-db
+;;   :ui.event/edit-facet
+;;   [e/validation-interceptor]
+;;   (fn [db [_ facet-name]]
+;;     (let [facet (get-in db [:facets/config facet-name])
+;;           selection (get-in db [:facets/applied facet-name])
+;;           with-ui-state (assoc facet
+;;                                :selection selection
+;;                                :expanded (db/all-expandable-uris (:codelists facet)))]
+;;       (db/set-current-facet db facet))))
+
+;;; SETTING CURRENT FACET
+
+(rf/reg-event-db
+ :ui.facets/set-current
+ [e/validation-interceptor]
+ (fn [db [_ facet]]
+   (let [facet-to-set (if-let [applied-selection (get-in db [:facets/applied (:name facet)])]
+                        (assoc facet :selection applied-selection)
+                        facet)]
+     (js/console.log "setting facet:::" facet-to-set)
+     (db/set-current-facet db facet-to-set))))
 
 ;;; GETTING CODELISTS
 
@@ -50,9 +70,9 @@
  :facets/apply-facet
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [name selection]}]]
-   {:db (cond-> db
-          (seq selection) (assoc-in [:facets/applied name] selection))
-    :dispatch [:app/navigate :ook.route/search]}))
+   (when (seq selection)
+     {:db (assoc-in db [:facets/applied name] selection)
+      :dispatch [:app/navigate :ook.route/search]})))
 
 ;;; HTTP REQUESTS & RESPONSES
 
@@ -74,11 +94,15 @@
  [e/validation-interceptor]
  (fn [db [_ facet-name response]]
    (let [status (if (empty? response) :success/empty :success/ready)
-         updated-db (caching/cache-codelist db facet-name response)]
+         updated-db (caching/cache-codelist db facet-name response)
+         current-facet (:ui.facets/current db)
+         updated-facet (if (= facet-name (:name current-facet))
+                         (merge current-facet (-> updated-db :facets/config (get facet-name)))
+                         (-> updated-db :facets/config (get facet-name)))]
      (-> updated-db
          (dissoc :facets.current/loading)
          (assoc :ui.facets.current/status status)
-         (assoc :ui.facets/current (-> updated-db :facets/config (get facet-name)))))))
+         (assoc :ui.facets/current updated-facet)))))
 
 (rf/reg-event-db
  :http.codelists/error

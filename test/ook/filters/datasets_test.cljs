@@ -7,6 +7,9 @@
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
    [ook.reframe.views :as views]
+   [ook.params.parse :as p]
+   [ook.reframe.router :as router]
+   [reagent.core :as r]
 
    [ook.reframe.events]
    [ook.reframe.subs]))
@@ -90,7 +93,8 @@
        (is (= ["Dimension 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
      (testing "marks applied facet as editable"
-       (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets))))
+       (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))
+       (is (not (nil? (qh/editable-facet-button "Facet 2")))))
 
      (testing "removes current facet chrome from ui"
        (is (nil? (qh/apply-filter-button)))
@@ -135,3 +139,24 @@
        (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles)))))
 
    (setup/cleanup!)))
+
+(deftest editing-facets
+  (rft/run-test-sync
+   (setup/stub-side-effects {:datasets datasets :codelists codelists :concept-trees concept-trees})
+   (setup/init! views/search initial-state)
+
+   (testing "fetches codelists if they're not already cached (i.e. visiting from a permalink with filters)"
+     (router/search-controller {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" nil}})}})
+     (r/flush)
+     (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+     (is (nil? @setup/codelist-request))
+
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= "Facet 2" @setup/codelist-request)))
+
+   (testing "it sets the previous selection properly"
+     (is (= ["Codelist 2 Label"] (qh/all-selected-labels))))
+
+
+   ;;
+   ))

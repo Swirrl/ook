@@ -47,7 +47,6 @@
      (assoc db :results.datasets/data :loading)
      db)))
 
-
 (rf/reg-event-fx
  :http/fetch-datasets
  [e/validation-interceptor]

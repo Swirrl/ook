@@ -3,6 +3,9 @@
    [ook.util :as u]
    [ook.concerns.transit :as t]))
 
+(defn serialize-filter-state [filter-state]
+  (t/write-string filter-state))
+
 (defn deserialize-filter-state [filter-state]
   (t/read-string filter-state))
 

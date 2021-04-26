@@ -1,7 +1,7 @@
 (ns ook.reframe.db
   (:require [reitit.core :as rt]
             [ook.reframe.router :as router]
-            [ook.concerns.transit :as t]))
+            [ook.params.parse :as p]))
 
 (def initial-db
   {:app/current-route (rt/map->Match {:template "/" :path "/" :data router/home-route-data})
@@ -10,7 +10,7 @@
 (defn filters->query-params [db]
   (let [filters (:facets/applied db)]
     (when (seq filters)
-      {:filters (t/write-string filters)})))
+      {:filters (p/serialize-filter-state filters)})))
 
 (defn all-expandable-uris [tree]
   (let [walk (fn walk* [node]
@@ -47,6 +47,12 @@
                      (all-expandable-uris children)
                      (mapcat walk* children)))))]
     (set (mapcat walk codelists))))
+
+;; (defn expanded-uris [facet selection]
+;;   (let [codelists (-> facet :codelists vals)
+;;         open-uris (-> selection vals flatten)]
+;;     )
+;;   )
 
 (defn code-expanded? [db uri]
   (-> db :ui.facets/current :expanded (get uri) boolean))

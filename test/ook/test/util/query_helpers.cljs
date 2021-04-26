@@ -81,6 +81,9 @@
 (defn cancel-facet-selection-button []
   (find-query ".filters button.btn-close"))
 
+(defn editable-facet-button [facet-name]
+  (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
+
 ;;; Dataset table
 
 (defn apply-filter-button []
