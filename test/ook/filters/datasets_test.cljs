@@ -29,11 +29,11 @@
               {:ook/uri "cl3" :label "Codelist 3 Label"}]})
 
 (def concept-trees
-  {"cl1" [{:scheme "cl1" :ook/uri "cl1-code1" :label "1-1 child 1"}]
-   "cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1"}]
-   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1"}
-          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2"
-           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1"}
+  {"cl1" [{:scheme "cl1" :ook/uri "cl1-code1" :label "1-1 child 1" :used true}]
+   "cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1" :used true}]
+   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :used true}
+          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2" :used true
+           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2"}]}]})
 (def datasets
   {nil initial-datasets
@@ -77,7 +77,7 @@
        (is (not (qh/disabled? (qh/apply-filter-button))))))
 
    (testing "applying a facet"
-     (eh/click-text "Codelist 1 Label")
+     (eh/click-text "1-1 child 1")
      (eh/click-text "Facet 2")
      (eh/click-text "Codelist 2 Label")
      (eh/click (qh/apply-filter-button))
@@ -101,7 +101,12 @@
        (is (nil? (qh/query-text "Codelists")))))
 
    (testing "removing a facet"
-     (eh/click (qh/remove-facet-button "Facet 2"))
+     (testing "removes current facet chrome from ui"
+       (eh/click (qh/editable-facet-button "Facet 2"))
+       (eh/click (qh/remove-facet-button "Facet 2"))
+
+       (is (nil? (qh/apply-filter-button)))
+       (is (nil? (qh/query-text "Codelists"))))
 
      (testing "resets the dataset list"
        (is (= "Showing all datasets" (qh/dataset-count-text)))
@@ -157,6 +162,18 @@
    (testing "it sets the previous selection properly"
      (is (= ["Codelist 2 Label"] (qh/all-selected-labels))))
 
+   (testing "updating the selection and reapplying the facet works"
+     (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
+     (eh/click-text "2-1 child 1")
+
+     (eh/click (qh/apply-filter-button))
+     (is (= {"Facet 2" {"cl2" #{"cl2-code1"}}} @setup/dataset-request))
+     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
+            (qh/dataset-count-text))))
+
+   (testing "it expands to show all selected codes"
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "Codelist 3 Label"] (qh/all-labels))))
 
    ;;
    ))

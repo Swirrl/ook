@@ -99,9 +99,9 @@
      (defn stub-codelist-fetch-success [codelists]
        (rf/reg-event-fx
         :http/fetch-codelists
-        (fn [_ [_ {:keys [name]}]]
+        (fn [_ [_ {:keys [name] :as facet}]]
           (reset! codelist-request name)
-          {:dispatch [:http.codelists/success name (get codelists name)]})))
+          {:dispatch [:http.codelists/success facet (get codelists name)]})))
 
      (def concept-tree-request (atom nil))
 
@@ -112,10 +112,13 @@
           (reset! concept-tree-request codelist-uri)
           {:dispatch [:http.codes/success facet codelist-uri (get concept-trees codelist-uri)]})))
 
+     (def dataset-request (atom nil))
+
      (defn stub-dataset-fetch-success [datasets]
        (rf/reg-event-fx
         :http/fetch-datasets
         (fn [_ [_ filters]]
+          (reset! dataset-request (transit/read-string filters))
           {:dispatch [:http.datasets/success (get datasets (transit/read-string filters) [])]})))
 
      (def last-navigation (atom nil))
@@ -141,5 +144,6 @@
      (defn cleanup! []
        (reset! codelist-request nil)
        (reset! concept-tree-request nil)
+       (reset! dataset-request nil)
        (reset! last-navigation nil)
        (.removeChild body test-div))))

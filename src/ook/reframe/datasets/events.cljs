@@ -20,7 +20,8 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ facet-name]]
    {:db (update db :facets/applied dissoc facet-name)
-    :dispatch [:app/navigate :ook.route/search]}))
+    :fx [[:dispatch [:ui.event/cancel-current-selection]]
+         [:dispatch [:app/navigate :ook.route/search]]]}))
 
 ;;; FILTERING DATASETS
 
