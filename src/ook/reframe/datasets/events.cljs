@@ -9,13 +9,6 @@
 ;;; CLICK HANDLERS
 
 (rf/reg-event-fx
- :ui.event/clear-filters
- [e/validation-interceptor]
- (fn [_ _]
-   {:fx [[:dispatch [:filters/apply-filter-state {}]]
-         [:dispatch [:app/navigate :ook.route/home]]]}))
-
-(rf/reg-event-fx
  :ui.event/remove-facet
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ facet-name]]
@@ -30,7 +23,8 @@
  [e/validation-interceptor]
  (fn [{db :db} [_ filter-state]]
    {:db (assoc db :facets/applied (p/deserialize-filter-state filter-state))
-    :dispatch [:datasets/get-datasets filter-state]}))
+    :fx [[:dispatch [:ui.event/cancel-current-selection]]
+         [:dispatch [:datasets/get-datasets filter-state]]]}))
 
 (rf/reg-event-fx
  :datasets/get-datasets

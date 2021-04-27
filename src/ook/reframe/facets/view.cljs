@@ -11,7 +11,9 @@
              selected? "btn-dark"
              applied? "btn-outline-dark applied-facet"
              :else "btn-outline-dark")
-    :on-click #(rf/dispatch [:ui.event/select-facet facet])}
+    :on-click #(if applied?
+                 (rf/dispatch [:ui.event/edit-facet facet])
+                 (rf/dispatch [:ui.event/select-facet facet]))}
    name
    (when applied?
      [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])

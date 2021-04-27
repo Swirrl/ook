@@ -94,7 +94,7 @@
    [:strong "No datasets matched the applied filters. "]
    [:a.btn-link.mx-1
     {:role "button"
-     :on-click #(rf/dispatch [:ui.event/clear-filters])}
+     :on-click #(rf/dispatch [:app/navigate :ook.route/home])}
     "Clear filters"]
    [:span " to reset and make a new selection."]])
 

@@ -44,7 +44,8 @@
                                              :dimensions [{:ook/uri "dim2"
                                                            :label "Dimension 2 Label"
                                                            :codes [{:ook/uri "a-code"
-                                                                    :label "Label for code"}]}]}])]})
+                                                                    :label "Label for code"}]}]}])]
+   {"Facet 2" {"cl2" #{"cl2-code3"}}} []})
 
 (deftest filtering-datasets
   (rft/run-test-sync
@@ -162,6 +163,29 @@
    (testing "it sets the previous selection properly"
      (is (= ["Codelist 2 Label"] (qh/all-selected-labels))))
 
+   (testing "it sets the disclosure properly given the selection"
+     (is (qh/closed? (qh/find-expansion-toggle "Codelist 2 Label"))))
+
+   (testing "fetches concept trees for selected codes if they're used and not already cached"
+     (eh/click (qh/cancel-facet-selection-button))
+     (is (nil? @setup/concept-tree-request))
+     (router/search-controller
+      {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" #{"cl2-code3"}}})}})
+     (r/flush)
+
+     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
+            (qh/dataset-count-text)))
+
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= "cl2" @setup/concept-tree-request)))
+
+   (testing "it sets the selection properly"
+     (is (= ["2-2 code 3"] (qh/all-selected-labels))))
+
+   (testing "it sets the disclosure properly for the selection"
+     (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
+     (is (qh/open? (qh/find-expansion-toggle "2-1 child 2"))))
+
    (testing "updating the selection and reapplying the facet works"
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (eh/click-text "2-1 child 1")
@@ -171,9 +195,7 @@
      (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
             (qh/dataset-count-text))))
 
-   (testing "it expands to show all selected codes"
+   (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "Codelist 3 Label"] (qh/all-labels))))
-
-   ;;
-   ))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
+     (is (= ["2-1 child 1"] (qh/all-selected-labels))))))

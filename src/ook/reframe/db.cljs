@@ -1,7 +1,8 @@
 (ns ook.reframe.db
   (:require [reitit.core :as rt]
             [ook.reframe.router :as router]
-            [ook.params.parse :as p]))
+            [ook.params.parse :as p]
+            [clojure.set :as set]))
 
 (def initial-db
   {:app/current-route (rt/map->Match {:template "/" :path "/" :data router/home-route-data})
@@ -28,31 +29,23 @@
                          (mapcat walk* children)))))]
     (set (mapcat walk tree))))
 
+(defn- collect-children [uri collect-fn]
+  (fn walk* [node]
+    (let [children (:children node)]
+      (when-not (keyword? children)
+        (if (= (:ook/uri node) uri)
+          (collect-fn children)
+          (mapcat walk* children))))))
+
 (defn uri->child-uris [db uri]
   (let [codelists (-> db :ui.facets/current :codelists vals)
-        walk (fn walk* [node]
-               (let [children (:children node)]
-                 (when-not (keyword? children)
-                   (if (= (:ook/uri node) uri)
-                     (all-uris children)
-                     (mapcat walk* children)))))]
+        walk (collect-children uri all-uris)]
     (set (mapcat walk codelists))))
 
 (defn uri->expandable-child-uris [db uri]
   (let [codelists (-> db :ui.facets/current :codelists vals)
-        walk (fn walk* [node]
-               (let [children (:children node)]
-                 (when-not (keyword? children)
-                   (if (= (:ook/uri node) uri)
-                     (all-expandable-uris children)
-                     (mapcat walk* children)))))]
+        walk (collect-children uri all-expandable-uris)]
     (set (mapcat walk codelists))))
-
-;; (defn expanded-uris [facet selection]
-;;   (let [codelists (-> facet :codelists vals)
-;;         open-uris (-> selection vals flatten)]
-;;     )
-;;   )
 
 (defn code-expanded? [db uri]
   (-> db :ui.facets/current :expanded (get uri) boolean))
@@ -61,8 +54,8 @@
   (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]
     (update-in db [:ui.facets/current :expanded] #(apply disj % to-collapse))))
 
-(defn set-current-facet [db facet]
-  (let [status (if (empty? (:codelists facet)) :success/empty :success/ready)]
-    (-> db
-        (assoc :ui.facets/current facet)
-        (assoc :ui.facets.current/status status))))
+(defn get-codelists [db facet-name]
+  (-> db :facets/config (get facet-name) :codelists boolean))
+
+(defn get-concept-tree [db facet-name codelist-uri]
+  (-> db :facets/config (get facet-name) :codelists (get codelist-uri) :children))

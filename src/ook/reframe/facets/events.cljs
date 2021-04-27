@@ -2,7 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [ajax.core :as ajax]
-   [ook.reframe.db :as db]
+   [ook.reframe.facets.db :as db]
    [ook.reframe.codes.db.caching :as caching]
    [ook.reframe.events :as e]))
 
@@ -12,16 +12,22 @@
  :ui.event/select-facet
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
-   (let [current-facet (:ui.facets/current db)
-         next-facet-with-selection (if-let [applied-selection (get-in db [:facets/applied (:name next-facet)])]
-                                     (assoc next-facet
-                                            :selection applied-selection
-                                            ;; :expanded (db/all-expandable-uris (:codelists next-facet))
-                                            )
-                                     next-facet)]
-     {:db (db/set-current-facet db next-facet-with-selection)
-      :fx [(when-not codelists [:dispatch [:ui.facets.current/get-codelists next-facet-with-selection]])
+   (let [current-facet (:ui.facets/current db)]
+     {:db (db/set-current-facet db next-facet)
+      :fx [(when-not codelists
+             [:dispatch [:ui.facets.current/get-codelists next-facet]])
            [:dispatch [:facets/apply-facet current-facet]]]})))
+
+(rf/reg-event-fx
+ :ui.event/edit-facet
+ [e/validation-interceptor]
+ (fn [{:keys [db]} [_ {:keys [name] :as facet}]]
+   (let [with-ui-state (db/set-applied-selection-and-disclosure db facet)]
+     {:db (db/set-current-facet db with-ui-state)
+      :fx [(when-not (caching/codelists-cached? db name)
+             [:dispatch [:ui.facets.current/get-codelists with-ui-state]])
+           ;; (when-not (set/subset (set (keys codelists))))
+           ]})))
 
 (rf/reg-event-db
  :ui.event/cancel-current-selection

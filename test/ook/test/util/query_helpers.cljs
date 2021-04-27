@@ -48,9 +48,9 @@
 ;;;;;;; OOK-specific UI helpers
 
 (defn find-expansion-toggle [label]
-  (-> (find-text label)
-      .-parentNode
-      (find-query "button")))
+  (some-> (query-text label)
+          .-parentNode
+          (find-query "button")))
 
 (defn find-toggle-icon-path [expand-toggle]
   (-> expand-toggle (find-query "svg path") (.getAttribute "d")))
