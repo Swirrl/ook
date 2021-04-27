@@ -17,10 +17,7 @@
   [db facet-name codelist-uri children]
   (assoc-in db [:facets/config facet-name :codelists codelist-uri :children] children))
 
-(defn codelists-cached? [db facet-name]
-  (boolean (db/get-codelists db facet-name)))
-
-(defn- concept-tree-cached? [db facet-name codelist-uri]
+(defn concept-tree-cached? [db facet-name codelist-uri]
   (boolean (db/get-concept-tree db facet-name codelist-uri)))
 
 (defn selected-trees-cached? [db {:keys [name selection]}]

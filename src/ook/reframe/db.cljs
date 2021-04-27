@@ -54,8 +54,5 @@
   (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]
     (update-in db [:ui.facets/current :expanded] #(apply disj % to-collapse))))
 
-(defn get-codelists [db facet-name]
-  (-> db :facets/config (get facet-name) :codelists boolean))
-
 (defn get-concept-tree [db facet-name codelist-uri]
   (-> db :facets/config (get facet-name) :codelists (get codelist-uri) :children))

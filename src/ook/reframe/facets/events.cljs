@@ -11,20 +11,20 @@
 (rf/reg-event-fx
  :ui.event/select-facet
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [codelists] :as next-facet}]]
+ (fn [{:keys [db]} [_ next-facet]]
    (let [current-facet (:ui.facets/current db)]
      {:db (db/set-current-facet db next-facet)
-      :fx [(when-not codelists
+      :fx [(when-not (:codelists next-facet)
              [:dispatch [:ui.facets.current/get-codelists next-facet]])
            [:dispatch [:facets/apply-facet current-facet]]]})))
 
 (rf/reg-event-fx
  :ui.event/edit-facet
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [name] :as facet}]]
+ (fn [{:keys [db]} [_ facet]]
    (let [with-ui-state (db/set-applied-selection-and-disclosure db facet)]
      {:db (db/set-current-facet db with-ui-state)
-      :fx [(when-not (caching/codelists-cached? db name)
+      :fx [(when-not (:codelists facet)
              [:dispatch [:ui.facets.current/get-codelists with-ui-state]])
            (when-not (caching/selected-trees-cached? db with-ui-state)
              [:dispatch [:codes/get-concept-trees-with-selected-codes with-ui-state]])]})))

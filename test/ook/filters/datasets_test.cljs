@@ -180,14 +180,15 @@
      (is (= "cl2" @setup/concept-tree-request)))
 
    (testing "it sets the selection properly"
-     (is (= ["2-2 code 3"] (qh/all-selected-labels))))
+     (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
    (testing "it sets the disclosure properly for the selection"
      (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
-     (is (qh/open? (qh/find-expansion-toggle "2-1 child 2"))))
+     (is (qh/open? (qh/find-expansion-toggle "2-1 child 2")))
+     (is (qh/closed? (qh/find-expansion-toggle "Codelist 3 Label"))))
 
    (testing "updating the selection and reapplying the facet works"
-     (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
+     (eh/click-text "2-2 child 1")
      (eh/click-text "2-1 child 1")
 
      (eh/click (qh/apply-filter-button))
@@ -197,5 +198,7 @@
 
    (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
+     ;; (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2" "Codelist 3 Label"]
+            (qh/all-labels)))
      (is (= ["2-1 child 1"] (qh/all-selected-labels))))))

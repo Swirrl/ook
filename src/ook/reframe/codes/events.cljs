@@ -69,7 +69,7 @@
  :codes/get-concept-trees-with-selected-codes
  [e/validation-interceptor]
  (fn [_db [_ facet]]
-   (let [codelist-uris (-> facet :selection keys)]
+   (let [codelist-uris (->> facet :selection (filter (fn [[k v]] (seq v))) (remove nil?) keys)]
      {:fx (for [codelist-uri codelist-uris]
             [:dispatch [:ui.event/get-codes codelist-uri facet]])})))
 
