@@ -12,12 +12,12 @@
 
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
-    (with-system [system ["drafter-client.edn" "cogs-staging.edn"]]
-      (is (= 35 (count (setup/example-datasets system)))))))
+    (with-system [system ["drafter-client.edn" "idp-beta.edn"]]
+      (is (= 36 (count (setup/example-datasets system)))))))
 
 (deftest transform-test
   (testing "Transform triples into json-ld"
-    (with-system [system ["drafter-client.edn", "cogs-staging.edn"]]
+    (with-system [system ["drafter-client.edn", "idp-beta.edn"]]
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (sut/transform frame datasets)]
@@ -26,7 +26,7 @@
 
 (deftest load-test
   (testing "Load json-ld into database"
-    (with-system [system ["drafter-client.edn" "cogs-staging.edn" "elasticsearch-test.edn"]]
+    (with-system [system ["drafter-client.edn" "idp-beta.edn" "elasticsearch-test.edn"]]
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (sut/transform frame datasets)
@@ -47,7 +47,7 @@
 (deftest dataset-pipeline-test
   (testing "Dataset pipeline schema"
     (with-system [system ["drafter-client.edn"
-                          "cogs-staging.edn"
+                          "idp-beta.edn"
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)
@@ -64,7 +64,7 @@
 (deftest component-pipeline-test
   (testing "Component pipeline schema"
     (with-system [system ["drafter-client.edn"
-                          "cogs-staging.edn"
+                          "idp-beta.edn"
                           "elasticsearch-test.edn"]]
       (setup/reset-indicies! system)
       (vcr/with-cassette {:name :component-pipeline :recordable? setup/not-localhost?}
@@ -81,7 +81,7 @@
 (deftest code-pipeline-test
   (testing "Code pipeline schema"
     (with-system [system ["drafter-client.edn"
-                          "cogs-staging.edn"
+                          "idp-beta.edn"
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)

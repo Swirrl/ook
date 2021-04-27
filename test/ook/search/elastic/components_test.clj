@@ -5,7 +5,7 @@
 
 (deftest components-tests
   (with-system [system ["drafter-client.edn"
-                        "cogs-staging.edn"
+                        "idp-beta.edn"
                         "elasticsearch-test.edn"
                         "project/fixture/data.edn"
                         "project/fixture/facets.edn"]]

@@ -246,7 +246,7 @@
   (def result
     (ook.concerns.integrant/exec-config
      {:profiles ["drafter-client.edn"
-                 "cogs-staging.edn"
+                 "idp-beta.edn"
                  "elasticsearch-development.edn"
                  "load-data.edn"
                  "project/trade/data.edn"
@@ -256,10 +256,10 @@
   (require 'ook.index)
   (dev/with-system [system
                     ["drafter-client.edn"
-                     "cogs-staging.edn"
+                     "idp-beta.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (let [system (assoc system :ook.etl/select-page-size 10000)]
+    (let [system (assoc system :ook.etl/select-page-size 50000)]
       (ook.index/delete-index system "code")
       (ook.index/create-index system "code")
       (code-pipeline system)))
@@ -268,7 +268,7 @@
   ;; recreate mid-pipeline error
   (dev/with-system [system
                     ["drafter-client.edn"
-                     "cogs-staging.edn"
+                     "idp-beta.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
     (let [subject-query (slurp (io/resource "etl/observation-select.sparql"))

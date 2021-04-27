@@ -6,7 +6,7 @@
 (deftest database-test
   (testing "Extracting resources from the index"
     (with-system [system ["drafter-client.edn"
-                          "cogs-staging.edn"
+                          "idp-beta.edn"
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"
                           "project/fixture/facets.edn"]]

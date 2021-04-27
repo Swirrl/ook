@@ -75,14 +75,14 @@
            :ook.etl/fixtures
            {:exec-fn ook.concerns.integrant/exec-config
             :exec-args {:profiles ["drafter-client.edn"
-                                   "cogs-staging.edn"
+                                   "idp-beta.edn"
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
                                    "project/fixture/data.edn"]}}
            :ook.etl/trade
            {:exec-fn ook.concerns.integrant/exec-config
             :exec-args {:profiles ["drafter-client.edn"
-                                   "cogs-staging.edn"
+                                   "idp-beta.edn"
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
                                    "project/trade/data.edn"]}}

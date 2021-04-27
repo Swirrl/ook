@@ -2,10 +2,10 @@
 
 ## Set-up
 
-We're downloading RDF using drafter client. Although we're only using the public endpoint, you still need to prove AUTH0 credentials. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like. You could also set it to the secret key for the [ook application](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8). You can store this locally in an encrypted file:
+We're downloading RDF using drafter client. Although we're only using the public endpoint, you still need to prove AUTH0 credentials. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like. You could also set it to the secret key for the ook application (e.g. on [cogs staging](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8) or [idp beta](https://manage.auth0.com/dashboard/eu/swirrl-ons-prod/applications/OS2GgkrjYyb7EXdawNfk6HViXznpf7Dh/settings)). You can store this locally in an encrypted file:
 
 ```bash
-echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > resources/secrets/AUTH0_SECRET.gpg
+echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > env/dev/resources/secrets/AUTH0_SECRET.gpg
 ```
 
 You can use this pattern and the `ook.concerns.integrant/secret` reader to encrypt other secrets.

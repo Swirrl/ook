@@ -71,7 +71,7 @@
                 "elasticsearch-prod.edn"
                 "load-data.edn"]
         target (or args ["project/trade/data.edn"
-                         "cogs-staging.edn"])
+                         "idp-beta.edn"])
         profiles (concat loader target)]
     (println "Starting index loader with profiles: " profiles)
     (i/exec-config {:profiles profiles})))
