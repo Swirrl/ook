@@ -30,8 +30,8 @@
 (rf/reg-event-fx
  :ui.event/get-codes
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ codelist-uri]]
-   (let [facet (:ui.facets/current db)]
+ (fn [{:keys [db]} [_ codelist-uri specific-facet]]
+   (let [facet (or specific-facet (:ui.facets/current db))]
      {:db (-> db
               (update-in [:ui.facets/current :expanded] conj codelist-uri)
               (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
@@ -39,7 +39,7 @@
            [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
 
 (rf/reg-event-db
-  :ui.event/set-selection
+ :ui.event/set-selection
  [e/validation-interceptor]
  (fn [db [_ which {:keys [ook/uri] :as option}]]
    (condp = which
@@ -64,6 +64,14 @@
      db)))
 
 ;;; HTTP REQUESTS & RESPONSES
+
+(rf/reg-event-fx
+ :codes/get-concept-trees-with-selected-codes
+ [e/validation-interceptor]
+ (fn [_db [_ facet]]
+   (let [codelist-uris (-> facet :selection keys)]
+     {:fx (for [codelist-uri codelist-uris]
+            [:dispatch [:ui.event/get-codes codelist-uri facet]])})))
 
 (rf/reg-event-fx
  :http/fetch-codes

@@ -26,8 +26,8 @@
      {:db (db/set-current-facet db with-ui-state)
       :fx [(when-not (caching/codelists-cached? db name)
              [:dispatch [:ui.facets.current/get-codelists with-ui-state]])
-           ;; (when-not (set/subset (set (keys codelists))))
-           ]})))
+           (when-not (caching/selected-trees-cached? db with-ui-state)
+             [:dispatch [:codes/get-concept-trees-with-selected-codes with-ui-state]])]})))
 
 (rf/reg-event-db
  :ui.event/cancel-current-selection
