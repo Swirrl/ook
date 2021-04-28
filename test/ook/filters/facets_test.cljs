@@ -160,17 +160,24 @@
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= 1 (count (qh/all-selected-labels)))))
 
-   (testing "toggling selection works"
-     (eh/click-text "2-1 child 1")
-     (is (= ["2-1 child 1"] (qh/all-selected-labels)))
+   (testing "toggling selection"
+     (testing "works for individual codes"
+       (eh/click-text "2-1 child 1")
+       (is (= ["2-1 child 1"] (qh/all-selected-labels)))
 
-     (eh/click (qh/find-expansion-toggle "2-1 child 2"))
+       (eh/click (qh/find-expansion-toggle "2-1 child 2"))
 
-     (eh/click-text "2-2 child 1")
-     (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
+       (eh/click-text "2-2 child 1")
+       (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
 
-     (eh/click-text "2-1 child 1")
-     (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+       (eh/click-text "2-1 child 1")
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+
+     (testing "un-selecting a code does not affect other codelists"
+       (eh/click-text "Codelist 3 Label")
+       (eh/click-text "2-2 child 1")
+       (is (= ["Codelist 3 Label"] (qh/all-selected-labels)))
+       (eh/click-text "Codelist 3 Label")))
 
    (testing "all codelists have an 'any' button"
      (is (not (nil? (qh/select-any-button "Codelist 2 Label"))))

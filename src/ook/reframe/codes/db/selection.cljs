@@ -15,13 +15,15 @@
     (add-codelist facet uri)
     (add-codes facet (:scheme option) [uri])))
 
-(defn- dissoc-empty-schemes [selection]
-  (->> selection (remove (fn [[_ v]] (empty? v))) (into {})))
+(defn- dissoc-empty-scheme [selection scheme]
+  (if (-> selection (get scheme) empty?)
+    (dissoc selection scheme)
+    selection))
 
 (defn- remove-code [facet {:keys [ook/uri scheme]}]
   (-> facet
       (update-in [:selection scheme] disj uri)
-      (update :selection dissoc-empty-schemes)))
+      (update :selection dissoc-empty-scheme scheme)))
 
 (defn- remove-from-selection [facet {:keys [ook/uri] :as option}]
   (if (codelist? option)
@@ -38,7 +40,7 @@
     (remove-from-selection facet option)
     (add-to-selection facet option)))
 
-(defn- used-child-uris [{:keys [children] :as code}]
+(defn- used-child-uris [{:keys [children]}]
   (->> children (filter :used) (map :ook/uri) set))
 
 (defn add-children [facet {:keys [scheme] :as code}]
