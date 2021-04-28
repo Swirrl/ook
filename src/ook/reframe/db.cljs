@@ -23,7 +23,7 @@
 
 (defn all-uris [tree]
   (let [walk (fn walk* [node]
-               (cons (:ook/uri node)
+               (cons (when (:used node) (:ook/uri node))
                      (let [children (:children node)]
                        (when-not (keyword? children)
                          (mapcat walk* children)))))]
@@ -37,18 +37,14 @@
           (collect-fn children)
           (mapcat walk* children))))))
 
-(defn uri->child-uris [db uri]
-  (let [codelists (-> db :ui.facets/current :codelists vals)
-        walk (collect-children uri all-uris)]
-    (set (mapcat walk codelists))))
+(defn uri->child-uris [concept-trees uri]
+  (let [walk (collect-children uri all-uris)]
+    (set (mapcat walk concept-trees))))
 
 (defn uri->expandable-child-uris [db uri]
   (let [codelists (-> db :ui.facets/current :codelists vals)
         walk (collect-children uri all-expandable-uris)]
     (set (mapcat walk codelists))))
-
-(defn code-expanded? [db uri]
-  (-> db :ui.facets/current :expanded (get uri) boolean))
 
 (defn collapse-children [db uri]
   (let [to-collapse (cons uri (uri->expandable-child-uris db uri))]

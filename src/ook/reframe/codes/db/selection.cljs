@@ -1,7 +1,7 @@
 (ns ook.reframe.codes.db.selection
   (:require [ook.reframe.db :as db]))
 
-(defn- codelist? [option]
+(defn codelist? [option]
   (nil? (:scheme option)))
 
 (defn add-codelist [db uri]
@@ -17,7 +17,7 @@
     (add-codes db (:scheme option) [uri])))
 
 (defn dissoc-empty-schemes [selection]
-  (->> selection (remove (fn [[ _ v]] (empty? v))) (into {})))
+  (->> selection (remove (fn [[_ v]] (empty? v))) (into {})))
 
 (defn remove-code [db {:keys [ook/uri scheme]}]
   (-> db
@@ -41,10 +41,12 @@
     (add-to-selection db option)))
 
 (defn add-children [db {:keys [scheme ook/uri]}]
-  (let [to-add (db/uri->child-uris db uri)]
+  (let [concept-trees (-> db :ui.facets/current :codelists vals)
+        to-add (db/uri->child-uris concept-trees uri)]
     (add-codes db scheme to-add)))
 
 (defn remove-children [db {:keys [scheme ook/uri]}]
-  (let [to-remove (db/uri->child-uris db uri)]
+  (let [concept-trees (-> db :ui.facets/current :codelists vals)
+        to-remove (db/uri->child-uris concept-trees uri)]
     (update-in db [:ui.facets/current :selection scheme]
                #(apply (fnil disj #{}) % to-remove))))

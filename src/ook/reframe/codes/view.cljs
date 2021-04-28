@@ -22,17 +22,14 @@
    (merge opts {:type "button"})
    (if expanded? icons/down icons/up)])
 
-(defn- toggle-code-expanded-button [{:keys [ook/uri]} expanded?]
+(defn- toggle-code-expanded-button [uri expanded?]
   [toggle-level-button
    {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [{:keys [ook/uri children]} expanded?]
+(defn- toggle-codelist-expanded-button [uri expanded?]
   [toggle-level-button
-   {:on-click (fn []
-                (if children
-                  (rf/dispatch [:ui.event/toggle-disclosure uri])
-                  (rf/dispatch [:ui.event/get-codes uri])))}
+   {:on-click #(rf/dispatch [:ui.event/toggle-codelist uri])}
    expanded?])
 
 (defn- select-any-button [codelist]
@@ -57,7 +54,7 @@
                :name "code"
                :value uri
                :id id
-               :checked (and used selected?)
+               :checked selected?
                :on-change #(rf/dispatch [:ui.event/toggle-selection option])}
         (not used) (merge {:disabled true}))]
      [:label.form-check-label.d-inline {:for id} label]]))
@@ -70,11 +67,11 @@
 
 (declare code-tree)
 
-(defn- code-item [{:keys [ook/uri label children] :as code}]
-  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
+(defn- code-item [{:keys [children ook/uri] :as code}]
+  (let [expanded? @(rf/subscribe [:ui.facets.current/option-expanded? uri])]
     [nested-list-item
      (when (seq children)
-       [toggle-code-expanded-button code expanded?])
+       [toggle-code-expanded-button uri expanded?])
      [checkbox-input code]
      (when (seq children)
        [:<>
@@ -92,10 +89,10 @@
    [nested-list-item {:class "text-muted"}
     [:em "No codes to show"]]])
 
-(defn- codelist-item [{:keys [ook/uri children] :as codelist}]
-  (let [expanded? @(rf/subscribe [:ui.facets.current/code-expanded? uri])]
+(defn- codelist-item [{:keys [children ook/uri] :as codelist}]
+  (let [expanded? @(rf/subscribe [:ui.facets.current/option-expanded? uri])]
     [nested-list-item
-     [toggle-codelist-expanded-button codelist expanded?]
+     [toggle-codelist-expanded-button uri expanded?]
      [checkbox-input (assoc codelist :used true)]
      [select-any-button codelist]
      (when expanded?

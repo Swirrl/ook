@@ -96,7 +96,7 @@
 
    (testing "expanding a codelist fetches its concept tree and expands all children"
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "concept trees are cached"
@@ -113,16 +113,20 @@
      ;; codelist 2 tree is not re-fetched
      (is (= "cl3" @setup/concept-tree-request)))
 
-   (testing "collapsing a sub-tree works"
+   (testing "expanding and collapsing a sub-tree works"
+     (eh/click (qh/find-expansion-toggle "2-1 child 2"))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+            (qh/expanded-labels-under-label "Codelist 2 Label")))
+
      (eh/click (qh/find-expansion-toggle "2-1 child 2"))
      (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
-   (testing "expanding a parent node expands all its children"
+   (testing "expanding a parent node expands only immediate children"
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= ["Codelist 2 Label"] (qh/expanded-labels-under-label "Codelist 2 Label")))
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "codelists remain sorted by uri when expanded/collapsed"
@@ -159,6 +163,8 @@
    (testing "toggling selection works"
      (eh/click-text "2-1 child 1")
      (is (= ["2-1 child 1"] (qh/all-selected-labels)))
+
+     (eh/click (qh/find-expansion-toggle "2-1 child 2"))
 
      (eh/click-text "2-2 child 1")
      (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))

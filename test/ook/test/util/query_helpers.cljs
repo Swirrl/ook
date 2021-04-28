@@ -48,9 +48,8 @@
 ;;;;;;; OOK-specific UI helpers
 
 (defn find-expansion-toggle [label]
-  (some-> (query-text label)
-          .-parentNode
-          (find-query "button")))
+  (let [toggle (some-> (query-text label) .-parentNode (find-query "button"))]
+    (if toggle toggle (throw (js/Error. (str "Could not find toggle for option: " label))))))
 
 (defn find-toggle-icon-path [expand-toggle]
   (-> expand-toggle (find-query "svg path") (.getAttribute "d")))

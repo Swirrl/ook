@@ -14,8 +14,7 @@
  (fn [{:keys [db]} [_ next-facet]]
    (let [current-facet (:ui.facets/current db)]
      {:db (db/set-current-facet db next-facet)
-      :fx [(when-not (:codelists next-facet)
-             [:dispatch [:ui.facets.current/get-codelists next-facet]])
+      :fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
            [:dispatch [:facets/apply-facet current-facet]]]})))
 
 (rf/reg-event-fx
@@ -24,8 +23,7 @@
  (fn [{:keys [db]} [_ facet]]
    (let [with-ui-state (db/set-applied-selection-and-disclosure db facet)]
      {:db (db/set-current-facet db with-ui-state)
-      :fx [(when-not (:codelists facet)
-             [:dispatch [:ui.facets.current/get-codelists with-ui-state]])
+      :fx [[:dispatch [:ui.facets.current/get-codelists with-ui-state]]
            (when-not (caching/selected-trees-cached? db with-ui-state)
              [:dispatch [:codes/get-concept-trees-with-selected-codes with-ui-state]])]})))
 
@@ -40,10 +38,11 @@
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ facet]]
-   {:db (assoc db :facets.current/loading true)
-    :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
-         [:dispatch [:http/fetch-codelists facet]]]}))
+ (fn [{:keys [db]} [_ {:keys [codelists] :as facet}]]
+   (when-not codelists
+     {:db (assoc db :facets.current/loading true)
+      :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
+           [:dispatch [:http/fetch-codelists facet]]]})))
 
 (rf/reg-event-db
  :ui.facets.current/set-loading
