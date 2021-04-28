@@ -46,6 +46,3 @@
 
 (defn add-all-open-codes [current-disclosure db selection facet-name]
   (apply (fnil conj #{}) current-disclosure (get-expanded-uris db selection facet-name)))
-
-(defn update-disclosure-to-show-all-selected [facet db selection]
-  (update facet :expanded add-all-open-codes db selection (:name facet)))

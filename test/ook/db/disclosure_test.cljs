@@ -1,5 +1,5 @@
 (ns ook.db.disclosure-test
-  (:require [cljs.test :refer [deftest is testing]]
+  (:require [cljs.test :refer [deftest is]]
             [ook.reframe.codes.db.disclosure :as sut]))
 
 (deftest get-expanded-uris-test

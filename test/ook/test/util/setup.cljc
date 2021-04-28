@@ -48,12 +48,6 @@
          (let [query (slurp (io/resource "etl/dataset-construct.sparql"))]
            (etl/extract system query "qb" example-cubes))))
 
-     (defn load-datasets! [system]
-       (let [datasets (example-datasets system)
-             frame (slurp (io/resource "etl/dataset-frame.json"))
-             jsonld (etl/transform frame datasets)]
-         (etl/load-documents system "dataset" jsonld)))
-
      (defn not-localhost? [req & _]
        (not (= (:server-name req)
                "localhost")))
