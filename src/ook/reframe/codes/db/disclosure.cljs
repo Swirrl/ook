@@ -6,6 +6,9 @@
 (defn expanded? [facet uri]
   (-> facet :expanded (get uri) boolean))
 
+(defn expand [facet uri]
+  (update facet :expanded (fnil conj #{}) uri))
+
 (defn collapse [facet uri]
   (update facet :expanded disj uri))
 

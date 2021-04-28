@@ -215,7 +215,7 @@
      (eh/click-text "2-2 child 2")
      (is (= [] (qh/all-selected-labels))))
 
-   (testing "selecting 'all children'"
+   (testing "selecting 'all children' or 'none'"
      (testing "selects all the children that are used"
        (eh/click (qh/multi-select-button "2-1 child 2"))
        (is (= ["2-2 child 1"] (qh/all-selected-labels))))
@@ -241,9 +241,16 @@
        (is (= "none" (qh/text-content (qh/multi-select-button "5-1 child 1"))))
        (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
 
-     (testing "clears only children for that level and changes button label back"
+     (testing "expands to show children that were just selected"
+       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
+       (is (qh/closed? (qh/find-expansion-toggle "5-2 child 2")))
+       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
+
        (eh/click (qh/multi-select-button "5-2 child 2"))
-       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels)))
+       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels))))
+
+     (testing "clears only children for that level and changes button label back"
+       (is (= "none" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
 
        (eh/click (qh/multi-select-button "5-2 child 2"))
        (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))

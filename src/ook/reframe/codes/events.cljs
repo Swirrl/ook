@@ -41,7 +41,9 @@
      :any (-> db
               (update :ui.facets/current selection/add-codelist uri)
               (update :ui.facets/current disclosure/collapse uri))
-     :add-children (update db :ui.facets/current selection/add-children option)
+     :add-children (-> db
+                       (update :ui.facets/current selection/add-children option)
+                       (update :ui.facets/current disclosure/expand uri))
      :remove-children (update db :ui.facets/current selection/remove-children option))))
 
 (rf/reg-event-db
