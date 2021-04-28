@@ -180,7 +180,6 @@
      (is (= "cl2" @setup/concept-tree-request)))
 
    (testing "it sets the selection properly"
-     (eh/click (qh/find-expansion-toggle "2-1 child 2"))
      (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
    (testing "it sets the disclosure properly for the selection"
@@ -199,7 +198,5 @@
 
    (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
-     ;; (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2" "Codelist 3 Label"]
-            (qh/all-labels)))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
      (is (= ["2-1 child 1"] (qh/all-selected-labels))))))

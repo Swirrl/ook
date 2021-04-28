@@ -3,7 +3,6 @@
    [re-frame.core :as rf]
    [ook.reframe.codes.db.caching :as caching]
    [ajax.core :as ajax]
-   [ook.reframe.db :as db]
    [ook.reframe.codes.db.selection :as selection]
    [ook.reframe.codes.db.disclosure :as disclosure]
    [ook.reframe.events :as e]))
@@ -73,10 +72,10 @@
            [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
 
 (rf/reg-event-fx
- :codes/get-concept-trees-with-selected-codes
+ :codes/get-selected-concept-trees
  [e/validation-interceptor]
  (fn [_db [_ facet]]
-   (let [codelist-uris (->> facet :selection (filter (fn [[k v]] (seq v))) (remove nil?) keys)]
+   (let [codelist-uris (->> facet :selection disclosure/open-codelist-uris)]
      {:fx (for [codelist-uri codelist-uris]
             [:dispatch [:codes/get-codes codelist-uri facet]])})))
 
@@ -94,15 +93,15 @@
 (rf/reg-event-db
  :http.codes/success
  [e/validation-interceptor]
- (fn [db [_ facet codelist-uri result]]
+ (fn [db [_ {:keys [selection name] :as facet} codelist-uri result]]
    (let [children (if (seq result) result :no-children)
          updated-db (caching/cache-code-tree db (:name facet) codelist-uri children)
-         facet-with-ui-state (-> updated-db :facets/config (get (:name facet))
-                                 (assoc :expanded (:expanded facet))
-                                 (assoc :selection (:selection facet)))]
+         updated-facet (-> facet
+                           (merge (get-in updated-db [:facets/config name]))
+                           (update :expanded disclosure/add-all-open-codes updated-db selection name))]
      (-> updated-db
          (update :ui.facets.current.codes/loading dissoc codelist-uri)
-         (assoc :ui.facets/current facet-with-ui-state)))))
+         (assoc :ui.facets/current updated-facet)))))
 
 (rf/reg-event-db
  :http.codes/error
