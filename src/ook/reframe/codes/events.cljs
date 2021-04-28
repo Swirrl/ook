@@ -39,15 +39,17 @@
  [e/validation-interceptor]
  (fn [db [_ which {:keys [ook/uri] :as option}]]
    (condp = which
-     :any (-> db (selection/add-codelist uri) (update :ui.facets/current disclosure/toggle uri))
-     :add-children (selection/add-children db option)
-     :remove-children (selection/remove-children db option))))
+     :any (-> db
+              (update :ui.facets/current selection/add-codelist uri)
+              (update :ui.facets/current disclosure/collapse uri))
+     :add-children (update db :ui.facets/current selection/add-children option)
+     :remove-children (update db :ui.facets/current selection/remove-children option))))
 
 (rf/reg-event-db
  :ui.event/toggle-selection
  [e/validation-interceptor]
  (fn [db [_ option]]
-   (selection/toggle db option)))
+   (update db :ui.facets/current selection/toggle option)))
 
 ;;; UI MANAGEMENT
 

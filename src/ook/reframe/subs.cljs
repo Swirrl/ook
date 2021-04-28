@@ -43,7 +43,7 @@
 (rf/reg-sub
  :ui.facets.current/option-selected?
  (fn [db [_ option]]
-   (selection/option-selected? db option)))
+   (selection/option-selected? (:ui.facets/current db) option)))
 
 (rf/reg-sub
  :ui.facets.current/option-expanded?

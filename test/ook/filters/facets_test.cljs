@@ -220,19 +220,24 @@
        (eh/click (qh/multi-select-button "2-1 child 2"))
        (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
-     (testing "selects all children of all levels for deeply nested code trees"
+     (testing "selects next-level children only for deeply nested code trees"
        (eh/click-text "2-2 child 1")
        (eh/click-text "Facet 4")
        (eh/click (qh/find-expansion-toggle "with nested codes"))
+       (eh/click (qh/find-expansion-toggle "5-1 child 1"))
+       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
 
        (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels))))
+       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels))))
 
      (testing "shows option to select no children only if all children are selected"
        (is (= "none" (qh/text-content (qh/multi-select-button "5-1 child 1"))))
-       (is (= "none" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
+       (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
 
      (testing "clears only children for that level and changes button label back"
+       (eh/click (qh/multi-select-button "5-2 child 2"))
+       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels)))
+
        (eh/click (qh/multi-select-button "5-2 child 2"))
        (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
        (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
