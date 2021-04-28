@@ -14,7 +14,6 @@ CONSTRUCT {
 	skos:narrower ?narrower;
 	skos:topConceptOf ?toppedScheme;
         ui:sortPriority ?sort_priority;
-	<http://example.net/def/used> ?used;
     .
 } WHERE {
 
@@ -33,14 +32,6 @@ CONSTRUCT {
     OPTIONAL {?code skos:broader ?broader;}
 
     OPTIONAL {?code skos:narrower ?narrower;}
-
-    # BIND (EXISTS {
-    #   ?code skos:inScheme ?scheme2 .
-    #   ?dimension qb:codeList ?scheme2 .
-    #   [] ?dimension ?code .
-    # } AS ?used)
-
-    BIND(true as ?used)
   }
 
   # code can be in multiple schemes so this is specified separately

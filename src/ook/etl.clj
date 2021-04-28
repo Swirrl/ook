@@ -157,9 +157,16 @@
 (defn- first-error [result]
   (->> result
        :items
-       (map (comp :error :index))
+       (map (comp :error first vals))
        (remove nil?)
        first))
+
+(defn bulk-upsert
+  "Generates operations for a bulk-upsert (esb/bulk-update doesn't quite work)"
+  [docs]
+  (let [ops (map (fn [doc] {"update" {"_id" (get doc "@id")}}) docs)
+        docs (map (fn [doc] {"doc" (dissoc doc :_id), "doc_as_upsert" true}) docs)]
+    (interleave ops docs)))
 
 (defn load-documents [{:keys [:ook.concerns.elastic/endpoint
                               :ook.etl/load-page-size
@@ -171,7 +178,7 @@
         params (if load-synchronously {:refresh "wait_for"} {})]
     (doall
      (for [batch batches]
-       (let [result (esb/bulk-with-index conn index (esb/bulk-index batch) params)]
+       (let [result (esb/bulk-with-index conn index (bulk-upsert batch) params)]
          (if (:errors result)
            (throw (ex-info "Error loading documents" (first-error result))))
          result)))))
@@ -218,6 +225,13 @@
    (slurp (io/resource "etl/code-frame.json"))
    "code"))
 
+(def code-used-pipeline
+  (pipeline-fn
+   (slurp (io/resource "etl/code-select.sparql"))
+   (slurp (io/resource "etl/code-used-construct.sparql"))
+   (slurp (io/resource "etl/code-used-frame.json"))
+   "code"))
+
 (def observation-pipeline
   (pipeline-fn
    (slurp (io/resource "etl/observation-select.sparql"))
@@ -230,6 +244,8 @@
   (dataset-pipeline system)
   (component-pipeline system)
   (code-pipeline system)
+  (let [system (assoc system :ook.etl/select-page-size 500)]
+    (code-used-pipeline system))
   (observation-pipeline system)
   (log/info "All pipelines complete"))
 
@@ -262,7 +278,9 @@
     (let [system (assoc system :ook.etl/select-page-size 50000)]
       (ook.index/delete-index system "code")
       (ook.index/create-index system "code")
-      (code-pipeline system)))
+      (code-pipeline system))
+    (let [system (assoc system :ook.etl/select-page-size 300)]
+      (code-used-pipeline system)))
 
 
   ;; recreate mid-pipeline error
@@ -284,8 +302,4 @@
              (transform jsonld-frame)
              ;;(load-documents system index)
              )
-        (log/warn (str "No compatible (" index ") subjects found!")))
-))
-
-
-  )
+        (log/warn (str "No compatible (" index ") subjects found!"))))))

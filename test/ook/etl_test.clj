@@ -37,7 +37,7 @@
 (defn found?
   "Checks to see if the doc has the value for the key.
 
-  You can be specify nil values to check for the existence of a
+  You can specify nil values to check for the existence of a
   property in the index mapping as otherwise :missing-from-mapping
   would be returned"
   [doc key value]
@@ -86,7 +86,8 @@
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)
       (vcr/with-cassette {:name :code-pipeline :recordable? setup/not-localhost?}
-        (etl/code-pipeline system))
+        (etl/code-pipeline system)
+        (etl/code-used-pipeline system))
 
       (let [db (setup/get-db system)
             doc (first (db/get-codes db ["def/trade/concept/alcohol-type/beer"]))]
@@ -94,7 +95,7 @@
           :ook/uri "def/trade/concept/alcohol-type/beer"
           :label "Beer"
           :notation "beer"
-          :used "true"
+          :used "false"
           :narrower nil
           :broader nil
           :topConceptOf "def/trade/concept-scheme/alcohol-type")))))
