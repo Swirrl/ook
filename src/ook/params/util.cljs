@@ -4,7 +4,7 @@
             [clojure.string :as str]))
 
 (def base-uri "http://gss-data.org.uk/")
-(def pmd-uri "https://staging.gss-data.org.uk/")
+(def pmd-uri "https://beta.gss-data.org.uk/")
 
 (defn- pair-dimensions-and-codes [{dim-uri :ook/uri codes :codes}]
   (when codes

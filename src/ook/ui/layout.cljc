@@ -41,7 +41,7 @@
    [:div.container
     [:p
      "Created by Swirrl and the ONS in collaboration with DIT as part of the "
-     [:a {:href "https://staging.gss-data.org.uk/"} "Integrated Data Programme"]
+     [:a {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
      "."]]])
 
 (defn- scripts []
