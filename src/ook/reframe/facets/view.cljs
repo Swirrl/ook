@@ -5,7 +5,7 @@
    [ook.ui.icons :as icons]))
 
 (defn- facet-button [{:keys [name] :as facet} selected? applied?]
-  [:button.btn.me-2
+  [:button.btn.me-2.mb-2
    {:type "button"
     :class (cond
              selected? "btn-dark"

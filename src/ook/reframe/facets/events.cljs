@@ -13,9 +13,9 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ next-facet]]
    (let [current-facet (:ui.facets/current db)]
-     {:db (db/set-current-facet db next-facet)
-      :fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
-           [:dispatch [:facets/apply-facet current-facet]]]})))
+     (cond-> {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
+                   [:dispatch [:facets/apply-facet current-facet]]]}
+       (:codelists next-facet) (assoc :db (db/set-current-facet db next-facet))))))
 
 (rf/reg-event-fx
  :ui.event/edit-facet
@@ -86,8 +86,8 @@
          updated-facet (merge facet (-> updated-db :facets/config (get (:name facet))))]
      (-> updated-db
          (dissoc :facets.current/loading)
-         (assoc :ui.facets.current/status status)
-         (assoc :ui.facets/current updated-facet)))))
+         (assoc :ui.facets/current updated-facet)
+         (assoc :ui.facets.current/status status)))))
 
 (rf/reg-event-db
  :http.codelists/error
