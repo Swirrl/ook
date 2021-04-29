@@ -81,37 +81,89 @@
                       [{:ook/uri "def/trade/property/dimension/alcohol-type"
                         :label "Alcohol Type"
                         :codes
-                        [{:ook/uri "def/trade/concept/alcohol-type/wine"
-                          :ook/type "skos:Concept"
-                          :label "Wine"
-                          :broader nil
-                          :narrower nil
-                          :topConceptOf "def/trade/concept-scheme/alcohol-type"
-                          :used "true"
-                          :notation "wine"
-                          :priority "1"
+                        [{:ook/uri "def/trade/concept/alcohol-type/beer-and-cider"
+                          :ook/type "skos:Concept",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/alcohol-type",
                           :scheme
-                          [{:ook/uri "def/trade/concept-scheme/alcohol-type"
-                            :label "Alcohol Type"}]}]}]}
+                          [{:ook/uri "def/trade/concept-scheme/alcohol-type",
+                            :label "Alcohol Type"}],
+                          :used "true"
+                          
+                          :notation "beer-and-cider",
+                          :label "Beer and Cider",
+                          :priority "4",
+                          }
+                         {:ook/uri "def/trade/concept/alcohol-type/all",
+                          :ook/type "skos:Concept",
+                          :priority "8",
+                          :label "All",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/alcohol-type",
+                          :notation "all",
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/alcohol-type",
+                            :label "Alcohol Type"}],
+                          :used "true"}
+                         {:ook/uri "def/trade/concept/alcohol-type/spirits",
+                          :ook/type "skos:Concept",
+                          :priority "3",
+                          :label "Spirits",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/alcohol-type",
+                          :notation "spirits",
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/alcohol-type",
+                            :label "Alcohol Type"}],
+                          :used "true"}]}]}
                      (description-for-facet "Alcohol Type")))
               (is (= {:name "Bulletin Type"
                       :dimensions
                       [{:ook/uri "def/trade/property/dimension/bulletin-type"
-                        :label "Alcohol Bulletin Type"
+                        :label "Alcohol Bulletin Type" 
                         :codes
                         [{:ook/uri
-                          "def/trade/concept/bulletin-type/total-wine-duty-receipts"
-                          :ook/type "skos:Concept"
-                          :label "Total Wine Duty receipts"
-                          :broader nil
-                          :narrower nil
-                          :topConceptOf "def/trade/concept-scheme/bulletin-type"
-                          :used "true"
-                          :notation "total-wine-duty-receipts"
-                          :priority "8"
+                          "def/trade/concept/bulletin-type/total-alcohol-duty-receipts"
+                          :ook/type "skos:Concept",
+                          :notation "total-alcohol-duty-receipts",
+                          :label "Total alcohol duty receipts",
+                          :priority "9",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type",
                           :scheme
-                          [{:ook/uri "def/trade/concept-scheme/bulletin-type"
-                            :label "Bulletin Type"}]}]}]}
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type",
+                            :label "Bulletin Type"}],
+                          :used "true"}
+                         {:ook/uri
+                          "def/trade/concept/bulletin-type/total-beer-duty-receipts",
+                          :ook/type "skos:Concept",
+                          :priority "29",
+                          :label "Total Beer Duty receipts",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type",
+                          :notation "total-beer-duty-receipts",
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type",
+                            :label "Bulletin Type"}],
+                          :used "true"}
+                         {:ook/uri
+                          "def/trade/concept/bulletin-type/total-cider-duty-receipts",
+                          :ook/type "skos:Concept",
+                          :priority "30",
+                          :label "Total Cider Duty receipts",
+                          :narrower nil,
+                          :broader nil,
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type",
+                          :notation "total-cider-duty-receipts",
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type",
+                            :label "Bulletin Type"}],
+                          :used "true"}]}]}
                      (description-for-facet "Bulletin Type")))
               (is (= nil
                      (description-for-facet "Date"))))))))))

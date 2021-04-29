@@ -64,24 +64,22 @@
 (defn- observation-query
   "Creates a query for finding observations with selected dimensions and dimension-values.
 
-  Provides counts by dataset and collapses to a few example observations for each dataset."
+  Provides counts by dataset and identifies (and counts observations for) the top three codes by dimension."
   [dimension-selections]
   (let [dimension-selections (reduce ;; append .@id to reach into nested dimval docs
                               (fn [m [k v]] (assoc m (str k ".@id") v))
                               {}
                               dimension-selections)
-        dimensions (keys dimension-selections)
         criteria (map (fn [[dim codes]]
                         (if (empty? codes)
                           {:exists {:field dim}} ;; dimension (with no codes specified) ought to be present
                           {:terms {dim codes}})) dimension-selections) ;; dimensions' values are one of the specified codes
-        ]
-    {:collapse {:field "qb:dataSet.@id"}
-     :fields dimensions
-     :_source false
-     :size size-limit
+        dimension-rollup (into {} (map (fn [dim] [dim {:terms {:field dim, :size 3}}]) ;; select the top 3 codes per dimension
+                                       (keys dimension-selections)))]
+    {:size 0
      :query {:bool {:should criteria}}
-     :aggregations {:datasets {:terms {:field "qb:dataSet.@id" :size size-limit}}}}))
+     :aggregations {:datasets {:terms {:field "qb:dataSet.@id" :size size-limit} ;; roll-up dimensions within each dataset
+                               :aggregations dimension-rollup}}}))
 
 (defn- find-observations
   "Finds observations with given dimensions and dimension-values. Groups results by dataset."
@@ -93,40 +91,28 @@
 (defn datasets-from-observation-hits
   "Parses observation-query results to return a sequence of datasets."
   [observation-hits]
-  (let [examples (->> observation-hits :hits :hits
-                      (reduce (fn [matches {:keys [fields]}]
-                                ;; Fields always returned as arrays even though obs properties (dimvals)
-                                ;; are scalar. Here we extract the first value from each to unbox them.
-                                (let [fields (zipmap (keys fields) (map first (vals fields)))]
-                                  (assoc matches
-                                         (get fields (keyword "qb:dataSet.@id"))
-                                         {:matching-observation-example (dissoc fields (keyword "qb:dataSet.@id"))})))
-                              {}))
-        buckets (->> observation-hits :aggregations :datasets :buckets
-                     (reduce (fn [matches {:keys [key doc_count]}]
-                               (assoc matches
-                                      key
-                                      {:matching-observation-count doc_count}))
-                             {}))]
-    (map (fn [[id match-description]] (merge {:ook/uri id} match-description))
-         (merge-with merge buckets examples))))
+  (->> observation-hits :aggregations :datasets :buckets
+       (map (fn [{:keys [key doc_count] :as dataset}]
+                 (let [dimension-buckets (dissoc dataset :key :doc_count) ;; if we remove ES bookkeeping we should be left with a map from dim.@id to buckets
+                       dimension-values (into {} (map (fn [[dim {:keys [buckets]}]] (when (not (empty? buckets))
+                                                                                      [dim (map :key buckets)]))
+                                                      dimension-buckets))]
+                   {:ook/uri key
+                    :matching-observation-count doc_count
+                    :matching-dimension-values dimension-values})))))
 
-(defn code-uris-from-observation-hits
+(defn code-uris-from-datasets
   "Parses observation-query results to return a sequence of code-uris."
-  [observation-hits]
-  (->> observation-hits :hits :hits
-       (mapcat (fn [hit]
-                 (-> hit
-                     :fields
-                     (dissoc (keyword "qb:dataSet.@id"))
-                     vals
-                     ((partial map first)))))
+  [datasets]
+  (->> datasets
+       (map (comp vals :matching-dimension-values))
+       flatten
        distinct))
 
-(defn explain-dimensions [matching-observation-example dimensions codelist-lookup code-lookup]
+(defn explain-dimensions [matching-dimension-values dimensions codelist-lookup code-lookup]
   (->> dimensions
        (map (fn [dimension]
-              (let [code-uris (some-> matching-observation-example
+              (let [code-uris (some-> matching-dimension-values
                                       (get (keyword (str (:ook/uri dimension) ".@id")))
                                       util/box)
                     matches (some->> code-uris
@@ -138,14 +124,14 @@
                     (seq matches) (assoc :codes matches))))))
        (remove nil?)))
 
-(defn explain-facets [facets matching-observation-example dimensions codelists codes]
+(defn explain-facets [facets matching-dimension-values dimensions codelists codes]
   (let [code-lookup (util/id-lookup codes)
         codelist-lookup (util/id-lookup codelists)]
     (->> facets
          (map (fn [facet]
                 (let [facet-dimensions (filter (fn [d] (contains? (set (:dimensions facet))
                                                                   (:ook/uri d))) dimensions)
-                      dimensions (explain-dimensions matching-observation-example
+                      dimensions (explain-dimensions matching-dimension-values
                                                      facet-dimensions
                                                      codelist-lookup
                                                      code-lookup)]
@@ -157,10 +143,10 @@
 (defn explain-match
   "Replace matching observation example with per facet, per dimension, codelist and code summary"
   [datasets facets dimensions codelists codes]
-  (for [{:keys [matching-observation-example] :as dataset} datasets]
-    (let [facets (explain-facets facets matching-observation-example dimensions codelists codes)]
+  (for [{:keys [matching-dimension-values] :as dataset} datasets]
+    (let [facets (explain-facets facets matching-dimension-values dimensions codelists codes)]
       (cond->
-       (dissoc dataset :matching-observation-example)
+       (dissoc dataset :matching-dimension-values)
         (seq facets) (assoc :facets facets)))))
 
 (defn for-facets [selections opts]
@@ -171,7 +157,7 @@
         dataset-hits (datasets-from-observation-hits observation-hits)
         dataset-descriptions (for-cubes (map :ook/uri dataset-hits) opts)
         datasets (util/join-by dataset-hits dataset-descriptions :ook/uri :cube)
-        code-uris (code-uris-from-observation-hits observation-hits)
+        code-uris (code-uris-from-datasets datasets)
         facets (facets/get-facets-for-selections selections opts)
         dimensions (components/get-components (mapcat :dimensions facets) opts)
         codelists (components/get-codelists codelist-uris opts)
