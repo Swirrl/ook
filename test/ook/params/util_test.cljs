@@ -9,8 +9,9 @@
              "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
              [{:name "Product"
                :dimensions [{:ook/uri "def/trade/property/dimension/product"
-                             :codes [{:ook/uri "def/trade/concept/product/A"}
-                                     {:ook/uri "def/trade/concept/product/B"}]}]}]))))
+                             :codes [{:ook/uri "def/trade/concept/product/A" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}
+                                     {:ook/uri "def/trade/concept/product/B" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}]}]}]
+             {"Product" {"def/trade/concept-scheme/product" ["def/trade/concept/product/A" "def/trade/concept/product/B"]}}))))
 
   (testing "does not include filter facet params for facets with no matching codes"
     (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id&apply-filters=true"
@@ -19,7 +20,17 @@
              [{:name "Facet"
                :dimensions [{:ook/uri "some/dim"
                              ;; no matching codes!
-                             }]}])))))
+                             }]}]
+             {"Facet" {"some/scheme" ["some/code"]}}))))
+
+  (testing "does not include filter facet params for facets specified with codelists (despite finding matching codes)"
+    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id&apply-filters=true"
+           (sut/link-to-pmd-dataset
+             "data/dataset-id"
+             [{:name "Facet"
+               :dimensions [{:ook/uri "some/dim"
+                             :codes [{:ook/uri "matching/code"  :scheme [{:ook/uri "some/scheme"}]}]}]}]
+             {"Facet" {"some/scheme" []}})))))
 
 (deftest absolute-uri-test
   (testing "reverses json-ld prefixing"

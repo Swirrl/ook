@@ -65,7 +65,7 @@
     (when matching-observation-count
       [:<>
        [:small (str "Found " matching-observation-count " matching observations")]
-       [:a.d-block {:href (pu/link-to-pmd-dataset uri facets)} "View Data"]])]])
+       [:a.d-block {:href (pu/link-to-pmd-dataset uri facets applied-facets)} "View Data"]])]])
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
