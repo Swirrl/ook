@@ -8,7 +8,7 @@
 
 (defn- pair-dimensions-and-codes [{dim-uri :ook/uri codes :codes}]
   (when codes
-    (mapcat (fn [{code-uri :ook/uri}] [dim-uri code-uri]) codes)))
+    (map (fn [{code-uri :ook/uri}] [dim-uri code-uri]) codes)))
 
 (defn absolute-uri [uri]
   (if (str/starts-with? uri "http")
@@ -26,7 +26,7 @@
   [filter-facets]
   (->> filter-facets
        (mapcat :dimensions)
-       (map pair-dimensions-and-codes)
+       (mapcat pair-dimensions-and-codes)
        (remove nil?)
        (map encode-pmd-style)))
 
