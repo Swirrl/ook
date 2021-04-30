@@ -43,7 +43,7 @@
        [:span.me-1 label]
        (for [{code-uri :ook/uri code-label :label} codes]
          ^{:key code-uri}
-         [:span.badge.bg-light.text-dark.rounded-pill.me-1 code-label])])))
+         [:span.badge.bg-light.text-dark.rounded-pill.me-1.text-wrap code-label])])))
 
 (defn- error-message []
   [:div.alert.alert-danger "Sorry, something went wrong."])
