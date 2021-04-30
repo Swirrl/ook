@@ -1,6 +1,6 @@
 (ns ook.search.elastic.datasets-test
   (:require [ook.search.elastic.datasets :as sut]
-            [clojure.test :refer [deftest testing is are]]))
+            [clojure.test :refer [deftest testing is]]))
 
 (deftest observation-hits-test
   ;; results returned by private method (here we're testing parsing not the query construction which is integration tested in elastic-test) 

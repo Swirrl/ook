@@ -3,8 +3,8 @@
    [re-frame.core :as rf]
    [ook.reframe.codes.db.caching :as caching]
    [ajax.core :as ajax]
-   [ook.reframe.db :as db]
    [ook.reframe.codes.db.selection :as selection]
+   [ook.reframe.codes.db.disclosure :as disclosure]
    [ook.reframe.events :as e]))
 
 ;;; CLICK HANDLERS
@@ -22,36 +22,35 @@
  :ui.event/toggle-disclosure
  [e/validation-interceptor]
  (fn [db [_ uri]]
-   (let [uri+children (cons uri (db/uri->expandable-child-uris db uri))
-         expanded? (db/code-expanded? db uri)
-         update-fn (if expanded? disj (fnil conj #{}))]
-     (update-in db [:ui.facets/current :expanded] #(apply update-fn % uri+children)))))
+   (update db :ui.facets/current disclosure/toggle uri)))
 
 (rf/reg-event-fx
- :ui.event/get-codes
+ :ui.event/toggle-codelist
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ codelist-uri]]
-   (let [facet (:ui.facets/current db)]
-     {:db (-> db
-              (update-in [:ui.facets/current :expanded] conj codelist-uri)
-              (assoc-in [:ui.facets.current.codes/loading codelist-uri] true))
-      :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
-           [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
+ (fn [{:keys [db]} [_ uri]]
+   (let [facet-name (-> db :ui.facets/current :name)]
+     {:fx [[:dispatch [:ui.event/toggle-disclosure uri]]
+           (when-not (caching/concept-tree-cached? db facet-name uri)
+             [:dispatch [:codes/get-codes uri]])]})))
 
 (rf/reg-event-db
-  :ui.event/set-selection
+ :ui.event/set-selection
  [e/validation-interceptor]
  (fn [db [_ which {:keys [ook/uri] :as option}]]
    (condp = which
-     :any (-> db (selection/add-codelist uri) (db/collapse-children uri))
-     :add-children (selection/add-children db option)
-     :remove-children (selection/remove-children db option))))
+     :any (-> db
+              (update :ui.facets/current selection/add-codelist uri)
+              (update :ui.facets/current disclosure/collapse uri))
+     :add-children (-> db
+                       (update :ui.facets/current selection/add-children option)
+                       (update :ui.facets/current disclosure/expand uri))
+     :remove-children (update db :ui.facets/current selection/remove-children option))))
 
 (rf/reg-event-db
  :ui.event/toggle-selection
  [e/validation-interceptor]
  (fn [db [_ option]]
-   (selection/toggle db option)))
+   (update db :ui.facets/current selection/toggle option)))
 
 ;;; UI MANAGEMENT
 
@@ -64,6 +63,23 @@
      db)))
 
 ;;; HTTP REQUESTS & RESPONSES
+
+(rf/reg-event-fx
+ :codes/get-codes
+ [e/validation-interceptor]
+ (fn [{:keys [db]} [_ codelist-uri specific-facet]]
+   (let [facet (or specific-facet (:ui.facets/current db))]
+     {:db (assoc-in db [:ui.facets.current.codes/loading codelist-uri] true)
+      :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
+           [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
+
+(rf/reg-event-fx
+ :codes/get-selected-concept-trees
+ [e/validation-interceptor]
+ (fn [_db [_ facet]]
+   (let [codelist-uris (->> facet :selection disclosure/open-codelist-uris)]
+     {:fx (for [codelist-uri codelist-uris]
+            [:dispatch [:codes/get-codes codelist-uri facet]])})))
 
 (rf/reg-event-fx
  :http/fetch-codes
@@ -79,18 +95,15 @@
 (rf/reg-event-db
  :http.codes/success
  [e/validation-interceptor]
- (fn [db [_ facet codelist-uri result]]
+ (fn [db [_ {:keys [selection name] :as facet} codelist-uri result]]
    (let [children (if (seq result) result :no-children)
          updated-db (caching/cache-code-tree db (:name facet) codelist-uri children)
-         expanded (apply (fnil conj #{})
-                         (:expanded facet)
-                         (-> codelist-uri (cons (db/all-expandable-uris result)) set))
-         facet-with-ui-state (-> updated-db :facets/config (get (:name facet))
-                                 (assoc :expanded expanded)
-                                 (assoc :selection (:selection facet)))]
+         updated-facet (-> facet
+                           (merge (get-in updated-db [:facets/config name]))
+                           (update :expanded disclosure/add-all-open-codes updated-db selection name))]
      (-> updated-db
          (update :ui.facets.current.codes/loading dissoc codelist-uri)
-         (assoc :ui.facets/current facet-with-ui-state)))))
+         (assoc :ui.facets/current updated-facet)))))
 
 (rf/reg-event-db
  :http.codes/error

@@ -96,7 +96,7 @@
 
    (testing "expanding a codelist fetches its concept tree and expands all children"
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "concept trees are cached"
@@ -113,16 +113,20 @@
      ;; codelist 2 tree is not re-fetched
      (is (= "cl3" @setup/concept-tree-request)))
 
-   (testing "collapsing a sub-tree works"
+   (testing "expanding and collapsing a sub-tree works"
+     (eh/click (qh/find-expansion-toggle "2-1 child 2"))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+            (qh/expanded-labels-under-label "Codelist 2 Label")))
+
      (eh/click (qh/find-expansion-toggle "2-1 child 2"))
      (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
-   (testing "expanding a parent node expands all its children"
+   (testing "expanding a parent node expands only immediate children"
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= ["Codelist 2 Label"] (qh/expanded-labels-under-label "Codelist 2 Label")))
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"]
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2"]
             (qh/expanded-labels-under-label "Codelist 2 Label"))))
 
    (testing "codelists remain sorted by uri when expanded/collapsed"
@@ -156,15 +160,24 @@
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= 1 (count (qh/all-selected-labels)))))
 
-   (testing "toggling selection works"
-     (eh/click-text "2-1 child 1")
-     (is (= ["2-1 child 1"] (qh/all-selected-labels)))
+   (testing "toggling selection"
+     (testing "works for individual codes"
+       (eh/click-text "2-1 child 1")
+       (is (= ["2-1 child 1"] (qh/all-selected-labels)))
 
-     (eh/click-text "2-2 child 1")
-     (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
+       (eh/click (qh/find-expansion-toggle "2-1 child 2"))
 
-     (eh/click-text "2-1 child 1")
-     (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+       (eh/click-text "2-2 child 1")
+       (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
+
+       (eh/click-text "2-1 child 1")
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+
+     (testing "un-selecting a code does not affect other codelists"
+       (eh/click-text "Codelist 3 Label")
+       (eh/click-text "2-2 child 1")
+       (is (= ["Codelist 3 Label"] (qh/all-selected-labels)))
+       (eh/click-text "Codelist 3 Label")))
 
    (testing "all codelists have an 'any' button"
      (is (not (nil? (qh/select-any-button "Codelist 2 Label"))))
@@ -202,7 +215,7 @@
      (eh/click-text "2-2 child 2")
      (is (= [] (qh/all-selected-labels))))
 
-   (testing "selecting 'all children'"
+   (testing "selecting 'all children' or 'none'"
      (testing "selects all the children that are used"
        (eh/click (qh/multi-select-button "2-1 child 2"))
        (is (= ["2-2 child 1"] (qh/all-selected-labels))))
@@ -214,19 +227,31 @@
        (eh/click (qh/multi-select-button "2-1 child 2"))
        (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
-     (testing "selects all children of all levels for deeply nested code trees"
+     (testing "selects next-level children only for deeply nested code trees"
        (eh/click-text "2-2 child 1")
        (eh/click-text "Facet 4")
        (eh/click (qh/find-expansion-toggle "with nested codes"))
+       (eh/click (qh/find-expansion-toggle "5-1 child 1"))
+       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
 
        (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels))))
+       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels))))
 
      (testing "shows option to select no children only if all children are selected"
        (is (= "none" (qh/text-content (qh/multi-select-button "5-1 child 1"))))
-       (is (= "none" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
+       (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
+
+     (testing "expands to show children that were just selected"
+       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
+       (is (qh/closed? (qh/find-expansion-toggle "5-2 child 2")))
+       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
+
+       (eh/click (qh/multi-select-button "5-2 child 2"))
+       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels))))
 
      (testing "clears only children for that level and changes button label back"
+       (is (= "none" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
+
        (eh/click (qh/multi-select-button "5-2 child 2"))
        (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
        (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2"))))

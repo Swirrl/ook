@@ -48,9 +48,8 @@
 ;;;;;;; OOK-specific UI helpers
 
 (defn find-expansion-toggle [label]
-  (-> (find-text label)
-      .-parentNode
-      (find-query "button")))
+  (let [toggle (some-> (query-text label) .-parentNode (find-query "button"))]
+    (if toggle toggle (throw (js/Error. (str "Could not find toggle for option: " label))))))
 
 (defn find-toggle-icon-path [expand-toggle]
   (-> expand-toggle (find-query "svg path") (.getAttribute "d")))
@@ -81,6 +80,9 @@
 (defn cancel-facet-selection-button []
   (find-query ".filters button.btn-close"))
 
+(defn editable-facet-button [facet-name]
+  (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
+
 ;;; Dataset table
 
 (defn apply-filter-button []
@@ -102,4 +104,4 @@
   (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
 
 (defn remove-facet-button [facet-name]
-  (some-> (query-text facet-name) .-parentNode (find-query "button")))
+  (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))
