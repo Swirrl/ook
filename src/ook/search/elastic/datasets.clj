@@ -34,16 +34,6 @@
        clean-datasets-result
        (map select-relevant-fields)))
 
-(defn get-datasets
-  "Find datasets using their URIs."
-  [uris {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        uris (util/box uris)]
-    (->> (esd/search conn "dataset" "_doc"
-                     {:query (q/ids "_doc" uris)
-                      :size (count uris)})
-         clean-datasets-result)))
-
 (defn for-components [components {:keys [elastic/endpoint] :as opts}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "dataset" "_doc"

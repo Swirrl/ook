@@ -4,47 +4,48 @@
 (defn- codelist? [option]
   (nil? (:scheme option)))
 
-(defn add-codelist [db uri]
-  (assoc-in db [:ui.facets/current :selection uri] nil))
+(defn add-codelist [facet uri]
+  (assoc-in facet [:selection uri] nil))
 
-(defn add-codes [db scheme code-uris]
-  (update-in db [:ui.facets/current :selection scheme]
-             #(apply (fnil conj #{}) % code-uris)))
+(defn- add-codes [facet scheme code-uris]
+  (update-in facet [:selection scheme] #(apply (fnil conj #{}) % code-uris)))
 
-(defn- add-to-selection [db {:keys [ook/uri] :as option}]
+(defn- add-to-selection [facet {:keys [ook/uri] :as option}]
   (if (codelist? option)
-    (add-codelist db uri)
-    (add-codes db (:scheme option) [uri])))
+    (add-codelist facet uri)
+    (add-codes facet (:scheme option) [uri])))
 
-(defn dissoc-empty-schemes [selection]
-  (->> selection (remove (fn [[ _ v]] (empty? v))) (into {})))
+(defn- dissoc-empty-scheme [selection scheme]
+  (if (-> selection (get scheme) empty?)
+    (dissoc selection scheme)
+    selection))
 
-(defn remove-code [db {:keys [ook/uri scheme]}]
-  (-> db
-      (update-in [:ui.facets/current :selection scheme] disj uri)
-      (update-in [:ui.facets/current :selection] dissoc-empty-schemes)))
+(defn- remove-code [facet {:keys [ook/uri scheme]}]
+  (-> facet
+      (update-in [:selection scheme] disj uri)
+      (update :selection dissoc-empty-scheme scheme)))
 
-(defn- remove-from-selection [db {:keys [ook/uri] :as option}]
+(defn- remove-from-selection [facet {:keys [ook/uri] :as option}]
   (if (codelist? option)
-    (update-in db [:ui.facets/current :selection] dissoc uri)
-    (remove-code db option)))
+    (update facet :selection dissoc uri)
+    (remove-code facet option)))
 
-(defn option-selected? [db {:keys [ook/uri scheme]}]
-  (let [selection (-> db :ui.facets/current :selection)]
-    (if scheme
-      (-> selection (get scheme) (get uri) boolean)
-      (and (contains? selection uri) (nil? (get selection uri))))))
+(defn option-selected? [{:keys [selection]} {:keys [ook/uri scheme]}]
+  (if scheme
+    (-> selection (get scheme) (get uri) boolean)
+    (and (contains? selection uri) (nil? (get selection uri)))))
 
-(defn toggle [db option]
-  (if (option-selected? db option)
-    (remove-from-selection db option)
-    (add-to-selection db option)))
+(defn toggle [facet option]
+  (if (option-selected? facet option)
+    (remove-from-selection facet option)
+    (add-to-selection facet option)))
 
-(defn add-children [db {:keys [scheme ook/uri]}]
-  (let [to-add (db/uri->child-uris db uri)]
-    (add-codes db scheme to-add)))
+(defn- used-child-uris [{:keys [children]}]
+  (->> children (filter :used) (map :ook/uri) set))
 
-(defn remove-children [db {:keys [scheme ook/uri]}]
-  (let [to-remove (db/uri->child-uris db uri)]
-    (update-in db [:ui.facets/current :selection scheme]
-               #(apply (fnil disj #{}) % to-remove))))
+(defn add-children [facet {:keys [scheme] :as code}]
+  (add-codes facet scheme (used-child-uris code)))
+
+(defn remove-children [facet {:keys [scheme] :as code}]
+  (update-in facet [:selection scheme]
+             #(apply (fnil disj #{}) % (used-child-uris code))))

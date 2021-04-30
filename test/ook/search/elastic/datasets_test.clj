@@ -1,6 +1,6 @@
 (ns ook.search.elastic.datasets-test
   (:require [ook.search.elastic.datasets :as sut]
-            [clojure.test :refer [deftest testing is are]]))
+            [clojure.test :refer [deftest testing is]]))
 
 (deftest observation-hits-test
   (let [facets {:name "Date"

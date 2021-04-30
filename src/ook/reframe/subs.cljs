@@ -3,7 +3,8 @@
    [re-frame.core :as rf]
    [clojure.set :as set]
    [ook.reframe.db :as db]
-   [ook.reframe.codes.db.selection :as selection]))
+   [ook.reframe.codes.db.selection :as selection]
+   [ook.reframe.codes.db.disclosure :as disclosure]))
 
 ;;;;;; INITIAL, PERMANENT STATE
 
@@ -42,12 +43,12 @@
 (rf/reg-sub
  :ui.facets.current/option-selected?
  (fn [db [_ option]]
-   (selection/option-selected? db option)))
+   (selection/option-selected? (:ui.facets/current db) option)))
 
 (rf/reg-sub
- :ui.facets.current/code-expanded?
+ :ui.facets.current/option-expanded?
  (fn [db [_ uri]]
-   (db/code-expanded? db uri)))
+   (disclosure/expanded? (:ui.facets/current db) uri)))
 
 (rf/reg-sub
  :ui.facets.current/all-children-selected?

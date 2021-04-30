@@ -7,6 +7,9 @@
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
    [ook.reframe.views :as views]
+   [ook.params.parse :as p]
+   [ook.reframe.router :as router]
+   [reagent.core :as r]
 
    [ook.reframe.events]
    [ook.reframe.subs]))
@@ -26,11 +29,11 @@
               {:ook/uri "cl3" :label "Codelist 3 Label"}]})
 
 (def concept-trees
-  {"cl1" [{:scheme "cl1" :ook/uri "cl1-code1" :label "1-1 child 1"}]
-   "cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1"}]
-   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1"}
-          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2"
-           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1"}
+  {"cl1" [{:scheme "cl1" :ook/uri "cl1-code1" :label "1-1 child 1" :used true}]
+   "cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1" :used true}]
+   "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :used true}
+          {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2" :used true
+           :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2"}]}]})
 (def datasets
   {nil initial-datasets
@@ -41,7 +44,8 @@
                                              :dimensions [{:ook/uri "dim2"
                                                            :label "Dimension 2 Label"
                                                            :codes [{:ook/uri "a-code"
-                                                                    :label "Label for code"}]}]}])]})
+                                                                    :label "Label for code"}]}]}])]
+   {"Facet 2" {"cl2" #{"cl2-code3"}}} []})
 
 (deftest filtering-datasets
   (rft/run-test-sync
@@ -74,7 +78,7 @@
        (is (not (qh/disabled? (qh/apply-filter-button))))))
 
    (testing "applying a facet"
-     (eh/click-text "Codelist 1 Label")
+     (eh/click-text "1-1 child 1")
      (eh/click-text "Facet 2")
      (eh/click-text "Codelist 2 Label")
      (eh/click (qh/apply-filter-button))
@@ -89,15 +93,21 @@
      (testing "shows matching codes in the results table"
        (is (= ["Dimension 2 LabelLabel for code"] (qh/column-x-contents 2))))
 
-     (testing "removes current facet from facet config"
-       (is (= ["Facet 1"] (qh/all-available-facets))))
+     (testing "marks applied facet as editable"
+       (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))
+       (is (not (nil? (qh/editable-facet-button "Facet 2")))))
 
      (testing "removes current facet chrome from ui"
        (is (nil? (qh/apply-filter-button)))
        (is (nil? (qh/query-text "Codelists")))))
 
    (testing "removing a facet"
-     (eh/click (qh/remove-facet-button "Facet 2"))
+     (testing "removes current facet chrome from ui"
+       (eh/click (qh/editable-facet-button "Facet 2"))
+       (eh/click (qh/remove-facet-button "Facet 2"))
+
+       (is (nil? (qh/apply-filter-button)))
+       (is (nil? (qh/query-text "Codelists"))))
 
      (testing "resets the dataset list"
        (is (= "Showing all datasets" (qh/dataset-count-text)))
@@ -135,3 +145,58 @@
        (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles)))))
 
    (setup/cleanup!)))
+
+(deftest editing-facets
+  (rft/run-test-sync
+   (setup/stub-side-effects {:datasets datasets :codelists codelists :concept-trees concept-trees})
+   (setup/init! views/search initial-state)
+
+   (testing "fetches codelists if they're not already cached (i.e. visiting from a permalink with filters)"
+     (router/search-controller {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" nil}})}})
+     (r/flush)
+     (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+     (is (nil? @setup/codelist-request))
+
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= "Facet 2" @setup/codelist-request)))
+
+   (testing "it sets the previous selection properly"
+     (is (= ["Codelist 2 Label"] (qh/all-selected-labels))))
+
+   (testing "it sets the disclosure properly given the selection"
+     (is (qh/closed? (qh/find-expansion-toggle "Codelist 2 Label"))))
+
+   (testing "fetches concept trees for selected codes if they're used and not already cached"
+     (eh/click (qh/cancel-facet-selection-button))
+     (is (nil? @setup/concept-tree-request))
+     (router/search-controller
+      {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" #{"cl2-code3"}}})}})
+     (r/flush)
+
+     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
+            (qh/dataset-count-text)))
+
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= "cl2" @setup/concept-tree-request)))
+
+   (testing "it sets the selection properly"
+     (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+
+   (testing "it sets the disclosure properly for the selection"
+     (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
+     (is (qh/open? (qh/find-expansion-toggle "2-1 child 2")))
+     (is (qh/closed? (qh/find-expansion-toggle "Codelist 3 Label"))))
+
+   (testing "updating the selection and reapplying the facet works"
+     (eh/click-text "2-2 child 1")
+     (eh/click-text "2-1 child 1")
+
+     (eh/click (qh/apply-filter-button))
+     (is (= {"Facet 2" {"cl2" #{"cl2-code1"}}} @setup/dataset-request))
+     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
+            (qh/dataset-count-text))))
+
+   (testing "it shows the right selection and disclosure"
+     (eh/click (qh/editable-facet-button "Facet 2"))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
+     (is (= ["2-1 child 1"] (qh/all-selected-labels))))))

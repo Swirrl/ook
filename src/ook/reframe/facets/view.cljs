@@ -1,14 +1,22 @@
 (ns ook.reframe.facets.view
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.codes.view :as codes]))
+   [ook.reframe.codes.view :as codes]
+   [ook.ui.icons :as icons]))
 
-(defn- facet-button [{:keys [name] :as facet} selected-facet-name]
-  [:button.btn.me-2
+(defn- facet-button [{:keys [name] :as facet} selected? applied?]
+  [:button.btn.me-2.mb-2
    {:type "button"
-    :class (if (= name selected-facet-name) "btn-dark" "btn-outline-dark")
-    :on-click #(rf/dispatch [:ui.event/set-current facet])}
-   name])
+    :class (cond
+             selected? "btn-dark"
+             applied? "btn-outline-dark applied-facet"
+             :else "btn-outline-dark")
+    :on-click #(if applied?
+                 (rf/dispatch [:ui.event/edit-facet facet])
+                 (rf/dispatch [:ui.event/select-facet facet]))}
+   name
+   (when applied?
+     [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])
 
 (defn- cancel-facet-selection []
   [:button.btn-close.border.border-dark
@@ -28,8 +36,7 @@
       [:div.mt-3.d-flex.align-items-center.justify-content-between
        [:div
         (for [{:keys [name] :as facet} facets]
-          (when-not (get applied-facets name)
-            ^{:key name} [facet-button facet selected-facet-name]))]
+          ^{:key name} [facet-button facet (= name selected-facet-name) (get applied-facets name)])]
        (when (or (= :success/ready selected-facet-status) (= :success/empty selected-facet-status))
          [cancel-facet-selection])]
       [codes/codelist-selection selected-facet-status]]]))
