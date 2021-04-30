@@ -2,7 +2,8 @@
   (:require
    [re-frame.core :as rf]
    [ook.ui.icons :as icons]
-   [ook.ui.common :as common]))
+   [ook.ui.common :as common]
+   [ook.reframe.codes.search.view :as search]))
 
 (defn- apply-filter-button []
   (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
@@ -116,6 +117,7 @@
     [:<>
      [apply-filter-button]
      [:p.h6.mt-4 "Codelists"]
+     [search/code-search]
      [:form.mt-3
       [nested-list {:class "p-0"}
        (for [{:keys [ook/uri label] :as codelist} codelists]

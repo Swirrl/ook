@@ -57,3 +57,9 @@
     (if (requesting-transit? request)
       (->> request p/get-codelist (db/get-concept-tree db) transit-response)
       invalid-format-response)))
+
+(defmethod ig/init-key :ook.handler/code-search [_ {:keys [search/db]}]
+  (fn [request]
+    (if (requesting-transit? request)
+      (->> request p/get-search-term (db/search-codes db) transit-response)
+      invalid-format-response)))

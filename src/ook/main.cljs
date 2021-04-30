@@ -3,6 +3,7 @@
    [ook.reframe.events]
    [ook.reframe.facets.events]
    [ook.reframe.codes.events]
+   [ook.reframe.codes.search.events]
    [ook.reframe.datasets.events]
    [ook.reframe.router :as router]
    [day8.re-frame.http-fx]

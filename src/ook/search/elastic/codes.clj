@@ -61,7 +61,8 @@
   (->> results
        :hits :hits
        (map (fn [{id :_id source :_source}]
-              {:scheme scheme
+              ;; TODO:: do not leave scheme like this
+              {:scheme (or scheme (first (u/box (:scheme source))))
                :ook/uri id
                :label (:label source)
                :children (:narrower source)
@@ -114,3 +115,20 @@
        (map (partial find-narrower-concepts conn codelist-id)
             (get-top-concepts conn codelist-id))))
     []))
+
+(def search-limit 10000)
+
+(defn- search-codes [conn query]
+  (-> conn
+      (esd/search "code" "_doc"
+                  {:query {:match {:label query}}
+                   :size search-limit})
+      (build-codes nil)))
+
+(defn search [query {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)
+        codes (search-codes conn query)
+        ]
+    codes
+
+    ))

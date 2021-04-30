@@ -57,6 +57,11 @@
          current-selection (-> db :ui.facets/current :selection (get scheme))]
      (set/subset? child-uris current-selection))))
 
+(rf/reg-sub
+  :ui.facets.current/search-term
+  (fn [db _]
+    (some-> db :ui.facets/current :search-term)))
+
 ;;;;;; FACETS
 
 (rf/reg-sub

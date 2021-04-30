@@ -23,3 +23,6 @@
 (defn get-codelist [{:keys [query-params]}]
   (when (seq query-params)
     (get query-params "codelist")))
+
+(defn get-search-term [request]
+  (-> request :query-params (get "search-term")))
