@@ -5,6 +5,8 @@
             [ook.util :as u]
             [clojurewerkz.elastisch.rest.document :as esd]))
 
+(def size-limit 500)
+
 (defn get-components
   "Find components using their URIs."
   [uris {:keys [elastic/endpoint]}]
@@ -13,7 +15,7 @@
     (if uris
       (->> (esd/search conn "component" "_doc"
                        {:query (q/ids "_doc" uris)
-                        :size 500})
+                        :size size-limit})
            :hits :hits
            (map :_source)
            (map esu/normalize-keys))
@@ -35,7 +37,8 @@
                  {:query
                   {:nested
                    {:path "codelist"
-                    :query {:terms {"codelist.@id" codelist-uris}}}}})
+                    :query {:terms {"codelist.@id" codelist-uris}}}}
+                  :size size-limit})
      :hits :hits
      (map :_source)
      (map esu/normalize-keys))))
