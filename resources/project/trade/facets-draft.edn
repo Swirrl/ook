@@ -21,7 +21,8 @@
    :dimensions ["data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/uk-region"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/country"
-                "data/gss_data/trade/ons_mrets#dimension/trade-area"]}
+                "data/gss_data/trade/ons_mrets#dimension/trade-area"
+                "data/gss_data/trade/ons-uk-total-trade#dimension/country"]}
   {:name "Flow"
    :sort-priority 4
    :parent-dimension "def/trade/property/dimension/flow-directions"}
