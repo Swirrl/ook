@@ -72,7 +72,7 @@
     [:<>
      (dataset-count-message data)
      (when (seq applied-facets)
-       [:p "For each dataset we show one example of a code that matches each facet. Empty cells indicate that the dataset doesn't match the criteria."])
+       [:p "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
      [:div.ook-datasets
       [:table.table
        [:thead (column-headers data applied-facets)]
