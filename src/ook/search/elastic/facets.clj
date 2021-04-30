@@ -3,9 +3,12 @@
             [ook.util :as util]
             [clojurewerkz.elastisch.rest.document :as esd]))
 
+(def size-limit 500)
+
 (defn- find-child-dimensions [conn parent-dimension]
   (->> (esd/search conn "component" "_doc"
-                   {:query {:term {:subPropertyOf parent-dimension}}})
+                   {:query {:term {:subPropertyOf parent-dimension}}
+                    :size size-limit})
        :hits :hits
        (map :_id)
        (into [])))
