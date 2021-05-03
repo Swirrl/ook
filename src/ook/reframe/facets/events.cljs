@@ -12,39 +12,53 @@
 (rf/reg-event-fx
  :ui.event/select-facet
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ next-facet]]
-   (let [current-facet (:ui.facets/current db)]
-     (cond-> {:fx [[:dispatch [:ui.facets.current/get-codelists next-facet]]
-                   [:dispatch [:facets/apply-facet current-facet]]]}
-       (:codelists next-facet) (assoc :db (db/set-current-facet db next-facet))))))
+ (fn [{:keys [db]} [_ next-facet-name]]
+   (let [current-facet (:ui.facets/current db)
+         codelists-cached? (caching/codelists-cached? db next-facet-name)
+         facet-ui {:name next-facet-name}
+         db-effect (if codelists-cached?
+                     [:dispatch [:ui.facets/set-current facet-ui]]
+                     [:dispatch-later {:ms 300 :dispatch [:ui.facets/set-current facet-ui]}])]
+     {:fx [db-effect
+           (when-not codelists-cached?
+             [:dispatch [:ui.facets.current/get-codelists next-facet-name]])
+           [:dispatch [:facets/apply-facet current-facet]]]})))
 
 (rf/reg-event-fx
  :ui.event/edit-facet
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ facet]]
-   (let [with-ui-state (db/set-applied-selection-and-disclosure db facet)]
-     {:db (db/set-current-facet db with-ui-state)
-      :fx [[:dispatch [:ui.facets.current/get-codelists with-ui-state]]
-           (when-not (caching/selected-trees-cached? db with-ui-state)
-             (let [codelist-uris (->> with-ui-state :selection disclosure/open-codelist-uris)]
-               [:dispatch [:codes/get-concept-trees codelist-uris with-ui-state]]))]})))
+ (fn [{:keys [db]} [_ facet-name]]
+   (let [facet-ui (db/set-applied-selection-and-disclosure db facet-name)]
+     {:db (assoc db :ui.facets/current facet-ui)
+      :fx [(when-not (caching/codelists-cached? db facet-name)
+             [:dispatch [:ui.facets.current/get-codelists facet-name]])
+           (when-not (caching/selected-trees-cached? db facet-ui)
+             (let [codelist-uris (->> facet-ui :selection disclosure/open-codelist-uris)]
+               [:dispatch [:codes/get-concept-trees codelist-uris facet-ui]]))]})))
 
 (rf/reg-event-db
  :ui.event/cancel-current-selection
  [e/validation-interceptor]
  (fn [db _]
-   (dissoc db :ui.facets/current :ui.facets.current/status)))
+   (dissoc db :ui.facets/current)))
+
+;;; UI MANAGEMENT
+
+(rf/reg-event-db
+ :ui.facets/set-current
+ [e/validation-interceptor]
+ (fn [db [_ facet-ui]]
+   (assoc db :ui.facets/current facet-ui)))
 
 ;;; GETTING CODELISTS
 
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ {:keys [codelists] :as facet}]]
-   (when-not codelists
-     {:db (assoc db :facets.current/loading true)
-      :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
-           [:dispatch [:http/fetch-codelists facet]]]})))
+ (fn [{:keys [db]} [_ name]]
+   {:db (assoc db :facets.current/loading true)
+    :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
+         [:dispatch [:http/fetch-codelists name]]]}))
 
 (rf/reg-event-db
  :ui.facets.current/set-loading
@@ -69,27 +83,25 @@
 (rf/reg-event-fx
  :http/fetch-codelists
  [e/validation-interceptor]
- (fn [_ [_ {:keys [dimensions] :as facet}]]
-   {:http-xhrio {:method :get
-                 :uri "/codelists"
-                 :params {:dimension dimensions}
-                 :response-format (ajax/transit-response-format)
-                 :on-success [:http.codelists/success facet]
-                 :on-failure [:http.codelists/error]}}))
+ (fn [{:keys [db]} [_ name]]
+   (let [dimensions (db/get-dimensions db name)]
+     {:http-xhrio {:method :get
+                   :uri "/codelists"
+                   :params {:dimension dimensions}
+                   :response-format (ajax/transit-response-format)
+                   :on-success [:http.codelists/success name]
+                   :on-failure [:http.codelists/error]}})))
 
 ;; HTTP RESPONSE HANDLERS
 
 (rf/reg-event-db
  :http.codelists/success
  [e/validation-interceptor]
- (fn [db [_ facet response]]
-   (let [status (if (empty? response) :success/empty :success/ready)
-         updated-db (caching/cache-codelist db (:name facet) response)
-         updated-facet (merge facet (-> updated-db :facets/config (get (:name facet))))]
-     (-> updated-db
-         (dissoc :facets.current/loading)
-         (assoc :ui.facets/current updated-facet)
-         (assoc :ui.facets.current/status status)))))
+ (fn [db [_ name response]]
+   (-> db
+       (caching/cache-codelist name response)
+       (dissoc :facets.current/loading)
+       (assoc :ui.facets.current/status :ready))))
 
 (rf/reg-event-db
  :http.codelists/error

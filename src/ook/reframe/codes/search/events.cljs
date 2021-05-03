@@ -38,16 +38,15 @@
  [e/validation-interceptor]
  (fn [db [_ facet results]]
    ;; (let [selection (db/code-result->selection results)
-   ;;       updated-facet (-> db
-   ;;                         :ui.facets/current
-   ;;                         (update ))]
+
+   ;;       ]
    ;;   )
    ;; show only codes in results, all expanded, if they're expandable
    ;; get relevant codelists so they can be shown
-   ;;
-   ;; (let [codelist-uris (->> results (map :scheme) set)
-   ;;       current-facet (:ui.facets/current db)]
-   ;;   {:fx [[:dispatch [:codes/get-concept-trees codelist-uris current-facet]]]})
+
+   (let [codelist-uris (->> results (map :scheme) set)
+         current-facet (assoc (:ui.facets/current db) :selection (db/code-result->selection results))]
+     {:fx [[:dispatch [:codes/get-concept-trees codelist-uris current-facet]]]})
    ;; (-> db
    ;;     (update-in [:ui.facets/current :expanded] disclosure/add-all-open-codes
    ;;                db

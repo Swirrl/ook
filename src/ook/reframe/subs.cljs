@@ -2,7 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [clojure.set :as set]
-   [ook.reframe.db :as db]
+   [ook.reframe.facets.db :as facets]
    [ook.reframe.codes.db.selection :as selection]
    [ook.reframe.codes.db.disclosure :as disclosure]))
 
@@ -36,11 +36,6 @@
    (some-> db :ui.facets/current :selection)))
 
 (rf/reg-sub
- :ui.facets.current/codelists
- (fn [db _]
-   (some->> db :ui.facets/current :codelists vals (sort-by :ook/uri))))
-
-(rf/reg-sub
  :ui.facets.current/option-selected?
  (fn [db [_ option]]
    (selection/option-selected? (:ui.facets/current db) option)))
@@ -56,6 +51,8 @@
    (let [child-uris (->> children (map :ook/uri) set)
          current-selection (-> db :ui.facets/current :selection (get scheme))]
      (set/subset? child-uris current-selection))))
+
+;;;;;; SEARCH
 
 (rf/reg-sub
   :ui.facets.current/search-term
@@ -73,6 +70,11 @@
  :facets/applied
  (fn [db _]
    (:facets/applied db)))
+
+(rf/reg-sub
+ :facets.config/codelists
+ (fn [db [_ name]]
+   (sort-by :ook/uri (facets/get-codelists db name))))
 
 ;;;;;; DATASETS
 

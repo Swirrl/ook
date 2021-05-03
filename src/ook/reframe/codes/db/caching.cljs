@@ -1,6 +1,7 @@
 (ns ook.reframe.codes.db.caching
   (:require
    [ook.reframe.db :as db]
+   [ook.reframe.facets.db :as facets]
    [ook.util :as u]))
 
 (defn cache-codelist
@@ -19,6 +20,9 @@
 
 (defn concept-tree-cached? [db facet-name codelist-uri]
   (boolean (db/get-concept-tree db facet-name codelist-uri)))
+
+(defn codelists-cached? [db facet-name]
+  (boolean (facets/get-codelists db facet-name)))
 
 (defn selected-trees-cached? [db {:keys [name selection]}]
   (let [codelist-uris (keys selection)]

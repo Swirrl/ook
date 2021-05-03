@@ -88,14 +88,20 @@
        (.appendChild body test-div)
        (rdom/render [component-fn] test-div))
 
+     (defn stub-dispatch-later []
+       (rf/reg-fx
+         :dispatch-later
+         (fn [{:keys [dispatch]}]
+           (rf/dispatch dispatch))))
+
      (def codelist-request (atom nil))
 
      (defn stub-codelist-fetch-success [codelists]
        (rf/reg-event-fx
         :http/fetch-codelists
-        (fn [_ [_ {:keys [name] :as facet}]]
+        (fn [_ [_ name]]
           (reset! codelist-request name)
-          {:dispatch [:http.codelists/success facet (get codelists name)]})))
+          {:dispatch [:http.codelists/success name (get codelists name)]})))
 
      (def concept-tree-request (atom nil))
 
@@ -131,6 +137,7 @@
 
      (defn stub-side-effects [{:keys [concept-trees codelists datasets]}]
        (stub-navigation)
+       (stub-dispatch-later)
        (stub-dataset-fetch-success (or datasets {}))
        (stub-codelist-fetch-success (or codelists {}))
        (stub-code-fetch-success (or concept-trees {})))

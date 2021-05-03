@@ -42,8 +42,8 @@
   (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
     [text-button
      {:on-click (fn [] (if all-selected?
-                    (rf/dispatch [:ui.event/set-selection :remove-children code])
-                    (rf/dispatch [:ui.event/set-selection :add-children code])))}
+                         (rf/dispatch [:ui.event/set-selection :remove-children code])
+                         (rf/dispatch [:ui.event/set-selection :add-children code])))}
      (if all-selected? "none" "all children")]))
 
 (defn- checkbox-input [{:keys [ook/uri label used] :as option}]
@@ -112,26 +112,27 @@
          :else
          [code-tree children]))]))
 
-(defn- code-selection []
-  (let [codelists @(rf/subscribe [:ui.facets.current/codelists])]
-    [:<>
-     [apply-filter-button]
-     [:p.h6.mt-4 "Codelists"]
-     [search/code-search]
-     [:form.mt-3
-      [nested-list {:class "p-0"}
-       (for [{:keys [ook/uri label] :as codelist} codelists]
-         ^{:key [uri label]} [codelist-item codelist])]]]))
+(defn- code-selection [name]
+  (when name
+    (let [codelists @(rf/subscribe [:facets.config/codelists name])]
+      (if (empty? codelists)
+        [:p.h6.mt-4 "No codelists for facet"]
+        [:<>
+         [apply-filter-button]
+         [:p.h6.mt-4 "Codelists"]
+         [search/code-search]
+         [:form.mt-3
+          [nested-list {:class "p-0"}
+           (for [{:keys [ook/uri label] :as codelist} codelists]
+             ^{:key [uri label]} [codelist-item codelist])]]]))))
 
-(defn codelist-selection [selected-facet-status]
+(defn codelist-selection [selected-facet-status facet-name]
   (when selected-facet-status
     (condp = selected-facet-status
       :loading [:div.mt-4.ms-1 [common/loading-spinner]]
 
       :error [common/error-message "Sorry, there was an error fetching the codelists for this facet."]
 
-      :success/empty [:p.h6.mt-4 "No codelists for facet"]
-
-      :success/ready [code-selection]
+      :ready [code-selection facet-name]
 
       [common/error-message "Sorry, something went wrong."])))

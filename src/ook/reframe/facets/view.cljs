@@ -4,7 +4,7 @@
    [ook.reframe.codes.view :as codes]
    [ook.ui.icons :as icons]))
 
-(defn- facet-button [{:keys [name] :as facet} selected? applied?]
+(defn- facet-button [facet-name selected? applied?]
   [:button.btn.me-2.mb-2
    {:type "button"
     :class (cond
@@ -12,9 +12,9 @@
              applied? "btn-outline-dark applied-facet"
              :else "btn-outline-dark")
     :on-click #(if applied?
-                 (rf/dispatch [:ui.event/edit-facet facet])
-                 (rf/dispatch [:ui.event/select-facet facet]))}
-   name
+                 (rf/dispatch [:ui.event/edit-facet facet-name])
+                 (rf/dispatch [:ui.event/select-facet facet-name]))}
+   facet-name
    (when applied?
      [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])
 
@@ -35,8 +35,8 @@
       [:span.text-muted "Add a filter"]
       [:div.mt-3.d-flex.align-items-center.justify-content-between
        [:div
-        (for [{:keys [name] :as facet} facets]
-          ^{:key name} [facet-button facet (= name selected-facet-name) (get applied-facets name)])]
-       (when (or (= :success/ready selected-facet-status) (= :success/empty selected-facet-status))
+        (for [{:keys [name]} facets]
+          ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
+       (when (and selected-facet-name (= :ready selected-facet-status))
          [cancel-facet-selection])]
-      [codes/codelist-selection selected-facet-status]]]))
+      [codes/codelist-selection selected-facet-status selected-facet-name]]]))
