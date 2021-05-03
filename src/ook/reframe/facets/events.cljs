@@ -4,7 +4,8 @@
    [ajax.core :as ajax]
    [ook.reframe.facets.db :as db]
    [ook.reframe.codes.db.caching :as caching]
-   [ook.reframe.events :as e]))
+   [ook.reframe.events :as e]
+   [ook.reframe.codes.db.disclosure :as disclosure]))
 
 ;;; CLICK HANDLERS
 
@@ -25,7 +26,8 @@
      {:db (db/set-current-facet db with-ui-state)
       :fx [[:dispatch [:ui.facets.current/get-codelists with-ui-state]]
            (when-not (caching/selected-trees-cached? db with-ui-state)
-             [:dispatch [:codes/get-selected-concept-trees with-ui-state]])]})))
+             (let [codelist-uris (->> with-ui-state :selection disclosure/open-codelist-uris)]
+               [:dispatch [:codes/get-concept-trees codelist-uris with-ui-state]]))]})))
 
 (rf/reg-event-db
  :ui.event/cancel-current-selection

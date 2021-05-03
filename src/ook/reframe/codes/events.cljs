@@ -74,12 +74,11 @@
            [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
 
 (rf/reg-event-fx
- :codes/get-selected-concept-trees
+ :codes/get-concept-trees
  [e/validation-interceptor]
- (fn [_db [_ facet]]
-   (let [codelist-uris (->> facet :selection disclosure/open-codelist-uris)]
-     {:fx (for [codelist-uri codelist-uris]
-            [:dispatch [:codes/get-codes codelist-uri facet]])})))
+ (fn [_db [_ codelist-uris facet]]
+   {:fx (for [codelist-uri codelist-uris]
+          [:dispatch [:codes/get-codes codelist-uri facet]])}))
 
 (rf/reg-event-fx
  :http/fetch-codes

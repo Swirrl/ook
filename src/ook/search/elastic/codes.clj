@@ -101,8 +101,8 @@
                 {:must [{:match {:label search-term}}
                         {:terms {:scheme codelists}}]}}}))
 
-(defn build-code-for-each-scheme [codelists {source :_source :as code-result}]
-  (let [code (build-code code-result)
+(defn build-code-for-each-scheme [codelists {id :_id source :_source}]
+  (let [code {:ook/uri id :children (:narrower source)}
         schemes (-> source :scheme u/box set)]
     (->> schemes
          (filter codelists)

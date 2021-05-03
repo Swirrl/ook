@@ -2,7 +2,9 @@
   (:require
    [re-frame.core :as rf]
    [ajax.core :as ajax]
-   [ook.reframe.events :as e]))
+   [ook.reframe.codes.search.db :as db]
+   [ook.reframe.events :as e]
+   [ook.reframe.codes.db.disclosure :as disclosure]))
 
 (rf/reg-event-fx
   :ui.event/submit-code-search
@@ -31,17 +33,32 @@
                  :on-success [:http.codes.search/success facet]
                  :on-failure [:http.codes.search/error facet]}}))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :http.codes.search/success
  [e/validation-interceptor]
  (fn [db [_ facet results]]
-   (let [updated-facet (assoc facet :codes.search/results results)]
-     (-> db
-         (assoc :ui.facets/current updated-facet)
-         (assoc-in [:ui.facets/current :codes.search/status] :success)))))
+   ;; (let [selection (db/code-result->selection results)
+   ;;       updated-facet (-> db
+   ;;                         :ui.facets/current
+   ;;                         (update ))]
+   ;;   )
+   ;; show only codes in results, all expanded, if they're expandable
+   ;; get relevant codelists so they can be shown
+   ;;
+   ;; (let [codelist-uris (->> results (map :scheme) set)
+   ;;       current-facet (:ui.facets/current db)]
+   ;;   {:fx [[:dispatch [:codes/get-concept-trees codelist-uris current-facet]]]})
+   ;; (-> db
+   ;;     (update-in [:ui.facets/current :expanded] disclosure/add-all-open-codes
+   ;;                db
+   ;;                (db/code-result->selection results)
+   ;;                (:name facet))
+   ;;     ;; (assoc-in [:ui.facets/current :selection])
+   ;;     (assoc-in [:ui.facets/current :codes.search/status] :success))
+   ))
 
 (rf/reg-event-db
   :http.codes.search/error
   [e/validation-interceptor]
   (fn [db _]
-    (assoc-in db [:ui.facets/current :codes.search/status] :error)))
+    (assoc-in db [:ui.facets/current :codes/search :status] :error)))
