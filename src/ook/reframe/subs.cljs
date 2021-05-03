@@ -62,6 +62,11 @@
   (fn [db _]
     (some-> db :ui.facets/current :search-term)))
 
+(rf/reg-sub
+ :ui.facets.current/search-status
+ (fn [db _]
+   (some-> db :ui.facets/current :codes.search/status)))
+
 ;;;;;; FACETS
 
 (rf/reg-sub

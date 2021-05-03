@@ -28,7 +28,7 @@
                  :params {:search-term search-term}
                  :response-format (ajax/transit-response-format)
                  :on-success [:http.codes.search/success facet]
-                 :on-failure [:http.codes.search/failure]}}))
+                 :on-failure [:http.codes.search/error facet]}}))
 
 (rf/reg-event-db
   :http.codes.search/success
@@ -36,3 +36,9 @@
   (fn [db [_ facet results]]
     (let [updated-facet (assoc facet :codes.search/results results)]
       (assoc db :ui.facets/current updated-facet))))
+
+(rf/reg-event-db
+  :http.codes.search/error
+  [e/validation-interceptor]
+  (fn [db _]
+    (assoc-in db [:ui.facets/current :codes.search/status] :error)))
