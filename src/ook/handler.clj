@@ -61,5 +61,5 @@
 (defmethod ig/init-key :ook.handler/code-search [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      (->> request p/get-search-term (db/search-codes db) transit-response)
+      (->> request p/get-search-params (db/search-codes db) transit-response)
       invalid-format-response)))

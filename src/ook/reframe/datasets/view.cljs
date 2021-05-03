@@ -90,7 +90,7 @@
                  (dataset-row ds applied-facets))]]]]))
 
 (defn- no-matches-message []
-  [:div.d-flex.align-items-center
+  [:div.d-flex.align-items-center.mb-2
    [:strong "No datasets matched the applied filters. "]
    [:a.btn-link.mx-1
     {:role "button"

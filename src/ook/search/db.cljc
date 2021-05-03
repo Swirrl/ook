@@ -4,7 +4,7 @@
   (get-codes [db uris]
     "Retrieve codes by URI")
 
-  (search-codes [db search-term]
+  (search-codes [db params]
     "Search for codes with a label matching the given term")
 
   (get-components [db uris]

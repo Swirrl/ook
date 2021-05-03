@@ -24,5 +24,6 @@
   (when (seq query-params)
     (get query-params "codelist")))
 
-(defn get-search-term [request]
-  (-> request :query-params (get "search-term")))
+(defn get-search-params [{:keys [query-params]}]
+  {:search-term (query-params "search-term")
+   :codelists (u/box (query-params "codelists"))})

@@ -13,8 +13,8 @@
   (get-codes [_ uris]
     (codes/get-codes uris opts))
 
-  (search-codes [_ search-term]
-    (codes/search search-term opts))
+  (search-codes [_ params]
+    (codes/search params opts))
 
   (get-components [_ uris]
     (components/get-components uris opts))
