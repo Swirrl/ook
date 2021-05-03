@@ -51,23 +51,33 @@
                       :size (count uris)})
          clean-datasets-result)))
 
+(defn- append-id-to-dimensions
+  "append .@id to reach into nested dimval docs"
+  [dimension-selections]
+  (let [append-id (fn [x] (str x ".@id"))]
+    (into {} (for [[f s] dimension-selections]
+               [f (into {} (for [[d vs] s]
+                             [(append-id d) vs]))]))))
+
 (defn- observation-query
   "Creates a query for finding observations with selected dimensions and dimension-values.
 
+  Within a facet, dimensions are combined with 'should' i.e. OR. Facets themselves are combined with 'must' i.e. AND.
+
   Provides counts by dataset and identifies (and counts observations for) the top three codes by dimension."
   [dimension-selections]
-  (let [dimension-selections (reduce ;; append .@id to reach into nested dimval docs
-                              (fn [m [k v]] (assoc m (str k ".@id") v))
-                              {}
-                              dimension-selections)
-        criteria (map (fn [[dim codes]]
-                        (if (empty? codes)
-                          {:exists {:field dim}} ;; dimension (with no codes specified) ought to be present
-                          {:terms {dim codes}})) dimension-selections) ;; dimensions' values are one of the specified codes
+  (let [dimension-selections (append-id-to-dimensions dimension-selections)
+        dimension-clause (fn [[dim codes]]
+                           (if (empty? codes)
+                             {:exists {:field dim}} ;; dimension (with no codes specified) ought to be present
+                             {:terms {dim codes}})) ;; dimensions' values are one of the specified codes
+        facet-criteria (into {} (map (fn [[facet criteria]]
+                                       [facet (map dimension-clause criteria)]) dimension-selections))
+        dimensions (->> dimension-selections (map (comp keys val)) flatten distinct)
         dimension-rollup (into {} (map (fn [dim] [dim {:terms {:field dim, :size 3}}]) ;; select the top 3 codes per dimension
-                                       (keys dimension-selections)))]
+                                       dimensions))]
     {:size 0
-     :query {:bool {:should criteria}}
+     :query {:bool {:must (map (fn [[facet criteria]] {:bool {:should criteria}}) facet-criteria)}}
      :aggregations {:datasets {:terms {:field "qb:dataSet.@id" :size size-limit} ;; roll-up dimensions within each dataset
                                :aggregations dimension-rollup}}}))
 
