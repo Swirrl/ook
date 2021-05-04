@@ -157,9 +157,19 @@
      (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
      (is (= 1 (count (qh/all-selected-labels)))))
 
+   (testing "fetching codes does not change disclosure"
+     (testing "when a code in another codelist is already selected"
+       (eh/click-text "2-1 child 1")
+       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
+       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))
+
+       (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
+       (is (= ["Codelist 2 Label" "Codelist 3 Label" "3-1 child 1"] (qh/all-labels)))))
+
    (testing "toggling selection"
      (testing "works for individual codes"
-       (eh/click-text "2-1 child 1")
+       (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
+       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
        (is (= ["2-1 child 1"] (qh/all-selected-labels)))
 
        (eh/click (qh/find-expansion-toggle "2-1 child 2"))
