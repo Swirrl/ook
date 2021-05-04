@@ -29,8 +29,8 @@
  [e/validation-interceptor]
  (fn [{:keys [db]} [_ uri]]
    (let [facet-name (-> db :ui.facets/current :name)]
-     {:fx [[:dispatch [:ui.event/toggle-disclosure uri]]
-           (when-not (caching/concept-tree-cached? db facet-name uri)
+     {:fx [(if (caching/concept-tree-cached? db facet-name uri)
+             [:dispatch [:ui.event/toggle-disclosure uri]]
              [:dispatch [:codes/get-codes-flow uri]])]})))
 
 (rf/reg-event-db
@@ -54,19 +54,32 @@
 
 ;;; UI MANAGEMENT
 
+(rf/reg-event-fx
+ :codes/get-codes
+ [e/validation-interceptor]
+ (fn [{:keys [db]} [_ codelist-uri specific-facet]]
+   (let [facet-name (:name (or specific-facet (:ui.facets/current db)))]
+     {:db (-> db
+              (assoc-in [:ui.codes/status codelist-uri] :delay)
+              (update :ui.codes/currently-loading (fnil conj #{}) codelist-uri))
+      :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
+           [:dispatch [:http/fetch-codes facet-name codelist-uri]]]})))
+
 (rf/reg-event-db
  :ui.facets.current.codes/set-loading
  [e/validation-interceptor]
  (fn [db [_ codelist-uri]]
-   (if (get-in db [:ui.facets.current.codes/loading codelist-uri])
-     (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :loading)
+   (if (get-in db [:ui.codes/currently-loading codelist-uri])
+     (assoc-in db [:ui.codes/status codelist-uri] :loading)
      db)))
 
 (defn get-codes-flow [codelist-uri]
   {:first-dispatch [:codes/get-codes codelist-uri]
-   :rules [{:when :seen? :events :http.codes/success :halt? true
+   :rules [{:when :seen? :events :codes/get-codes :dispatch [:ui.event/toggle-disclosure codelist-uri]}
+           {:when :seen? :events :http.codes/success :halt? true
             :dispatch-fn (fn [[_ facet-ui codelist-uri]]
-                           [[:ui.codes/expand-selected-codes facet-ui codelist-uri]])}]})
+                           [[:ui.codes/expand-selected-codes facet-ui codelist-uri]])}
+           {:when :seen? :events :http.codes/error :halt? true}]})
 
 (rf/reg-event-fx
  :codes/get-codes-flow
@@ -84,15 +97,6 @@
 ;;; HTTP REQUESTS & RESPONSES
 
 (rf/reg-event-fx
- :codes/get-codes
- [e/validation-interceptor]
- (fn [{:keys [db]} [_ codelist-uri specific-facet]]
-   (let [facet (or specific-facet (:ui.facets/current db))]
-     {:db (assoc-in db [:ui.facets.current.codes/loading codelist-uri] true)
-      :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
-           [:dispatch [:http/fetch-codes facet codelist-uri]]]})))
-
-(rf/reg-event-fx
  :codes/get-concept-trees
  [e/validation-interceptor]
  (fn [_db [_ codelist-uris facet]]
@@ -102,29 +106,26 @@
 (rf/reg-event-fx
  :http/fetch-codes
  [e/validation-interceptor]
- (fn [_ [_ facet codelist-uri]]
+ (fn [_ [_ facet-name codelist-uri]]
    {:http-xhrio {:method :get
                  :uri "/codes"
                  :params {:codelist codelist-uri}
                  :response-format (ajax/transit-response-format)
-                 :on-success [:http.codes/success facet codelist-uri]
+                 :on-success [:http.codes/success facet-name codelist-uri]
                  :on-failure [:http.codes/error codelist-uri]}}))
 
 (rf/reg-event-db
  :http.codes/success
  [e/validation-interceptor]
- (fn [db [_ {:keys [selection name] :as facet} codelist-uri result]]
+ (fn [db [_ facet-name codelist-uri result]]
    (let [children (if (seq result) result :no-children)
-         updated-db (caching/cache-code-tree db (:name facet) codelist-uri children)
-         updated-facet (-> facet
-                           (merge (get-in updated-db [:facets/config name]))
-                           (update :expanded disclosure/expand-selected-codes updated-db selection name))]
+         updated-db (caching/cache-code-tree db facet-name codelist-uri children)]
      (-> updated-db
-         (update :ui.facets.current.codes/loading dissoc codelist-uri)
-         (assoc :ui.facets/current updated-facet)))))
+         (update :ui.codes/currently-loading disj codelist-uri)
+         (update-in [:ui.codes/status] assoc codelist-uri :ready)))))
 
 (rf/reg-event-db
  :http.codes/error
  [e/validation-interceptor]
  (fn [db [_ codelist-uri]]
-   (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :error)))
+   (assoc-in db [:ui.codes/status codelist-uri] :error)))

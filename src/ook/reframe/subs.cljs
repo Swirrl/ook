@@ -18,7 +18,7 @@
  (fn [db _]
    (:datasets/count db)))
 
-;;;;;; EPHEMERAL UI STATE
+;;;;;; EPHEMERAL UI STATE - FACETS
 
 (rf/reg-sub
  :ui.facets.current/status
@@ -51,6 +51,13 @@
    (let [child-uris (->> children (map :ook/uri) set)
          current-selection (-> db :ui.facets/current :selection (get scheme))]
      (set/subset? child-uris current-selection))))
+
+;;;;;; CODES
+
+(rf/reg-sub
+ :ui.codes/status
+ (fn [db [_ codelist-uri]]
+   (-> db :ui.codes/status (get codelist-uri))))
 
 ;;;;;; SEARCH
 

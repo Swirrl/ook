@@ -80,15 +80,15 @@
         (when expanded?
           [code-tree children])])]))
 
-(defn- code-tree [tree]
-  [nested-list
-   (for [{:keys [ook/uri scheme] :as code} tree]
-     ^{:key [scheme uri]} [code-item code])])
-
 (defn- no-codes-message []
   [nested-list
    [nested-list-item {:class "text-muted"}
     [:em "No codes to show"]]])
+
+(defn- code-tree [tree]
+  [nested-list
+   (for [{:keys [ook/uri scheme] :as code} tree]
+     ^{:key [scheme uri]} [code-item code])])
 
 (defn- codelist-item [{:keys [children ook/uri] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/option-expanded? uri])]
@@ -97,20 +97,27 @@
      [checkbox-input (assoc codelist :used true)]
      [select-any-button codelist]
      (when expanded?
-       (cond
-         (= :loading children)
-         [nested-list [nested-list-item (common/loading-spinner)]]
+       (let [status @(rf/subscribe [:ui.codes/status uri])]
+         (condp = status
+           ;; special intermediate state to prevent a flash of the loading spinner when
+           ;; a codelist loads in <300ms
+           :delay
+           [:div]
 
-         (= :error children)
-         [nested-list
-          [nested-list-item
-           [common/error-message "Sorry, there was an error fetching the codes for this codelist."]]]
+           :loading
+           [nested-list [nested-list-item (common/loading-spinner)]]
 
-         (= :no-children children)
-         [no-codes-message]
+           :error
+           [nested-list
+            [nested-list-item
+             [common/error-message "Sorry, there was an error fetching the codes for this codelist."]]]
 
-         :else
-         [code-tree children]))]))
+           :ready
+           (if (= :no-children children)
+             [no-codes-message]
+             [code-tree children])
+
+           [common/error-message "Sorry, something went wrong."])))]))
 
 (defn- code-selection [name]
   (when name
