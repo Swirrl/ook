@@ -44,5 +44,5 @@
         open-codes (mapcat (partial find-open-codes db facet-name selection) open-codelists)]
     (set (concat open-codelists open-codes))))
 
-(defn add-all-open-codes [current-disclosure db selection facet-name]
+(defn expand-selected-codes [current-disclosure db selection facet-name]
   (apply (fnil conj #{}) current-disclosure (get-expanded-uris db selection facet-name)))

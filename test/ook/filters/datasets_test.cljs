@@ -9,10 +9,7 @@
    [ook.reframe.views :as views]
    [ook.params.parse :as p]
    [ook.reframe.router :as router]
-   [reagent.core :as r]
-
-   [ook.reframe.events]
-   [ook.reframe.subs]))
+   [reagent.core :as r]))
 
 (def initial-state
   {:facets {"Facet 1" {:name "Facet 1" :sort-priority 1 :dimensions ["dim1" "dim2"]}

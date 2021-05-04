@@ -6,10 +6,7 @@
 
    [ook.test.util.event-helpers :as eh]
    [ook.test.util.query-helpers :as qh]
-   [ook.reframe.facets.view :as facets]
-
-   [ook.reframe.events]
-   [ook.reframe.subs]))
+   [ook.reframe.facets.view :as facets]))
 
 (def initial-state
   {:facets {"Facet 1" {:name "Facet 1" :sort-priority 1 :dimensions ["dim1" "dim2"]}

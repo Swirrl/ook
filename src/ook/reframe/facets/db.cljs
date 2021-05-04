@@ -17,7 +17,7 @@
     (if applied-selection
       (-> base-ui-state
           (assoc :selection applied-selection)
-          (update :expanded disclosure/add-all-open-codes db applied-selection facet-name))
+          (update :expanded disclosure/expand-selected-codes db applied-selection facet-name))
       base-ui-state)))
 
 (defn get-dimensions [db facet-name]

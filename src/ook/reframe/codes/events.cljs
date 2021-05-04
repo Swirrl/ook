@@ -31,7 +31,7 @@
    (let [facet-name (-> db :ui.facets/current :name)]
      {:fx [[:dispatch [:ui.event/toggle-disclosure uri]]
            (when-not (caching/concept-tree-cached? db facet-name uri)
-             [:dispatch [:codes/get-codes uri]])]})))
+             [:dispatch [:codes/get-codes-flow uri]])]})))
 
 (rf/reg-event-db
  :ui.event/set-selection
@@ -61,6 +61,25 @@
    (if (get-in db [:ui.facets.current.codes/loading codelist-uri])
      (assoc-in db [:ui.facets/current :codelists codelist-uri :children] :loading)
      db)))
+
+(defn get-codes-flow [codelist-uri]
+  {:first-dispatch [:codes/get-codes codelist-uri]
+   :rules [{:when :seen? :events :http.codes/success :halt? true
+            :dispatch-fn (fn [[_ facet-ui codelist-uri]]
+                           [[:ui.codes/expand-selected-codes facet-ui codelist-uri]])}]})
+
+(rf/reg-event-fx
+ :codes/get-codes-flow
+ [e/validation-interceptor]
+ (fn [_ [_ codelist-uri]]
+   {:async-flow (get-codes-flow codelist-uri)}))
+
+(rf/reg-event-db
+ :ui.codes/expand-selected-codes
+ [e/validation-interceptor]
+ (fn [db [_ {:keys [selection name]}]]
+   (update-in db [:ui.facets/current :expanded]
+              disclosure/expand-selected-codes db selection name)))
 
 ;;; HTTP REQUESTS & RESPONSES
 
@@ -99,7 +118,7 @@
          updated-db (caching/cache-code-tree db (:name facet) codelist-uri children)
          updated-facet (-> facet
                            (merge (get-in updated-db [:facets/config name]))
-                           (update :expanded disclosure/add-all-open-codes updated-db selection name))]
+                           (update :expanded disclosure/expand-selected-codes updated-db selection name))]
      (-> updated-db
          (update :ui.facets.current.codes/loading dissoc codelist-uri)
          (assoc :ui.facets/current updated-facet)))))

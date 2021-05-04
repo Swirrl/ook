@@ -7,6 +7,7 @@
    [ook.reframe.datasets.events]
    [ook.reframe.router :as router]
    [day8.re-frame.http-fx]
+   [day8.re-frame.async-flow-fx]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
    [ook.concerns.transit :as t]

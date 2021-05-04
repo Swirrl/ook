@@ -13,6 +13,9 @@
               [re-frame.core :as rf]
               [ook.reframe.router :as router]
               [ook.concerns.transit :as transit]
+              [day8.re-frame.async-flow-fx]
+              [ook.reframe.events]
+              [ook.reframe.subs]
               [ook.reframe.facets.events]
               [ook.reframe.codes.events]
               [ook.reframe.datasets.events]])))
@@ -90,9 +93,9 @@
 
      (defn stub-dispatch-later []
        (rf/reg-fx
-         :dispatch-later
-         (fn [{:keys [dispatch]}]
-           (rf/dispatch dispatch))))
+        :dispatch-later
+        (fn [{:keys [dispatch]}]
+          (rf/dispatch dispatch))))
 
      (def codelist-request (atom nil))
 
