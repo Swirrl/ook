@@ -39,10 +39,13 @@
 (defn open-codelist-uris [selection]
   (->> selection (filter (fn [[_k v]] (seq v))) keys set))
 
-(defn get-expanded-uris [db selection facet-name]
-  (let [open-codelists (open-codelist-uris selection)
-        open-codes (mapcat (partial find-open-codes db facet-name selection) open-codelists)]
-    (set (concat open-codelists open-codes))))
+(defn expand-selected-codes-for-codelist [current-disclosure db selection facet-name codelist-uri]
+  (let [open-codes (find-open-codes db facet-name selection codelist-uri)
+        expanded-uris (set (cons codelist-uri open-codes))]
+    (apply (fnil conj #{}) current-disclosure expanded-uris)))
 
-(defn expand-selected-codes [current-disclosure db selection facet-name]
-  (apply (fnil conj #{}) current-disclosure (get-expanded-uris db selection facet-name)))
+(defn expand-all-selected-codes [current-disclosure db selection facet-name]
+  (let [open-codelists (open-codelist-uris selection)
+        open-codes (mapcat (partial find-open-codes db facet-name selection) open-codelists)
+        expanded-uris (set (concat open-codelists open-codes))]
+    (apply (fnil conj #{}) current-disclosure expanded-uris)))

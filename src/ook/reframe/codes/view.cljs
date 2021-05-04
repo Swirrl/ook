@@ -117,7 +117,7 @@
              [no-codes-message]
              [code-tree children])
 
-           [common/error-message "Sorry, something went wrong."])))]))
+           [:div])))]))
 
 (defn- code-selection [name]
   (when name

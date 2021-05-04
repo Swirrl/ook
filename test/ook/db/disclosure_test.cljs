@@ -2,15 +2,17 @@
   (:require [cljs.test :refer [deftest is]]
             [ook.reframe.codes.db.disclosure :as sut]))
 
-(deftest get-expanded-uris-test
+(deftest expand-all-selected-codes-test
   (is (= #{}
-         (sut/get-expanded-uris {:facets/config {"facet" {:codelists [{:ook/uri "codelist1"
-                                                                       :children []}]}}}
-                                {"codelist1" nil}
-                                "facet")))
+         (sut/expand-all-selected-codes #{}
+                                         {:facets/config {"facet" {:codelists [{:ook/uri "codelist1"
+                                                                                :children []}]}}}
+                                         {"codelist1" nil}
+                                         "facet")))
 
   (is (= #{"codelist2"}
-         (sut/get-expanded-uris
+         (sut/expand-all-selected-codes
+          #{}
           {:facets/config {"facet"
                            {:codelists
                             {"codelist1" {:ook/uri "codelist1" :children []}
@@ -20,7 +22,8 @@
           "facet")))
 
   (is (= #{"codelist2" "code1"}
-         (sut/get-expanded-uris
+         (sut/expand-all-selected-codes
+          #{}
           {:facets/config {"facet"
                            {:codelists
                             {"codelist1" {:ook/uri "codelist1" :children []}
@@ -32,7 +35,8 @@
           "facet")))
 
   (is (= #{"codelist2" "code1" "code3" "code4"}
-         (sut/get-expanded-uris
+         (sut/expand-all-selected-codes
+          #{}
           {:facets/config {"facet"
                            {:codelists
                             {"codelist1" {:ook/uri "codelist1" :children []}
