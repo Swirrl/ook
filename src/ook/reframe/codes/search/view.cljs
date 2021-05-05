@@ -26,7 +26,7 @@
   [:<>
    (when (seq search-results)
      [common/text-button
-      {:on-click (js/console.log "select all matches")}
+      {:on-click #(js/console.log "select all matches")}
       "select all matches"])
    [common/text-button
     {:on-click #(rf/dispatch [:ui.event/reset-search])}

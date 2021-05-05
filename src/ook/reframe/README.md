@@ -22,6 +22,7 @@ OOK's front end is a single-page appp built with [re-frame](https://github.com/d
 - there are 2 types of side-effecting events in the app
   1. http events, namespaced with `:http/`
   2. navigation, which is just the `:app/navigate` event and associated `:app/navigate!` effect, which uses reitit to change the app url
+- Events, especially the side-effecting events, are written to do as little as possible on success or failure (usually just update some internal app state) so they can be reused in many places without causing surprise side effects. Use `:async-flow` to control what should happen after a handler resolves if more needs to be done than just setting the return value in the internal app state.
 
 ## Testing
 

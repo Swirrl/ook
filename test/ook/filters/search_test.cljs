@@ -27,7 +27,7 @@
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]})
 
 (def search-results
-  {"2-2 child 1" {:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1"}})
+  {"2-2 child 1" [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1"}]})
 
 (defn- search-for [label]
   (eh/set-input-val (qh/code-search-input) label)
@@ -54,7 +54,8 @@
      (testing "shows a relevant message and reset button, no select all button"
        (is (nil? (qh/query-text "select all matches")))
        (is (not (nil? (qh/query-text "reset search"))))
-       (is (not (nil? (qh/query-text "No codes match")))))
+       (is (not (nil? (qh/query-text "No codes match"))))
+       (is (= [] (qh/all-labels))))
 
      (testing "can be reset to show all the codelists again"
        (eh/click-text "reset search")
@@ -64,14 +65,27 @@
        (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))))
 
    (testing "searching for a code by label that matches"
-
+     (is (nil? @setup/concept-tree-request))
      (search-for "2-2 child 1")
-     (testing "expands the right levels of the tree"
-       ;; (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
+
+     (testing "shows select all and reset options"
+       (is (not (nil? (qh/query-text "select all matches"))))
+       (is (not (nil? (qh/query-text "reset search")))))
+
+     ;; (testing "expands the right levels of the tree"
+     ;;   (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
+     ;;   (is (qh/closed? (qh/find-expansion-toggle "2-1 child 2")))
+     ;;   (is (qh/closed? (qh/find-expansion-toggle "Codelist 3 Label"))))
+
+     (testing "fetches code trees that were not already cached"
+       (is (= "cl2" @setup/concept-tree-request)))
+
+     (testing "shows only matching codes with all parents expanded"
+       (is (= ["Codelist 2 Label" "2-1 child 1"] (qh/all-labels)))
+
+       ;; search for a deeper nested code
        )
 
-     (testing "fetches code trees that were not already cached")
-     (testing "only shows matching codes")
      (testing "can be reset to show all the codelists again"))
 
    (testing "select all matches"

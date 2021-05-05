@@ -102,8 +102,7 @@
                         {:terms {:scheme codelists}}]}}}))
 
 (defn build-code-for-each-scheme [codelists {id :_id source :_source}]
-  ;; TODO:: don't think i need children here?
-  (let [code {:ook/uri id :children? (seq (:narrower source))}
+  (let [code {:ook/uri id}
         schemes (-> source :scheme u/box set)]
     (->> schemes
          (filter codelists)

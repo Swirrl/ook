@@ -141,9 +141,8 @@
      (defn stub-code-search [search-results]
        (rf/reg-event-fx
         :http/search-codes
-        (fn [_ [_ {:keys [search-term name]}]]
-          (js/console.log "stubby " search-term name)
-          {:dispatch [:http.codes.search/success name (get search-results search-term [])]})))
+        (fn [_ [_ {:keys [codes/search name]}]]
+          {:dispatch [:http.codes.search/success name (get search-results (:search-term search) [])]})))
 
      (defn stub-side-effects [{:keys [concept-trees codelists datasets search-results]}]
        (stub-navigation)
