@@ -23,7 +23,8 @@
 (rf/reg-sub
  :ui.facets.current/status
  (fn [db _]
-   (:ui.facets.current/status db)))
+   (let [facet-name (-> db :ui.facets/current :name)]
+     (-> db :ui.facets/status (get facet-name)))))
 
 (rf/reg-sub
  :ui.facets.current/name
@@ -86,7 +87,10 @@
 (rf/reg-sub
  :facets.config/codelists
  (fn [db [_ name]]
-   (sort-by :ook/uri (facets/get-codelists db name))))
+   (let [codelists (facets/get-codelists db name)]
+     (if (= :no-codelists codelists)
+       codelists
+       (sort-by :ook/uri codelists)))))
 
 ;;;;;; DATASETS
 

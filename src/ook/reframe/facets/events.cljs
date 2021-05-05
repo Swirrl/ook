@@ -4,8 +4,7 @@
    [ajax.core :as ajax]
    [ook.reframe.facets.db :as db]
    [ook.reframe.codes.db.caching :as caching]
-   [ook.reframe.events :as e]
-   [ook.reframe.codes.db.disclosure :as disclosure]))
+   [ook.reframe.events :as e]))
 
 ;;; CLICK HANDLERS
 
@@ -40,8 +39,6 @@
  (fn [db _]
    (dissoc db :ui.facets/current)))
 
-;;; UI MANAGEMENT
-
 (rf/reg-event-db
  :ui.facets/set-current
  [e/validation-interceptor]
@@ -53,18 +50,18 @@
 (rf/reg-event-fx
  :ui.facets.current/get-codelists
  [e/validation-interceptor]
- (fn [{:keys [db]} [_ name]]
-   {:db (assoc db :facets.current/loading true)
-    :fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading]}]
+ (fn [_ [_ name]]
+   {:fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current/set-loading name]}]
          [:dispatch [:http/fetch-codelists name]]]}))
 
 (rf/reg-event-db
  :ui.facets.current/set-loading
  [e/validation-interceptor]
- (fn [db _]
-   (if (:facets.current/loading db)
-     (assoc db :ui.facets.current/status :loading)
-     db)))
+ (fn [db [_ facet-name]]
+   (let [status (get-in db [:ui.facets/status facet-name])]
+     (if (#{:ready :error} status)
+       db
+       (assoc-in db [:ui.facets/status facet-name] :loading)))))
 
 ;;; APPLYING A FACET
 
@@ -88,7 +85,7 @@
                    :params {:dimension dimensions}
                    :response-format (ajax/transit-response-format)
                    :on-success [:http.codelists/success name]
-                   :on-failure [:http.codelists/error]}})))
+                   :on-failure [:http.codelists/error name]}})))
 
 ;; HTTP RESPONSE HANDLERS
 
@@ -96,13 +93,13 @@
  :http.codelists/success
  [e/validation-interceptor]
  (fn [db [_ name response]]
-   (-> db
-       (caching/cache-codelist name response)
-       (dissoc :facets.current/loading)
-       (assoc :ui.facets.current/status :ready))))
+   (let [codelists (if (seq response) response :no-codelists)]
+     (-> db
+         (caching/cache-codelists name codelists)
+         (assoc-in [:ui.facets/status name] :ready)))))
 
 (rf/reg-event-db
  :http.codelists/error
  [e/validation-interceptor]
- (fn [db [_ error]]
-   (assoc db :ui.facets.current/status :error)))
+ (fn [db [_ name]]
+   (assoc-in db [:ui.facets/status name] :error)))

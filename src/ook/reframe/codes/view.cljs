@@ -94,11 +94,6 @@
      (when expanded?
        (let [status @(rf/subscribe [:ui.codes/status uri])]
          (condp = status
-           ;; special intermediate state to prevent a flash of the loading spinner when
-           ;; a codelist loads in <300ms
-           :delay
-           [:div]
-
            :loading
            [nested-list [nested-list-item (common/loading-spinner)]]
 
@@ -142,7 +137,7 @@
     ;; or do it in the view? check each iteration if it's included in the selection
     (let [codelists @(rf/subscribe [:facets.config/codelists name])
           search-results @(rf/subscribe [:ui.facets.current/search-results name])]
-      (if (empty? codelists)
+      (if (= :no-codelists codelists)
         [:p.h6.mt-4 "No codelists for facet"]
         [:<>
          [apply-filter-button]

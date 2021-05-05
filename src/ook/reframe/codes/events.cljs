@@ -83,19 +83,17 @@
  (fn [{:keys [db]} [_ codelist-uri]]
    (let [facet-name (-> db :ui.facets/current :name)]
      (when-not (caching/concept-tree-cached? db facet-name codelist-uri)
-       {:db (-> db
-                (assoc-in [:ui.codes/status codelist-uri] :delay)
-                (update :ui.codes/currently-loading (fnil conj #{}) codelist-uri))
-        :fx [[:dispatch-later {:ms 100 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
+       {:fx [[:dispatch-later {:ms 300 :dispatch [:ui.facets.current.codes/set-loading codelist-uri]}]
              [:dispatch [:http/fetch-codes facet-name codelist-uri]]]}))))
 
 (rf/reg-event-db
  :ui.facets.current.codes/set-loading
  [e/validation-interceptor]
  (fn [db [_ codelist-uri]]
-   (if (get-in db [:ui.codes/currently-loading codelist-uri])
-     (assoc-in db [:ui.codes/status codelist-uri] :loading)
-     db)))
+   (let [status (get-in db [:ui.codes/status codelist-uri])]
+     (if (#{:ready :error} status)
+       db
+       (assoc-in db [:ui.codes/status codelist-uri] :loading)))))
 
 ;;; HTTP REQUESTS & RESPONSES
 
@@ -123,9 +121,7 @@
  (fn [db [_ facet-name codelist-uri result]]
    (let [children (if (seq result) result :no-children)
          updated-db (caching/cache-code-tree db facet-name codelist-uri children)]
-     (-> updated-db
-         (update :ui.codes/currently-loading disj codelist-uri)
-         (update-in [:ui.codes/status] assoc codelist-uri :ready)))))
+     (update-in updated-db [:ui.codes/status] assoc codelist-uri :ready))))
 
 (rf/reg-event-db
  :http.codes/error

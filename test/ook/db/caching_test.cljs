@@ -12,7 +12,7 @@
     (is (= {"facet 1" {:name "facet 1"
                        :codelists {"cl1" codelist-1}}}
            (:facets/config
-            (sut/cache-codelist initial-db "facet 1" [codelist-1]))))))
+            (sut/cache-codelists initial-db "facet 1" [codelist-1]))))))
 
 (deftest cache-code-tree-test
   (is (= {"facet 1" {:name "facet 1"

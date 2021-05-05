@@ -35,7 +35,7 @@
  [e/validation-interceptor]
  (fn [db _]
    (let [status (get-in db [:ui.facets/current :codes/search :status])]
-     (if (= status :ready)
+     (if (#{:ready :error} status)
        db
        (assoc-in db [:ui.facets/current :codes/search :status] :loading)))))
 

@@ -4,7 +4,7 @@
 
 (defn get-codelists [db facet-name]
   (when-let [codelists (some-> db :facets/config (get facet-name) :codelists)]
-    (if (empty? codelists)
+    (if (= :no-codelists codelists)
       codelists
       (vals codelists))))
 
