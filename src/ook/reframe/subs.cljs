@@ -64,12 +64,17 @@
 (rf/reg-sub
   :ui.facets.current/search-term
   (fn [db _]
-    (some-> db :ui.facets/current :search-term)))
+    (some-> db :ui.facets/current :codes/search :search-term)))
 
 (rf/reg-sub
  :ui.facets.current/search-status
  (fn [db _]
    (some-> db :ui.facets/current :codes/search :status)))
+
+(rf/reg-sub
+ :ui.facets.current/search-results
+ (fn [db _]
+   (some-> db :ui.facets/current :codes/search :results)))
 
 ;;;;;; FACETS
 

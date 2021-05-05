@@ -7,16 +7,11 @@
 
 (defn- apply-filter-button []
   (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
-    [:button.btn.btn-primary.mt-3
-     {:type "button"
+    [common/primary-button
+     {:class "mt-3"
       :disabled (empty? current-selection)
       :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
      "Apply filter"]))
-
-(defn- text-button [opts & children]
-  [:button.btn.btn-link.mx-1.p-0.align-baseline
-   (merge opts {:type "button"})
-   children])
 
 (defn- toggle-level-button [opts expanded?]
   [:button.btn.as-link.p-0.m-0.expand-code-button
@@ -34,13 +29,13 @@
    expanded?])
 
 (defn- select-any-button [codelist]
-  [text-button
+  [common/text-button
    {:on-click #(rf/dispatch [:ui.event/set-selection :any codelist])}
    "any"])
 
 (defn- select-all-children-button [code]
   (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
-    [text-button
+    [common/text-button
      {:on-click (fn [] (if all-selected?
                          (rf/dispatch [:ui.event/set-selection :remove-children code])
                          (rf/dispatch [:ui.event/set-selection :add-children code])))}
@@ -119,19 +114,43 @@
 
            [:div])))]))
 
-(defn- code-selection [name]
+(defn- code-selection [codelists]
+  [:form.mt-3
+   [nested-list {:class "p-0"}
+    (for [{:keys [ook/uri label] :as codelist} codelists]
+      ^{:key [uri label]} [codelist-item codelist])]])
+
+(defn- search-info [codelists search-results]
+  (let [search-status @(rf/subscribe [:ui.facets.current/search-status name])]
+    (condp = search-status
+      :ready
+      [:<>
+       [search/options search-results]
+       (if (empty? search-results)
+         [:p.mt-3.ms-1 [:em.text-muted "No codes match"]]
+         [code-selection codelists])]
+
+      :error [common/error-message "Sorry, there was an error searching for codes"]
+
+      :loading [common/loading-spinner]
+
+      [common/error-message "Sorry, something went wrong."])))
+
+(defn- codelists [name]
   (when name
-    (let [codelists @(rf/subscribe [:facets.config/codelists name])]
+    ;; TODO:: filter down these codelists in the sub?
+    ;; or do it in the view? check each iteration if it's included in the selection
+    (let [codelists @(rf/subscribe [:facets.config/codelists name])
+          search-results @(rf/subscribe [:ui.facets.current/search-results name])]
       (if (empty? codelists)
         [:p.h6.mt-4 "No codelists for facet"]
         [:<>
          [apply-filter-button]
          [:p.h6.mt-4 "Codelists"]
          [search/code-search]
-         [:form.mt-3
-          [nested-list {:class "p-0"}
-           (for [{:keys [ook/uri label] :as codelist} codelists]
-             ^{:key [uri label]} [codelist-item codelist])]]]))))
+         (if search-results
+           [search-info codelists search-results]
+           [code-selection codelists])]))))
 
 (defn codelist-selection [selected-facet-status facet-name]
   (when selected-facet-status
@@ -140,6 +159,6 @@
 
       :error [common/error-message "Sorry, there was an error fetching the codelists for this facet."]
 
-      :ready [code-selection facet-name]
+      :ready [codelists facet-name]
 
       [common/error-message "Sorry, something went wrong."])))

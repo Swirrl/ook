@@ -53,6 +53,14 @@
 ;;; UI MANAGEMENT
 
 (rf/reg-event-fx
+ :ui.codes/get-all-code-trees-with-selections
+ [e/validation-interceptor]
+ (fn [_ [_ {:keys [selection] :as facet-ui}]]
+   (let [codelist-uris (disclosure/open-codelist-uris selection)]
+     {:fx (for [codelist-uri codelist-uris]
+            [:dispatch [:ui.codes/get-code-tree-open-to-selection facet-ui codelist-uri]])})))
+
+(rf/reg-event-fx
  :ui.codes/get-code-tree-open-to-selection
  [e/validation-interceptor]
  (fn [_ [_ facet-ui codelist-uri]]

@@ -83,6 +83,17 @@
 (defn editable-facet-button [facet-name]
   (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
 
+;;; Search
+
+(defn code-search-input []
+  (find-query "#search-term"))
+
+(defn submit-search-button []
+  (find-query "#search button[type='submit']"))
+
+(defn search-input-val []
+  (.-value (code-search-input)))
+
 ;;; Dataset table
 
 (defn apply-filter-button []

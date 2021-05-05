@@ -18,6 +18,7 @@
               [ook.reframe.subs]
               [ook.reframe.facets.events]
               [ook.reframe.codes.events]
+              [ook.reframe.codes.search.events]
               [ook.reframe.datasets.events]])))
 
 #?(:clj
@@ -127,8 +128,7 @@
      (def last-navigation (atom nil))
 
      (defn stub-navigation
-       "Manually trigger the controller for the matched route,
-  which reitit would normally do"
+       "Manually trigger the controller for the matched route, which reitit would normally do"
        []
        (rf/reg-fx
         :app/navigate!
@@ -138,9 +138,17 @@
             :ook.route/home (router/home-controller)
             :ook.route/search (router/search-controller {:query query})))))
 
-     (defn stub-side-effects [{:keys [concept-trees codelists datasets]}]
+     (defn stub-code-search [search-results]
+       (rf/reg-event-fx
+        :http/search-codes
+        (fn [_ [_ {:keys [search-term name]}]]
+          (js/console.log "stubby " search-term name)
+          {:dispatch [:http.codes.search/success name (get search-results search-term [])]})))
+
+     (defn stub-side-effects [{:keys [concept-trees codelists datasets search-results]}]
        (stub-navigation)
        (stub-dispatch-later)
+       (stub-code-search (or search-results {}))
        (stub-dataset-fetch-success (or datasets {}))
        (stub-codelist-fetch-success (or codelists {}))
        (stub-code-fetch-success (or concept-trees {})))

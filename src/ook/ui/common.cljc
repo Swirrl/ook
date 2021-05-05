@@ -12,3 +12,11 @@
 
 (defn error-message [message]
   [:div.alert.alert-danger.mt-3 message])
+
+(defn primary-button [opts content]
+  [:button.btn.btn-primary (merge {:type "button"} opts) content])
+
+(defn text-button [opts & children]
+  [:button.btn.btn-link.mx-1.p-0.align-baseline
+   (merge opts {:type "button"})
+   children])

@@ -40,7 +40,6 @@
 
 (deftest selecting-facets
   (rft/run-test-sync
-
    (setup/stub-side-effects {:codelists codelists :concept-trees concept-trees})
 
    (setup/init! facets/configured-facets initial-state)

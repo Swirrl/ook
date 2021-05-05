@@ -18,6 +18,16 @@
       :aria-label "Search"
       :value @(rf/subscribe [:ui.facets.current/search-term])
       :on-change #(rf/dispatch [:ui.event/search-term-change (-> % .-target .-value)])}]
-    [:button.btn.btn-primary {:type "submit"} "Search"]]
+    [common/primary-button {:type "submit"} "Search"]]
    (when (= :error @(rf/subscribe [:ui.facets.current/search-status]))
      [common/error-message "Sorry, there was an error submitting your search"])])
+
+(defn options [search-results]
+  [:<>
+   (when (seq search-results)
+     [common/text-button
+      {:on-click (js/console.log "select all matches")}
+      "select all matches"])
+   [common/text-button
+    {:on-click #(rf/dispatch [:ui.event/reset-search])}
+    "reset search"]])
