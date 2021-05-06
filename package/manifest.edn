@@ -70,8 +70,9 @@
                         :dest-path "sites-available/ook"
                         :keys [:ook/domain]}
 
-                       ;; just copy this without changing it.
+                       ;; just copy these file without changing them
                        "sites-available/monitoring-status"
+                       ".htpasswd"
 
                        ;; symlinks
 

@@ -12,8 +12,11 @@
   (es/connect endpoint {:content-type :json}))
 
 
-(defn create-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-  (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")}))
+(defn create-index
+  ([system index]
+   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
+  ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
+   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")})))
 
 (defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
   (esi/delete (connect endpoint) index))
@@ -33,7 +36,7 @@
 
 (defn create-indicies [system]
   (log/info "Creating indicies")
-  (each-index #(create-index system % (io/resource (str "etl/" % "-mapping.json")))))
+  (each-index (partial create-index system)))
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
@@ -67,8 +70,8 @@
   (let [loader ["drafter-client.edn"
                 "elasticsearch-prod.edn"
                 "load-data.edn"]
-        target (or args ["trade-data.edn"
-                         "cogs-staging.edn"])
+        target (or args ["project/trade/data.edn"
+                         "idp-beta.edn"])
         profiles (concat loader target)]
     (println "Starting index loader with profiles: " profiles)
     (i/exec-config {:profiles profiles})))

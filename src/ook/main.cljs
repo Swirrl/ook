@@ -1,9 +1,15 @@
 (ns ook.main
   (:require
    [ook.reframe.events]
+   [ook.reframe.facets.events]
+   [ook.reframe.codes.events]
+   [ook.reframe.datasets.events]
    [ook.reframe.router :as router]
+   [day8.re-frame.http-fx]
    [ook.reframe.subs]
    [ook.reframe.views :as views]
+   [ook.concerns.transit :as t]
+   [goog.object :as go]
    [re-frame.core :as rf]
    [reagent.dom :as rdom]))
 
@@ -12,12 +18,19 @@
     (println "*** starting OOK in dev mode ***")
     (set-print-fn! (constantly nil))))
 
-(defn- render []
-  (rdom/render [views/main] (.getElementById js/document "app")))
+(defn- render [el]
+  (rdom/render [views/main] el))
 
 (defn ^:export init []
   (router/init!)
-  (render))
+  (let [el (.getElementById js/document "app")
+        initial-state (-> el
+                          (go/get "attributes")
+                          (go/get "data-init")
+                          (go/get "value")
+                          (t/read-string))]
+    (rf/dispatch-sync [:init/initialize-db initial-state])
+    (render el)))
 
 (defn ^:dev/after-load clear-cache-and-render!
   []
@@ -25,4 +38,5 @@
   ;; after shadow-cljs hot-reloads code. We force a UI update by clearing
   ;; the Reframe subscription cache.
   (rf/clear-subscription-cache!)
-  (render))
+  (let [el (.getElementById js/document "app")]
+    (render el)))

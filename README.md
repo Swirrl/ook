@@ -2,10 +2,10 @@
 
 ## Set-up
 
-We're downloading RDF using drafter client. Although we're only using the public endpoint, you still need to prove AUTH0 credentials. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like. You could also set it to the secret key for the [ook application](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8). You can store this locally in an encrypted file:
+We're downloading RDF using drafter client. Although we're only using the public endpoint, you still need to prove AUTH0 credentials. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like. You could also set it to the secret key for the ook application (e.g. on [cogs staging](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8) or [idp beta](https://manage.auth0.com/dashboard/eu/swirrl-ons-prod/applications/OS2GgkrjYyb7EXdawNfk6HViXznpf7Dh/settings)). You can store this locally in an encrypted file:
 
 ```bash
-echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > resources/secrets/AUTH0_SECRET.gpg
+echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > env/dev/resources/secrets/AUTH0_SECRET.gpg
 ```
 
 You can use this pattern and the `ook.concerns.integrant/secret` reader to encrypt other secrets.
@@ -64,12 +64,12 @@ Then compile the cljs to JS and watch for changes:
 yarn  watch
 ```
 
-or, if you also want the devcards:
+or, if you also want the tests:
 ```bash
 yarn watch-all
 ```
 
-With the shadow-cljs watcher running, devcards are available at `localhost:8000`.
+With the shadow-cljs watcher running, cljs tests are run and watched at `localhost:8021`.
 
 ## Fixtures
 
@@ -94,6 +94,32 @@ Run the tests with the alias:
 ```bash
 clojure -M:dev:test
 ```
+
+Clojurescript tests can be built and viewed in dev as described above. To build/run them from the command line you need to have Chrome installed and run:
+```bash
+yarn build-ci
+node_modules/karma/bin/karma start --single-run
+```
+Or, if you have the [karma cli](http://karma-runner.github.io/latest/index.html) installed globally, just
+```bash
+karma start --single-run
+```
+
+This runs the cljs tests in a way that can be reported programatically for CI.
+
+## Deployment
+
+See the [deployment readme](./deploy/README.md).
+
+To load the data, ssh into the box and do:
+
+```
+cd /opt/ook
+export AUTH0_SECRET=XXX
+java -cp "ook.jar:lib/*" -Xmx3g clojure.main -m ook.index
+```
+
+It takes a couple of hours so you'll likely want to run this with gnu-screen/ tmux/ NOHUP so a drop in the connection doesn't kill the pipeline run.
 
 ## License
 

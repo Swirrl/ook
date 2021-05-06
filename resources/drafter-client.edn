@@ -1,6 +1,7 @@
 {:drafter-client/client {:auth-provider #ig/ref :drafter-client.auth.auth0/m2m-provider
                          :drafter-uri #ig/ref :drafter/endpoint-url
-                         :batch-size 10000}
+                         :batch-size 10000 ;; used for rdf upload so not relevant here
+                         }
 
  :drafter-client.auth.auth0/m2m-provider {:auth0-client #ig/ref :swirrl.auth0/client}
 

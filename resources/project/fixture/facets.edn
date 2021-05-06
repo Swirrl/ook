@@ -1,0 +1,10 @@
+{:ook.search/facets
+ [{:name "Alcohol Type"
+   :sort-priority 1
+   :dimensions ["def/trade/property/dimension/alcohol-type"]}
+  {:name "Bulletin Type"
+   :sort-priority 2
+   :dimensions ["def/trade/property/dimension/bulletin-type"]}
+  {:name "Date"
+   :sort-priority 3
+   :parent-dimension "sdmxd:refPeriod"}]}

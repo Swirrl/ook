@@ -6,21 +6,27 @@
    [reitit.frontend.easy :as rtfe]
    [reitit.frontend :as rt]))
 
-(def ^:private routes
-  [["/" {:name :ook.route/home
-         :view views/home
-         :controllers [{:start #(rf/dispatch [:init/initialize-db])}]}]
+(defn home-controller []
+  (rf/dispatch [:filters/apply-filter-state {}]))
 
+(def home-route-data
+  {:name :ook.route/home
+   :view views/search
+   :controllers [{:start home-controller}]})
+
+(defn search-controller [params]
+  (let [filter-state (-> params :query :filters)]
+    (if filter-state
+      (rf/dispatch [:filters/apply-filter-state filter-state])
+      (rf/dispatch [:app/navigate :ook.route/home]))))
+
+(def ^:private routes
+  [["/" home-route-data]
    ["/search" {:name :ook.route/search
-               :view views/results
-               :parameters {:query {:q string? :facet [string?]}}
-               :controllers [{:start (fn [params]
-                                       (let [query (-> params :query :q)
-                                             facets (-> params :query :facet)]
-                                         (rf/dispatch [:codes/submit-search query])
-                                         (when facets
-                                           (rf/dispatch [:filters/apply-code-selection facets]))))
-                              :parameters {:query [:q :facet]}}]}]])
+               :view views/search
+               :parameters {:query {:filters [string?]}}
+               :controllers [{:start search-controller
+                              :parameters {:query [:filters]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

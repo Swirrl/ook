@@ -1,15 +1,25 @@
 (ns ook.params.parse
   (:require
    [ook.util :as u]
-   [clojure.string :as str]))
+   [ook.concerns.transit :as t]))
 
-(defn get-query [{:keys [query-params]}]
-  (get query-params "q"))
+(defn serialize-filter-state [filter-state]
+  (t/write-string filter-state))
 
-(defn parse-filters [{:keys [query-params]}]
-  (let [param (get query-params "facet")]
-    (when (seq param)
-      (some->> param
-               u/box
-               (map #(str/split % #","))
-               (map (fn [[dim val]] {:value val :dimension dim}))))))
+(defn deserialize-filter-state [filter-state]
+  (t/read-string filter-state))
+
+(defn get-facets
+  "Parse query param facet tuples into a map of facet-name [codelists] for
+  use in db queries, referred to as 'selection' elsewhere"
+  [{:keys [query-params]}]
+  (when (seq query-params)
+    (-> query-params (get "filters") deserialize-filter-state)))
+
+(defn get-dimensions [{:keys [query-params]}]
+  (when (seq query-params)
+    (-> query-params (get "dimension") u/box)))
+
+(defn get-codelist [{:keys [query-params]}]
+  (when (seq query-params)
+    (get query-params "codelist")))

@@ -1,0 +1,156 @@
+{:calls [{:arg-key {:query-string nil,
+                    :request-method :post,
+                    :server-name "idp-beta-drafter.publishmydata.com",
+                    :server-port nil,
+                    :uri "/v1/sparql/live"},
+          :return {:body #vcr-clj/input-stream
+                   ["ZW50cnkNCmh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWF"
+                    "sY29ob2wtYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1kdXR5LXJlY2VpcHRzLWNhdGFsb2ctZW"
+                    "50cnkNCmh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY"
+                    "29ob2wtYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1wcm9kdWN0aW9uLWNhdGFsb2ctZW50cnkN"
+                    "Cg=="],
+                   :cached nil,
+                   :chunked? true,
+                   :headers #vcr-clj/clj-http-header-map
+                   {"Alt-Svc" "clear",
+                    "Connection" "close",
+                    "Content-Type" "text/csv",
+                    "Date" "Tue, 27 Apr 2021 09:34:43 GMT",
+                    "Server" "nginx",
+                    "Strict-Transport-Security" "max-age=15768000",
+                    "Transfer-Encoding" "chunked",
+                    "Vary" "Accept-Encoding",
+                    "Via" "1.1 google"},
+                   :http-client "-- clj-http cannot serialize instances of org.apache.http.client.HttpClient --",
+                   :length -1,
+                   :protocol-version {:major 1, :minor 1, :name "HTTP"},
+                   :reason-phrase "OK",
+                   :repeatable? false,
+                   :status 200,
+                   :streaming? true,
+                   :trace-redirects []},
+          :var-name "clj-http.core/request"}
+         {:arg-key {:query-string nil,
+                    :request-method :post,
+                    :server-name "idp-beta-drafter.publishmydata.com",
+                    :server-port nil,
+                    :uri "/v1/sparql/live"},
+          :return {:body #vcr-clj/input-stream
+                   ["PGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob2w"
+                    "tYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1kdXR5LXJlY2VpcHRzLWNhdGFsb2ctZW50cnk+ID"
+                    "xodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjdHlwZT4gPGh0dHA6L"
+                    "y9wdWJsaXNobXlkYXRhLmNvbS9wbWRjYXQjRGF0YXNldD4gLgo8aHR0cDovL2dzcy1kYXRhLm9y"
+                    "Zy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ"
+                    "1bGxldGluLWR1dHktcmVjZWlwdHMtY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly93d3cudzMub3JnLz"
+                    "IwMDAvMDEvcmRmLXNjaGVtYSNsYWJlbD4gIkFsY29ob2wgQnVsbGV0aW4gLSBEdXR5IFJlY2Vpc"
+                    "HRzIiAuCjxodHRwOi8vZ3NzLWRhdGEub3JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1h"
+                    "bGNvaG9sLWJ1bGxldGluL2FsY29ob2wtYnVsbGV0aW4tZHV0eS1yZWNlaXB0cy1jYXRhbG9nLWV"
+                    "udHJ5PiA8aHR0cDovL3B1Ymxpc2hteWRhdGEuY29tL3BtZGNhdCNkYXRhc2V0Q29udGVudHM+ID"
+                    "xodHRwOi8vZ3NzLWRhdGEub3JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sL"
+                    "WJ1bGxldGluL2FsY29ob2wtYnVsbGV0aW4tZHV0eS1yZWNlaXB0cyNkYXRhc2V0PiAuCjxodHRw"
+                    "Oi8vZ3NzLWRhdGEub3JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1bGx"
+                    "ldGluL2FsY29ob2wtYnVsbGV0aW4tZHV0eS1yZWNlaXB0cy1jYXRhbG9nLWVudHJ5PiA8aHR0cD"
+                    "ovL3d3dy53My5vcmcvMjAwMC8wMS9yZGYtc2NoZW1hI2NvbW1lbnQ+ICJNb250aGx5IER1dHkgU"
+                    "mVjZWlwdHMgc3RhdGlzdGljcyBmcm9tIHRoZSA0IGRpZmZlcmVudCBhbGNvaG9sIGR1dHkgcmVn"
+                    "aW1lcyBhZG1pbmlzdGVyZWQgYnkgSE0gUmV2ZW51ZSBhbmQgQ3VzdG9tcyIgLgo8aHR0cDovL2d"
+                    "zcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi"
+                    "9hbGNvaG9sLWJ1bGxldGluLWR1dHktcmVjZWlwdHMtY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9wd"
+                    "XJsLm9yZy9kYy90ZXJtcy9kZXNjcmlwdGlvbj4gIk1vbnRobHkgRHV0eSBSZWNlaXB0cyBzdGF0"
+                    "aXN0aWNzIGZyb20gdGhlIDQgZGlmZmVyZW50IGFsY29ob2wgZHV0eSByZWdpbWVzIGFkbWluaXN"
+                    "0ZXJlZCBieSBITSBSZXZlbnVlIGFuZCBDdXN0b21zXG4gVGFibGUgb2YgaGlzdG9yaWMgd2luZS"
+                    "wgbWFkZSB3aW5lLCBzcGlyaXRzLCBiZWVyIGFuZCBjaWRlciBEdXR5IFJlY2VpcHRzIiAuCjxod"
+                    "HRwOi8vZ3NzLWRhdGEub3JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1"
+                    "bGxldGluL2FsY29ob2wtYnVsbGV0aW4tZHV0eS1yZWNlaXB0cy1jYXRhbG9nLWVudHJ5PiA8aHR"
+                    "0cDovL3B1cmwub3JnL2RjL3Rlcm1zL3B1Ymxpc2hlcj4gPGh0dHBzOi8vd3d3Lmdvdi51ay9nb3"
+                    "Zlcm5tZW50L29yZ2FuaXNhdGlvbnMvaG0tcmV2ZW51ZS1jdXN0b21zPiAuCjxodHRwOi8vZ3NzL"
+                    "WRhdGEub3JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1bGxldGluL2Fs"
+                    "Y29ob2wtYnVsbGV0aW4tZHV0eS1yZWNlaXB0cy1jYXRhbG9nLWVudHJ5PiA8aHR0cDovL2dzcy1"
+                    "kYXRhLm9yZy51ay9kZWYvZ2RwI2ZhbWlseT4gPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGVmL2"
+                    "dkcCN0cmFkZT4gLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL"
+                    "2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bGxldGluLWR1dHktcmVjZWlwdHMtY2F0"
+                    "YWxvZy1lbnRyeT4gPGh0dHA6Ly9leGFtcGxlLm5ldC9kZWYvY29tcG9uZW50cz4gPGh0dHA6Ly9"
+                    "wdXJsLm9yZy9saW5rZWQtZGF0YS9jdWJlI21lYXN1cmVUeXBlPiAuCjxodHRwczovL3d3dy5nb3"
+                    "YudWsvZ292ZXJubWVudC9vcmdhbmlzYXRpb25zL2htLXJldmVudWUtY3VzdG9tcz4gPGh0dHA6L"
+                    "y93d3cudzMub3JnLzIwMDAvMDEvcmRmLXNjaGVtYSNsYWJlbD4gIkhNIFJldmVudWUgJiBDdXN0"
+                    "b21zIiAuCjxodHRwczovL3d3dy5nb3YudWsvZ292ZXJubWVudC9vcmdhbmlzYXRpb25zL2htLXJ"
+                    "ldmVudWUtY3VzdG9tcz4gPGh0dHA6Ly93d3cudzMub3JnLzIwMDQvMDIvc2tvcy9jb3JlI2FsdE"
+                    "xhYmVsPiAiSE1SQyIgLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyY"
+                    "WRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bGxldGluLWR1dHktcmVjZWlwdHMt"
+                    "Y2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9leGFtcGxlLm5ldC9kZWYvY29tcG9uZW50cz4gPGh0dHA"
+                    "6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob2wtYnVsbG"
+                    "V0aW4vYWxjb2hvbC1idWxsZXRpbi1kdXR5LXJlY2VpcHRzI2RpbWVuc2lvbi9wZXJpb2Q+IC4KP"
+                    "Gh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob2wt"
+                    "YnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1kdXR5LXJlY2VpcHRzLWNhdGFsb2ctZW50cnk+IDx"
+                    "odHRwOi8vZXhhbXBsZS5uZXQvZGVmL2NvbXBvbmVudHM+IDxodHRwOi8vZ3NzLWRhdGEub3JnLn"
+                    "VrL2RlZi90cmFkZS9wcm9wZXJ0eS9kaW1lbnNpb24vYnVsbGV0aW4tdHlwZT4gLgo8aHR0cDovL"
+                    "2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRp"
+                    "bi9hbGNvaG9sLWJ1bGxldGluLWR1dHktcmVjZWlwdHMtY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9"
+                    "leGFtcGxlLm5ldC9kZWYvY29tcG9uZW50cz4gPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGVmL3"
+                    "RyYWRlL3Byb3BlcnR5L2RpbWVuc2lvbi9hbGNvaG9sLXR5cGU+IC4KPGh0dHA6Ly9nc3MtZGF0Y"
+                    "S5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob2wtYnVsbGV0aW4vYWxjb2hv"
+                    "bC1idWxsZXRpbi1wcm9kdWN0aW9uLWNhdGFsb2ctZW50cnk+IDxodHRwOi8vd3d3LnczLm9yZy8"
+                    "xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjdHlwZT4gPGh0dHA6Ly9wdWJsaXNobXlkYXRhLmNvbS"
+                    "9wbWRjYXQjRGF0YXNldD4gLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL"
+                    "3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bGxldGluLXByb2R1Y3Rpb24t"
+                    "Y2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDEvcmRmLXNjaGVtYSNsYWJ"
+                    "lbD4gIkFsY29ob2wgQnVsbGV0aW4gLSBQcm9kdWN0aW9uIiAuCjxodHRwOi8vZ3NzLWRhdGEub3"
+                    "JnLnVrL2RhdGEvZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1bGxldGluL2FsY29ob2wtY"
+                    "nVsbGV0aW4tcHJvZHVjdGlvbi1jYXRhbG9nLWVudHJ5PiA8aHR0cDovL3B1Ymxpc2hteWRhdGEu"
+                    "Y29tL3BtZGNhdCNkYXRhc2V0Q29udGVudHM+IDxodHRwOi8vZ3NzLWRhdGEub3JnLnVrL2RhdGE"
+                    "vZ3NzX2RhdGEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1bGxldGluL2FsY29ob2wtYnVsbGV0aW4tcH"
+                    "JvZHVjdGlvbiNkYXRhc2V0PiAuCjxodHRwOi8vZ3NzLWRhdGEub3JnLnVrL2RhdGEvZ3NzX2Rhd"
+                    "GEvdHJhZGUvaG1yYy1hbGNvaG9sLWJ1bGxldGluL2FsY29ob2wtYnVsbGV0aW4tcHJvZHVjdGlv"
+                    "bi1jYXRhbG9nLWVudHJ5PiA8aHR0cDovL3d3dy53My5vcmcvMjAwMC8wMS9yZGYtc2NoZW1hI2N"
+                    "vbW1lbnQ+ICJNb250aGx5IFByb2R1Y3Rpb24gc3RhdGlzdGljcyBmcm9tIHRoZSA0IGRpZmZlcm"
+                    "VudCBhbGNvaG9sIGR1dHkgcmVnaW1lcyBhZG1pbmlzdGVyZWQgYnkgSE0gUmV2ZW51ZSBhbmQgQ"
+                    "3VzdG9tcyIgLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2ht"
+                    "cmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bGxldGluLXByb2R1Y3Rpb24tY2F0YWxvZy1"
+                    "lbnRyeT4gPGh0dHA6Ly9wdXJsLm9yZy9kYy90ZXJtcy9kZXNjcmlwdGlvbj4gIk1vbnRobHkgUH"
+                    "JvZHVjdGlvbiBzdGF0aXN0aWNzIGZyb20gdGhlIDQgZGlmZmVyZW50IGFsY29ob2wgZHV0eSByZ"
+                    "WdpbWVzIGFkbWluaXN0ZXJlZCBieSBITSBSZXZlbnVlIGFuZCBDdXN0b21zXG4gVGFibGUgb2Yg"
+                    "aGlzdG9yaWMgc3Bpcml0cywgYmVlciBhbmQgY2lkZXIgUHJvZHVjdGlvbiIgLgo8aHR0cDovL2d"
+                    "zcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi"
+                    "9hbGNvaG9sLWJ1bGxldGluLXByb2R1Y3Rpb24tY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9wdXJsL"
+                    "m9yZy9kYy90ZXJtcy9wdWJsaXNoZXI+IDxodHRwczovL3d3dy5nb3YudWsvZ292ZXJubWVudC9v"
+                    "cmdhbmlzYXRpb25zL2htLXJldmVudWUtY3VzdG9tcz4gLgo8aHR0cDovL2dzcy1kYXRhLm9yZy5"
+                    "1ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bG"
+                    "xldGluLXByb2R1Y3Rpb24tY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZ"
+                    "GVmL2dkcCNmYW1pbHk+IDxodHRwOi8vZ3NzLWRhdGEub3JnLnVrL2RlZi9nZHAjdHJhZGU+IC4K"
+                    "PGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob2w"
+                    "tYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1wcm9kdWN0aW9uLWNhdGFsb2ctZW50cnk+IDxodH"
+                    "RwOi8vZXhhbXBsZS5uZXQvZGVmL2NvbXBvbmVudHM+IDxodHRwOi8vcHVybC5vcmcvbGlua2VkL"
+                    "WRhdGEvY3ViZSNtZWFzdXJlVHlwZT4gLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51ay9kYXRhL2dz"
+                    "c19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXRpbi9hbGNvaG9sLWJ1bGxldGluLXByb2R"
+                    "1Y3Rpb24tY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9leGFtcGxlLm5ldC9kZWYvY29tcG9uZW50cz"
+                    "4gPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29ob"
+                    "2wtYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1wcm9kdWN0aW9uI2RpbWVuc2lvbi9wZXJpb2Q+"
+                    "IC4KPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGF0YS9nc3NfZGF0YS90cmFkZS9obXJjLWFsY29"
+                    "ob2wtYnVsbGV0aW4vYWxjb2hvbC1idWxsZXRpbi1wcm9kdWN0aW9uLWNhdGFsb2ctZW50cnk+ID"
+                    "xodHRwOi8vZXhhbXBsZS5uZXQvZGVmL2NvbXBvbmVudHM+IDxodHRwOi8vZ3NzLWRhdGEub3JnL"
+                    "nVrL2RlZi90cmFkZS9wcm9wZXJ0eS9kaW1lbnNpb24vYnVsbGV0aW4tdHlwZT4gLgo8aHR0cDov"
+                    "L2dzcy1kYXRhLm9yZy51ay9kYXRhL2dzc19kYXRhL3RyYWRlL2htcmMtYWxjb2hvbC1idWxsZXR"
+                    "pbi9hbGNvaG9sLWJ1bGxldGluLXByb2R1Y3Rpb24tY2F0YWxvZy1lbnRyeT4gPGh0dHA6Ly9leG"
+                    "FtcGxlLm5ldC9kZWYvY29tcG9uZW50cz4gPGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZGVmL3RyY"
+                    "WRlL3Byb3BlcnR5L2RpbWVuc2lvbi9hbGNvaG9sLXR5cGU+IC4K"],
+                   :cached nil,
+                   :chunked? true,
+                   :headers #vcr-clj/clj-http-header-map
+                   {"Alt-Svc" "clear",
+                    "Connection" "close",
+                    "Content-Type" "application/n-triples",
+                    "Date" "Tue, 27 Apr 2021 09:34:43 GMT",
+                    "Server" "nginx",
+                    "Strict-Transport-Security" "max-age=15768000",
+                    "Transfer-Encoding" "chunked",
+                    "Vary" "Accept-Encoding",
+                    "Via" "1.1 google"},
+                   :http-client "-- clj-http cannot serialize instances of org.apache.http.client.HttpClient --",
+                   :length -1,
+                   :protocol-version {:major 1, :minor 1, :name "HTTP"},
+                   :reason-phrase "OK",
+                   :repeatable? false,
+                   :status 200,
+                   :streaming? true,
+                   :trace-redirects []},
+          :var-name "clj-http.core/request"}],
+ :recorded-at #inst "2021-04-27T09:34:42.849-00:00"}

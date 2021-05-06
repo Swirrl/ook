@@ -1,5 +1,6 @@
 (ns ook.test.util.query-helpers
-  (:require ["@testing-library/react" :as rt]))
+  (:require ["@testing-library/react" :as rt]
+            [ook.ui.icons :as icons]))
 
 (defn find-query
   ([selector]
@@ -40,3 +41,67 @@
   ([container selector]
    (->> (find-all-query container selector)
         (map text-content))))
+
+(defn disabled? [el]
+  (.-disabled el))
+
+;;;;;;; OOK-specific UI helpers
+
+(defn find-expansion-toggle [label]
+  (let [toggle (some-> (query-text label) .-parentNode (find-query "button"))]
+    (if toggle toggle (throw (js/Error. (str "Could not find toggle for option: " label))))))
+
+(defn find-toggle-icon-path [expand-toggle]
+  (-> expand-toggle (find-query "svg path") (.getAttribute "d")))
+
+(defn open? [expand-toggle]
+  (= icons/down-path (find-toggle-icon-path expand-toggle)))
+
+(defn closed? [expand-toggle]
+  (= icons/up-path (find-toggle-icon-path expand-toggle)))
+
+(def code-label-query ".filters input[type='checkbox'] + label")
+
+(defn all-labels []
+  (all-text-content code-label-query))
+
+(defn all-selected-labels []
+  (all-text-content ".filters input[type='checkbox']:checked + label"))
+
+(defn expanded-labels-under-label [label]
+  (-> label query-text .-parentNode (all-text-content code-label-query)))
+
+(defn select-any-button [label]
+  (-> label query-text .-parentNode (find-text "any")))
+
+(defn multi-select-button [label]
+  (some-> label query-text .-parentNode (find-query "button ~ button")))
+
+(defn cancel-facet-selection-button []
+  (find-query ".filters button.btn-close"))
+
+(defn editable-facet-button [facet-name]
+  (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
+
+;;; Dataset table
+
+(defn apply-filter-button []
+  (query-text "Apply filter"))
+
+(defn all-dataset-titles []
+  (-> (find-query ".ook-datasets") (all-text-content ".title-column strong")))
+
+(defn column-x-contents [column-index-starting-from-1]
+  (all-text-content (str ".ook-datasets tr td:nth-child(" column-index-starting-from-1 ")")))
+
+(defn dataset-count-text []
+  (some-> (find-query ".filters") .-nextElementSibling text-content))
+
+(defn datset-results-columns []
+  (all-text-content ".ook-datasets th"))
+
+(defn all-available-facets []
+  (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
+
+(defn remove-facet-button [facet-name]
+  (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))

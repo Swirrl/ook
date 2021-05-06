@@ -12,7 +12,7 @@
     "measure": "http://gss-data.org.uk/def/measure/",
     "skos": "http://www.w3.org/2004/02/skos/core#",
     "label": {"@id": "rdfs:label" },
-    "codelist": {"@id": "qb:codeList", "@type": "@id" },
+    "codelist": {"@id": "qb:codeList" },
     "subPropertyOf": {"@id": "rdfs:subPropertyOf", "@type": "@id"}
   },
   "label": {},

@@ -1,0 +1,50 @@
+.ook-datasets {
+  overflow-x: auto;
+}
+
+.ook-datasets .vertical-truncate {
+  max-height: 100px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.title-column {
+  min-width: 35rem;
+  max-width: 35rem;
+}
+
+.btn-xs {
+  font-size: .65rem;
+  line-height: .5;
+  border-radius: .2rem;
+}
+
+.expand-code-button svg {
+  vertical-align: top;
+}
+
+.expand-code-button:focus,
+.expand-code-button ~ button:focus {
+  box-shadow: none;
+}
+
+button svg {
+  fill: black;
+  stroke: black;
+  opacity: 0.5;
+}
+
+button.btn-dark svg {
+  fill: white;
+  stroke: white;
+  opacity: 1;
+}
+
+button.applied-facet:hover svg {
+  fill: white;
+  stroke: white;
+  opacity: 1;
+}

@@ -32,3 +32,9 @@
 
 (defn press-enter [target]
   (send-keys target "{enter}"))
+
+(defn click-text [text]
+  (let [el (qh/query-text text)]
+    (if el
+      (click el)
+      (throw (js/Error. (str "Could not find element with text: " text))))))

@@ -13,19 +13,18 @@
 
 
         drafter-client/drafter-client {:git/url "git@github.com:Swirrl/drafter.git"
-                                       :sha "250df5d226f5f8f299038f86e095935e9024b3a3"
+                                       :sha "7c9302bf7dface04feea226b0175c73937ec18cf"
                                        :deps/root "drafter-client"}
-        com.auth0/jwks-rsa {:mvn/version "0.8.1"}
 
         ;; ETL
         clj-http/clj-http {:mvn/version "3.10.0"}
-        com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
         com.github.jsonld-java/jsonld-java {:mvn/version "0.13.2"}
 
         org.clojure/tools.logging {:mvn/version "1.1.0"}
         org.apache.logging.log4j/log4j-api {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-core {:mvn/version "2.11.1"} ; Import log4j2 as the logging backend
         org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.11.1"} ; Redirect all SLF4J logs over the log4j2 backend
+        org.apache.logging.log4j/log4j-web {:mvn/version "2.11.1"} ; Ensure servlet logs are closed
 
         clojurewerkz/elastisch {:mvn/version "5.0.0-beta1"}
         org.clojure/data.json {:mvn/version "1.0.0"}
@@ -50,14 +49,16 @@
                  :extra-deps {integrant/repl {:mvn/version "0.3.1"}
                               vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
                               ring/ring-mock {:mvn/version "0.4.0"}
+                              com.gfredericks/vcr-clj {:mvn/version "0.4.19"}
 
                               ;;;;;;;;;;;;;
                               ;; CLJS DEPS
                               ;;;;;;;;;;;;;
 
                               binaryage/devtools {:mvn/version "1.0.2"}
-                              devcards/devcards {:mvn/version "0.2.7"}
-                              day8.re-frame/re-frame-10x {:mvn/version "1.0.1"}
+                              day8.re-frame/re-frame-10x {:mvn/version "1.0.2"}
+                              day8.re-frame/test {:mvn/version "0.1.5"}
+                              day8.re-frame/tracing {:mvn/version "0.6.2"}
 
                               ;; shadow-cljs is two parts. the JS parts that do the CLI stuff (in package.json)
                               ;; and the JVM parts that do the actual compilation (here in deps.edn).
@@ -74,10 +75,17 @@
            :ook.etl/fixtures
            {:exec-fn ook.concerns.integrant/exec-config
             :exec-args {:profiles ["drafter-client.edn"
-                                   "cogs-staging.edn"
+                                   "idp-beta.edn"
                                    "elasticsearch-development.edn"
                                    "load-data.edn"
-                                   "fixture-data.edn"]}}
+                                   "project/fixture/data.edn"]}}
+           :ook.etl/trade
+           {:exec-fn ook.concerns.integrant/exec-config
+            :exec-args {:profiles ["drafter-client.edn"
+                                   "idp-beta.edn"
+                                   "elasticsearch-development.edn"
+                                   "load-data.edn"
+                                   "project/trade/data.edn"]}}
 
            :prod {:extra-paths ["env/prod/resources"
                                 "target/prod/cljs"]}

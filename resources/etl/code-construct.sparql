@@ -2,6 +2,7 @@ PREFIX qb: <http://purl.org/linked-data/cube#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ui: <http://www.w3.org/ns/ui#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 
 CONSTRUCT {
     ?code
@@ -10,26 +11,31 @@ CONSTRUCT {
         skos:inScheme ?scheme;
         skos:notation ?notation;
         skos:broader ?broader;
+	skos:narrower ?narrower;
+	skos:topConceptOf ?toppedScheme;
         ui:sortPriority ?sort_priority;
     .
 } WHERE {
+
+  # these patterns ought to match one code at a time
+  {
     ?code
-        a skos:Concept;
-        rdfs:label ?label_;
-        skos:inScheme ?scheme;
-        .
+      # a skos:Concept;
+      rdfs:label ?label_;
 
     BIND(STR(?label_) AS ?label) # strip language tag
 
-    OPTIONAL {
-        ?code skos:notation ?notation;
-    }
+    OPTIONAL {?code skos:notation ?notation;}
 
-    OPTIONAL {
-        ?code ui:sortPriority ?sort_priority;
-    }
+    OPTIONAL {?code ui:sortPriority ?sort_priority;}
 
-    OPTIONAL {
-        ?code skos:broader ?broader;
-    }
+    OPTIONAL {?code skos:broader ?broader;}
+
+    OPTIONAL {?code skos:narrower ?narrower;}
+  }
+
+  # code can be in multiple schemes so this is specified separately
+  ?code skos:inScheme ?scheme .
+
+  OPTIONAL {?toppedScheme skos:hasTopConcept ?code}
 }

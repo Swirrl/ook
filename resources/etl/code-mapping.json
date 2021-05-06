@@ -1,12 +1,16 @@
 {
-    "mappings": {
-        "properties": {
-            "@type": { "type": "keyword" },
-            "label": { "type": "text" },
-            "scheme": { "type": "keyword" },
-            "notation": { "type": "keyword" },
-            "broader": { "type": "keyword" },
-            "priority": { "type": "integer" }
-        }
+  "mappings": {
+    "properties": {
+      "@id": { "type": "keyword" },
+      "@type": { "type": "keyword" },
+      "label": { "type": "text" },
+      "scheme": { "type": "keyword" },
+      "notation": { "type": "keyword" },
+      "broader": { "type": "keyword" },
+      "narrower": { "type": "keyword" },
+      "topConceptOf": { "type": "keyword" },
+      "priority": { "type": "integer" },
+      "used": { "type": "boolean" }
     }
+  }
 }

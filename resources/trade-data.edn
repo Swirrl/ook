@@ -1,5 +1,0 @@
-{:ook.etl/target-datasets
- {:sparql "PREFIX dcat: <http://www.w3.org/ns/dcat#>
-           PREFIX gdp: <http://gss-data.org.uk/def/gdp#>
-           SELECT ?dataset WHERE { ?dataset dcat:theme gdp:trade . }"
-  :client #ig/ref :drafter-client/client}}

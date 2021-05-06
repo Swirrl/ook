@@ -1,20 +1,14 @@
 (ns ook.reframe.views
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.views.search :as search]
-   [ook.reframe.views.filters :as filters]
-   [ook.reframe.views.datasets :as datasets]))
+   [ook.reframe.error-boundary :as err]
+   [ook.reframe.facets.view :as facets]
+   [ook.reframe.datasets.view :as datasets]))
 
-(defn home []
-  [:<>
-   (search/create-filter-card)
-   (datasets/results)])
-
-(defn results []
-  [:<>
-   (search/create-filter-card
-     (filters/filters))
-   (datasets/results)])
+(defn search []
+  [err/error-boundary
+   [facets/configured-facets]
+   [datasets/results]])
 
 (defn main []
   (let [current-route @(rf/subscribe [:app/current-route])]

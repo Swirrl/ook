@@ -1,0 +1,20 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX ui: <http://www.w3.org/ns/ui#>
+PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
+
+CONSTRUCT {
+    ?code
+        a skos:Concept;
+	<http://example.net/def/used> ?used;
+    .
+} WHERE {
+
+  # check for use across any dimension and scheme
+  BIND (EXISTS {
+    ?code skos:inScheme ?scheme .
+    ?dimension qb:codeList ?scheme .
+    [] ?dimension ?code .
+  } AS ?used)
+}

@@ -11,9 +11,46 @@
    [clojure.tools.logging :as log]
    [clojure.string :as s]
    [integrant.core :as ig])
-  (:import (java.io ByteArrayOutputStream)
+  (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
+
+;; Pipeline debugging
+
+(defn write-to-disk
+  "Pipeline function to print sequence values to disk (returning sequence for further processing)"
+  ([s]
+   (write-to-disk s (File/createTempFile "ook-etl-" ".tmp" (new File "/tmp"))))
+  ([s file]
+   (log/info "Writing to:" (.getAbsolutePath file))
+   (with-open [w (io/writer file)]
+     (if (seq? s)
+       (doseq [x s]
+         (.write w (prn-str x)))
+       (.write w (prn-str s))))
+   s))
+
+(defn wait
+  "Sleep to avoid overloading stardog with consecutive queries"
+  [& _]
+  (log/info "Sleeping for 15s")
+  (Thread/sleep 15000)
+  (log/info "Waking"))
+
+
+;; Error recovery
+
+(defmacro with-retry
+  "If an exception is raised by the expression, it is retried once after waiting 30s"
+  [expr]
+  `(try
+    (doall ~expr)
+    (catch Exception e#
+      (log/warn "Caught Exception: " (.toString e#))
+      (wait)
+      (log/info "Retrying")
+      (doall ~expr))))
+
 
 ;; Query utilities
 
@@ -23,7 +60,7 @@
   ([client query & opts]
    (let [args (concat [client query] opts);
          response (apply dci/post-query-live args)]
-     (:body (doall response)))))
+     (:body response))))
 
 (defn insert-values-clause
   "Adds a VALUES clause to a sparql query string with the URIs provided"
@@ -93,7 +130,7 @@
 (defn ->jsonld [statements]
   (with-open [output (ByteArrayOutputStream.)]
     (let [wtr (gio/rdf-writer (io/output-stream output) :format :jsonld)]
-      (gpr/add wtr statements))
+      (doall (gpr/add wtr statements)))
     (JsonUtils/fromString (str output))))
 
 (defn compact [context input]
@@ -120,21 +157,36 @@
 (defn- first-error [result]
   (->> result
        :items
-       (map (comp :error :index))
+       (map (comp :error first vals))
        (remove nil?)
        first))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint :ook.etl/load-page-size] :as system} index jsonld]
+(defn bulk-upsert
+  "Generates operations for a bulk-upsert (esb/bulk-update doesn't quite work)"
+  [docs]
+  (let [ops (map (fn [doc] {"update" {"_id" (get doc "@id")}}) docs)
+        docs (map (fn [doc] {"doc" (dissoc doc :_id), "doc_as_upsert" true}) docs)]
+    (interleave ops docs)))
+
+(defn load-documents [{:keys [:ook.concerns.elastic/endpoint
+                              :ook.etl/load-page-size
+                              :ook.etl/load-synchronously] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
   (let [conn (es/connect endpoint {:content-type :json})
         docs (map add-id (get jsonld "@graph"))
-        batches (partition-all (or load-page-size 10000) docs)]
+        batches (partition-all (or load-page-size 10000) docs)
+        params (if load-synchronously {:refresh "wait_for"} {})]
     (doall
      (for [batch batches]
-       (let [result (esb/bulk-with-index conn index (esb/bulk-index batch))]
+       (let [result (esb/bulk-with-index conn index (bulk-upsert batch) params)]
          (if (:errors result)
            (throw (ex-info "Error loading documents" (first-error result))))
          result)))))
+
+(derive :ook.etl/load-synchronously :ook/const)
+
+
+
 
 
 ;; Pipeline
@@ -145,9 +197,10 @@
     (doseq [[var-name & uris] (subject-pages system page-query)]
       (log/info "Processing page")
       (if uris
-        (->> (extract system construct-query var-name uris)
-             (transform jsonld-frame)
-             (load-documents system index))
+        (with-retry
+          (->> (extract system construct-query var-name uris)
+               (transform jsonld-frame)
+               (load-documents system index)))
         (log/warn (str "No compatible (" index ") subjects found!"))))
     (log/info (str "Pipeline Complete: " index))))
 
@@ -172,6 +225,13 @@
    (slurp (io/resource "etl/code-frame.json"))
    "code"))
 
+(def code-used-pipeline
+  (pipeline-fn
+   (slurp (io/resource "etl/code-select.sparql"))
+   (slurp (io/resource "etl/code-used-construct.sparql"))
+   (slurp (io/resource "etl/code-used-frame.json"))
+   "code"))
+
 (def observation-pipeline
   (pipeline-fn
    (slurp (io/resource "etl/observation-select.sparql"))
@@ -184,6 +244,8 @@
   (dataset-pipeline system)
   (component-pipeline system)
   (code-pipeline system)
+  (let [system (assoc system :ook.etl/select-page-size 500)]
+    (code-used-pipeline system))
   (observation-pipeline system)
   (log/info "All pipelines complete"))
 
@@ -200,10 +262,44 @@
   (def result
     (ook.concerns.integrant/exec-config
      {:profiles ["drafter-client.edn"
-                 "cogs-staging.edn"
+                 "idp-beta.edn"
                  "elasticsearch-development.edn"
                  "load-data.edn"
-                 "trade-data.edn"
+                 "project/trade/data.edn"
                  ]}))
 
-  )
+  ;; update single index
+  (require 'ook.index)
+  (dev/with-system [system
+                    ["drafter-client.edn"
+                     "idp-beta.edn"
+                     "elasticsearch-development.edn"
+                     "project/trade/data.edn"]]
+    (let [system (assoc system :ook.etl/select-page-size 50000)]
+      (ook.index/delete-index system "code")
+      (ook.index/create-index system "code")
+      (code-pipeline system))
+    (let [system (assoc system :ook.etl/select-page-size 300)]
+      (code-used-pipeline system)))
+
+
+  ;; recreate mid-pipeline error
+  (dev/with-system [system
+                    ["drafter-client.edn"
+                     "idp-beta.edn"
+                     "elasticsearch-development.edn"
+                     "project/trade/data.edn"]]
+    (let [subject-query (slurp (io/resource "etl/observation-select.sparql"))
+          target-datasets (:ook.etl/target-datasets system)
+          client (:drafter-client/client system)
+          subject-query (insert-values-clause subject-query "dataset" target-datasets)
+          [var-name & uris] (first (select-paged client subject-query 50000 6250000))
+          construct-query (slurp (io/resource "etl/observation-construct.sparql"))
+          jsonld-frame (slurp (io/resource "etl/observation-frame.json"))
+          index "observation"]
+      (if uris
+        (->> (extract system construct-query var-name uris)
+             (transform jsonld-frame)
+             ;;(load-documents system index)
+             )
+        (log/warn (str "No compatible (" index ") subjects found!"))))))

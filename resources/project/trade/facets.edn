@@ -1,0 +1,29 @@
+{:ook.search/facets
+ [{:name "Product"
+   :sort-priority 1
+   :parent-dimension "def/trade/property/dimension/product"}
+  {:name "Industry" ;; should this be further down the list?
+   :sort-priority 2
+   :parent-dimension "def/trade/property/dimension/industry"}
+  ;; {:name "Reporter Geography" ;; should this be joined with def/trade/property/dimension/geography or sdmxd:refArea
+  ;;  :parent-dimension "def/trade/property/dimension/reporter-geography"}
+  ;; {:name "Partner Geography"
+  ;;  :parent-dimension "def/trade/property/dimension/partner-geography"}
+  {:name "Geography"
+   :sort-priority 3
+   :parent-dimension "sdmxd:refArea"}
+  {:name "Flow"
+   :sort-priority 4
+   :parent-dimension "def/trade/property/dimension/flow-directions"}
+  {:name "Date"
+   :sort-priority 5
+   :parent-dimension "sdmxd:refPeriod"}
+  {:name "Measure"
+   :sort-priority 6
+   :parent-dimension "qb:measureType"}
+  {:name "Basis"
+   :sort-priority 7
+   :parent-dimension "def/trade/property/dimension/international-trade-basis"}
+  {:name "Seasonality"
+   :sort-priority 8
+   :parent-dimension "def/trade/property/dimension/seasonal-adjustments"}]}
