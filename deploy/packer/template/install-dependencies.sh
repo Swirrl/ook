@@ -15,4 +15,4 @@ echo '>>> setting ownership'
 sudo chown -R ook /opt/ook/
 
 echo ">>> installing server"
-sudo -E java -jar $OMNI_JAR install $OOK_PACKAGE_NAME -c $BOOTSTRAP_DIR/config/config.edn --environment prod --transitive
+sudo -E java -jar $OMNI_JAR install $OOK_PACKAGE_NAME -c $OMNI_PACKAGE_CONFIG --environment prod --transitive

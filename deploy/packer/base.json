@@ -24,7 +24,7 @@
     {
       "type": "shell",
       "inline": [
-	"/usr/bin/cloud-init status --wait"
+        "/usr/bin/cloud-init status --wait"
       ]
     },
     {

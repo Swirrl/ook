@@ -4,7 +4,7 @@
 
   vars:
     omni_jar: "/opt/omni/omni.jar"
-    ook_package_config: "/etc/opt/ook/config.edn"
+    ook_package_config: "/etc/opt/omni/ook.edn"
     ook_package_name: ook
 
   tasks:
@@ -16,6 +16,13 @@
         OOK_PACKAGE_VERSION: "{{ ook_package_version }}"
         AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
         AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+      register: shell_result
+    - debug:
+        var: shell_result.stdout_lines
+    - name: Restart OOK service
+      become: yes
+      become_method: sudo
+      shell: systemctl restart ook
       register: shell_result
     - debug:
         var: shell_result.stdout_lines
