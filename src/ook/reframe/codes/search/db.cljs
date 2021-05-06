@@ -1,6 +1,8 @@
 (ns ook.reframe.codes.search.db
   (:require
-    [ook.reframe.codes.db.disclosure :as disclosure]))
+   [ook.reframe.codes.db.disclosure :as disclosure]
+   [clojure.set :as set]
+   [clojure.walk :as walk]))
 
 (defn code-result->selection [result]
   (->> result
@@ -14,3 +16,29 @@
     (-> {:name facet-name}
         (assoc :selection selection)
         (update :expanded disclosure/expand-all-selected-codes db selection facet-name))))
+
+(defn get-results [db]
+  (some-> db :ui.facets/current :codes/search :results))
+
+(defn- results->visible-uris [results]
+  (->> results
+       (map #(select-keys % [:ook/uri :scheme]))
+       (mapcat vals)
+       set))
+
+(defn- filter-visible-uris [result-uris codelist]
+  (let [open-codes (disclosure/find-open-codes result-uris (:children codelist))
+        visible-uris (set (concat result-uris open-codes))
+        walk  (fn walk* [node]
+                (let [children (:children node)]
+                  (when-not (keyword? children)
+                    (when (visible-uris (:ook/uri node))
+                      (assoc node :children (->> children (map walk*) (remove nil?)))))))]
+    (walk codelist)))
+
+(defn filter-to-search-results [codelists search-results]
+  (let [result-uris (results->visible-uris search-results)]
+    (->> codelists
+         (map (partial filter-visible-uris result-uris))
+         (remove nil?)
+         (sort-by :ook/uri))))

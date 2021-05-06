@@ -18,29 +18,14 @@
      :rules [{:when :seen? :events :http.codes.search/success
               :dispatch-fn (fn [[_  _ results]]
                              [[:ui.codes.search/set-facet-ui results]
-                              [:ui.codes.search/get-missing-code-trees results]])}
-             ;; {:when :seen? :events :http.codes.search/success
-             ;;  :dispatch-fn (fn [[_ _ results]]
-             ;;                 [[:ui.codes.search/get-missing-code-trees results]])}
-             ]}}))
+                              [:ui.codes.search/get-missing-code-trees results]])}]}}))
 
 (rf/reg-event-db
  :ui.event/reset-search
  (fn [db _]
-   (update-in db [:ui.facets/current] dissoc :codes/search)))
+   (update-in db [:ui.facets/current] dissoc :codes/search :expanded)))
 
 ;;; UI MANAGEMENT
-
-;; (rf/reg-event-db
-;;  :ui.codes.search/set-loading
-;;  [e/validation-interceptor]
-;;  (fn [db _]
-;;    (let [status (get-in db [:ui.facets/current :codes/search :status])]
-;;      (js/console.log "STATUS::: " status)
-;;      (if (#{:ready :error nil} status)
-;;        db
-;;        (assoc-in db [:ui.facets/current :codes/search :status] :loading)))))
-
 
 (rf/reg-event-db
  :ui.codes.search/set-facet-ui

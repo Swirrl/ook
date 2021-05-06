@@ -4,7 +4,8 @@
    [clojure.set :as set]
    [ook.reframe.facets.db :as facets]
    [ook.reframe.codes.db.selection :as selection]
-   [ook.reframe.codes.db.disclosure :as disclosure]))
+   [ook.reframe.codes.db.disclosure :as disclosure]
+   [ook.reframe.codes.search.db :as search]))
 
 ;;;;;; INITIAL, PERMANENT STATE
 
@@ -75,7 +76,7 @@
 (rf/reg-sub
  :ui.facets.current/search-results
  (fn [db _]
-   (some-> db :ui.facets/current :codes/search :results)))
+   (search/get-results db)))
 
 ;;;;;; FACETS
 
@@ -85,12 +86,16 @@
    (:facets/applied db)))
 
 (rf/reg-sub
- :facets.config/codelists
+ :ui.facets/visible-codes
  (fn [db [_ name]]
-   (let [codelists (facets/get-codelists db name)]
-     (if (= :no-codelists codelists)
-       codelists
-       (sort-by :ook/uri codelists)))))
+   (let [all-codelists (facets/get-codelists db name)
+         search-results (search/get-results db)]
+     (cond
+       (= :no-codelists all-codelists) all-codelists
+
+       (seq search-results) (search/filter-to-search-results all-codelists search-results)
+
+       :else (sort-by :ook/uri all-codelists)))))
 
 ;;;;;; DATASETS
 

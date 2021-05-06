@@ -10,24 +10,32 @@
 
 (def initial-state
   {:facets {"Facet 1" {:name "Facet 1" :sort-priority 1 :dimensions ["dim1" "dim2"]}
-            "Facet 2" {:name "Facet 2" :sort-priority 2 :dimensions ["dim3"]}}
+            "Facet 2" {:name "Facet 2" :sort-priority 2 :dimensions ["dim3"]}
+            "Facet 3" {:name "Facet 3" :sort-priority 3 :dimensions ["dim4"]}}
    :dataset-count 20})
 
 (def codelists
   {"Facet 1" [{:ook/uri "cl1" :label "Codelist 1 Label"}
               {:ook/uri "another-codelist" :label "Another codelist"}]
    "Facet 2" [{:ook/uri "cl2" :label "Codelist 2 Label"}
-              {:ook/uri "cl3" :label "Codelist 3 Label"}]})
+              {:ook/uri "cl3" :label "Codelist 3 Label"}]
+   "Facet 3" [{:ook/uri "cl5" :label "with nested codes"}]})
 
 (def concept-trees
   {"cl3" [{:scheme "cl3" :ook/uri "cl3-code1" :label "3-1 child 1" :used true}]
    "cl2" [{:scheme "cl2" :ook/uri "cl2-code1" :label "2-1 child 1" :used true :children nil}
           {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2" :used true
            :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
-                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]})
+                      {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]
+   "cl5" [{:scheme "cl4" :ook/uri "cl4-code1" :label "4-1 child 1" :used true}
+                  {:scheme "cl5" :ook/uri "cl5-code1" :label "5-1 child 1" :used true
+                   :children [{:scheme "cl5" :ook/uri "cl5-code3" :label "5-2 child 1" :used true}
+                              {:scheme "cl5" :ook/uri "cl5-code4" :label "5-2 child 2" :used true
+                               :children [{:scheme "cl5" :ook/uri "cl5-code5" :label "5-3 child 1" :used true}]}]}]})
 
 (def search-results
-  {"2-2 child 1" [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1"}]})
+  {"2-2 child 1" [{:scheme "cl2" :ook/uri "cl2-code3"}]
+   "5-3 child 1" [{:scheme "cl5" :ook/uri "cl5-code5"}]})
 
 (defn- search-for [label]
   (eh/set-input-val (qh/code-search-input) label)
@@ -72,21 +80,36 @@
        (is (not (nil? (qh/query-text "select all matches"))))
        (is (not (nil? (qh/query-text "reset search")))))
 
-     ;; (testing "expands the right levels of the tree"
-     ;;   (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
-     ;;   (is (qh/closed? (qh/find-expansion-toggle "2-1 child 2")))
-     ;;   (is (qh/closed? (qh/find-expansion-toggle "Codelist 3 Label"))))
-
      (testing "fetches code trees that were not already cached"
        (is (= "cl2" @setup/concept-tree-request)))
 
      (testing "shows only matching codes with all parents expanded"
-       (is (= ["Codelist 2 Label" "2-1 child 1"] (qh/all-labels)))
+       (is (= ["Codelist 2 Label" "2-1 child 2" "2-2 child 1"] (qh/all-labels)))
 
-       ;; search for a deeper nested code
-       )
+       (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
+       (is (qh/open? (qh/find-expansion-toggle "2-1 child 2")))
 
-     (testing "can be reset to show all the codelists again"))
+       (eh/click-text "Facet 3")
+       (is (= ["with nested codes"] (qh/all-labels)))
+       (search-for "5-3 child 1")
+       (is (= ["with nested codes" "5-1 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-labels))))
+
+     (testing "can be reset to show all the codelists again"
+       (eh/click-text "reset search")
+       (is (= ["with nested codes"] (qh/all-labels)))
+       (is (qh/closed? (qh/find-expansion-toggle "with nested codes"))))))
+
+  (setup/cleanup!))
+
+(deftest code-search-results-selection-and-disclosur
+  (rft/run-test-sync
+   (setup/stub-side-effects {:codelists codelists
+                             :concept-trees concept-trees
+                             :search-results search-results})
+
+   (setup/init! facets/configured-facets initial-state)
+
+   (eh/click-text "Facet 2")
 
    (testing "select all matches"
      ;; select something
@@ -112,6 +135,6 @@
        ;; search
        ;; clear the search
        ;; expansion should be reset (all closed)
-       )))
+       ))
 
-  (setup/cleanup!))
+   (setup/cleanup!)))

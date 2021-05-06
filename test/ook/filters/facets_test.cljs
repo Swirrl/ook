@@ -32,11 +32,11 @@
            :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]
    "no-codes" []
-   "deep-nested" [{:scheme "cl4" :ook/uri "cl4-code1" :label "4-1 child 1" :used true}
-                  {:scheme "cl5" :ook/uri "cl5-code1" :label "5-1 child 1" :used true
-                   :children [{:scheme "cl5" :ook/uri "cl5-code3" :label "5-2 child 1" :used true}
-                              {:scheme "cl5" :ook/uri "cl5-code4" :label "5-2 child 2" :used true
-                               :children [{:scheme "cl5" :ook/uri "cl5-code5" :label "5-3 child 1" :used true}]}]}]})
+   "deep-nested" [{:scheme "deep-nested" :ook/uri "cl4-code1" :label "4-1 child 1" :used true}
+                  {:scheme "deep-nested" :ook/uri "cl5-code1" :label "5-1 child 1" :used true
+                   :children [{:scheme "deep-nested" :ook/uri "cl5-code3" :label "5-2 child 1" :used true}
+                              {:scheme "deep-nested" :ook/uri "cl5-code4" :label "5-2 child 2" :used true
+                               :children [{:scheme "deep-nested" :ook/uri "cl5-code5" :label "5-3 child 1" :used true}]}]}]})
 
 (deftest selecting-facets
   (rft/run-test-sync

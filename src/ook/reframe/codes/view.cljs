@@ -135,7 +135,7 @@
   (when name
     ;; TODO:: filter down these codelists in the sub?
     ;; or do it in the view? check each iteration if it's included in the selection
-    (let [codelists @(rf/subscribe [:facets.config/codelists name])
+    (let [codelists @(rf/subscribe [:ui.facets/visible-codes name])
           search-results @(rf/subscribe [:ui.facets.current/search-results name])]
       (if (= :no-codelists codelists)
         [:p.h6.mt-4 "No codelists for facet"]
