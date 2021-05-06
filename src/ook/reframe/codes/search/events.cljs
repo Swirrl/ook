@@ -21,7 +21,7 @@
                               [:ui.codes.search/get-missing-code-trees results]])}]}}))
 
 (rf/reg-event-db
- :ui.event/reset-search
+ :ui.event/clear-search
  (fn [db _]
    (update-in db [:ui.facets/current] dissoc :codes/search :expanded)))
 

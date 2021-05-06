@@ -1,6 +1,7 @@
 (ns ook.reframe.codes.search.db
   (:require
-   [ook.reframe.codes.db.disclosure :as disclosure]))
+   [ook.reframe.codes.db.disclosure :as disclosure]
+   [ook.reframe.facets.db :as facets]))
 
 (defn code-result->selection [result]
   (->> result
@@ -41,3 +42,6 @@
          (map (partial filter-visible-uris result-uris))
          (remove nil?)
          (sort-by :ook/uri))))
+
+(defn matching-codelists [db facet-name search-term]
+  (->> (facets/get-codelists db facet-name)))

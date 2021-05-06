@@ -29,5 +29,5 @@
       {:on-click #(js/console.log "select all matches")}
       "select all matches"])
    [common/text-button
-    {:on-click #(rf/dispatch [:ui.event/reset-search])}
-    "reset search"]])
+    {:on-click #(rf/dispatch [:ui.event/clear-search])}
+    "clear search"]])
