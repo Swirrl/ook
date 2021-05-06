@@ -1,8 +1,6 @@
 (ns ook.reframe.codes.search.db
   (:require
-   [ook.reframe.codes.db.disclosure :as disclosure]
-   [clojure.set :as set]
-   [clojure.walk :as walk]))
+   [ook.reframe.codes.db.disclosure :as disclosure]))
 
 (defn code-result->selection [result]
   (->> result
@@ -27,7 +25,8 @@
        set))
 
 (defn- filter-visible-uris [result-uris codelist]
-  (let [open-codes (disclosure/find-open-codes result-uris (:children codelist))
+  (let [code-tree (if (= :no-children (:children codelist)) [] (:children codelist))
+        open-codes (disclosure/find-open-codes result-uris code-tree)
         visible-uris (set (concat result-uris open-codes))
         walk  (fn walk* [node]
                 (let [children (:children node)]

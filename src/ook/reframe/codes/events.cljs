@@ -66,7 +66,9 @@
  (fn [_ [_ facet-ui codelist-uri]]
    {:async-flow
     {:first-dispatch [:codes/get-codes codelist-uri]
-     :rules [{:when :seen? :events :http.codes/success
+     :rules [{:when :seen? :events (fn [[event _facet finished-codelist-uri]]
+                                     (and (= event :http.codes/success)
+                                          (= codelist-uri finished-codelist-uri)))
               :dispatch [:ui.codes/expand-codelist-to-selection facet-ui codelist-uri]}]}}))
 
 (rf/reg-event-db

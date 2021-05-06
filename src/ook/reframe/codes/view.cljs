@@ -43,7 +43,7 @@
 
 (defn- checkbox-input [{:keys [ook/uri label used] :as option}]
   (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])
-        id (str (gensym uri))]
+        id (str (gensym (str uri "-react-id-")))]
     [:<>
      [:input.form-check-input.mx-2
       (cond-> {:type "checkbox"
