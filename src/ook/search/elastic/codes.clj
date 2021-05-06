@@ -98,7 +98,10 @@
               {:size search-limit
                :query
                {:bool
-                {:must [{:match {:label search-term}}
+                {:must [{:match {:label {:query search-term
+                                         ;; interpret "world total" as "world AND total" not "world OR total"
+                                         :operator "AND"
+                                         :fuzziness 1}}}
                         {:terms {:scheme codelists}}]}}}))
 
 (defn build-code-for-each-scheme [codelists {id :_id source :_source}]
