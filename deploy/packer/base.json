@@ -17,29 +17,15 @@
   ],
   "provisioners": [
     {
-      "type": "file",
-      "source": "../server",
-      "destination": "/tmp"
-    },
-    {
       "type": "shell",
       "inline": [
-	"/usr/bin/cloud-init status --wait"
+        "/usr/bin/cloud-init status --wait"
       ]
     },
     {
       "type": "shell",
       "scripts": [
         "./base/install-packages.sh"
-      ],
-      "environment_vars": [
-        "FILES_DIR=/tmp/server/files"
-      ]
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "rm -r /tmp/server"
       ]
     }
   ]

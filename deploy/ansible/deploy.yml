@@ -1,0 +1,30 @@
+- name: Install OOK from omni package
+  hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars:
+    omni_jar: "/opt/omni/omni.jar"
+    ook_package_config: "/etc/opt/omni/ook.edn"
+    ook_package_name: ook
+
+  tasks:
+    - name: Update jar
+      script: ./scripts/update.sh
+      environment:
+        OOK_PACKAGE_VERSION: "{{ ook_package_version }}"
+        AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+        AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+      register: shell_result
+    - debug:
+        var: shell_result.stdout_lines
+    - name: Restart service
+      shell: systemctl restart ook
+      register: shell_result
+    - debug:
+        var: shell_result.stdout_lines
+    - name: Wait for service to come up
+      wait_for:
+        host: 0.0.0.0
+        port: 3010
+        delay: 5
