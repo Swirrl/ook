@@ -1,5 +1,22 @@
 # Deploying OOK
 
+## tl;dr
+
+### To deploy a jar
+
+Check [the Book pipeline on Circle CI](https://app.circleci.com/pipelines/github/Swirrl/ook) for the omni package version number, e.g. `main-circle_297_f492fa` then do:
+
+    cd deploy
+    ./deploy_build.sh
+
+### New server from scratch
+
+    ./pack_base.sh
+    ./pack_image.sh # pass image name from last task e.g. ook-base-1620388107 and ook omni package version e.g. main-circle_297_f492fa
+    ./provision_image.sh # pass image name from last task e.g. ook-staging-1620389524
+
+Then add the server to the load-balancer group (and clear-up the old one).
+
 ## 0. Prerequisites
 
 ### Packer
@@ -109,11 +126,13 @@ packer build \
 
 Note the image name (used in the next step).
 
-## 2. Deploying a server with ansible
+## 2. Deploying with ansible
+
+### 2.1 Provisioning a server from scratch
 
 We use ansible to provision the server.
 
-There's a script to automate this in [deploy_image.sh](./deploy_image.sh).
+There's a script to automate this in [provision_image.sh](./provision_image.sh).
 You'll need to provide an image name (from the last step).
 You can keep the default server name (unique by datetime).
 
@@ -139,3 +158,9 @@ env ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook server.yml \
                 source_image=ook-staging-1614974526  \
                 server_name=ook-staging-1599210947"
 ```
+
+### 2.2 Deploying a build to an existing server
+
+We can also update ook on an already provisioned server using ansible.
+
+The [deploy_build.sh](./deploy_build.sh) script uses omni to install a given build (package version).
