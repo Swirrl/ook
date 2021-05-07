@@ -64,8 +64,11 @@
 
 (def selectable-code-label-query ".filters input[type='checkbox'] + label")
 
-(defn all-selectable-labels []
+(defn all-checkbox-labels []
   (all-text-content selectable-code-label-query))
+
+(defn all-labels []
+  (all-text-content (str ".filters .list-group-item > span, " selectable-code-label-query)))
 
 (defn all-selected-labels []
   (all-text-content ".filters input[type='checkbox']:checked + label"))

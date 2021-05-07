@@ -5,7 +5,8 @@
    [ook.reframe.codes.search.db :as search]
    [ook.reframe.events :as e]
    [ook.reframe.codes.db.disclosure :as disclosure]
-   [ook.reframe.facets.db :as facets]))
+   [ook.reframe.facets.db :as facets]
+   [meta-merge.core :as mm]))
 
 ;;; USER INITIATED EVENT HANDLERS
 
@@ -20,10 +21,20 @@
                              [[:ui.codes.search/set-facet-ui results]
                               [:ui.codes.search/get-missing-code-trees results]])}]}}))
 
+(rf/reg-event-fx
+ :ui.event/reset-search
+ (fn [{:keys [db]} _]
+   (let [facet-ui (:ui.facets/current db)
+         codelist-uris (disclosure/open-codelist-uris (:selection facet-ui))]
+     {:db (update-in db [:ui.facets/current] dissoc :codes/search :expanded)
+      :fx (for [codelist-uri codelist-uris]
+            [:dispatch [:ui.codes/expand-codelist-to-selection facet-ui codelist-uri]])})))
+
 (rf/reg-event-db
- :ui.event/clear-search
+ :ui.event/select-all-matches
  (fn [db _]
-   (update-in db [:ui.facets/current] dissoc :codes/search :expanded)))
+   (let [selectable-search-results (-> db search/selectable-results search/code-result->selection)]
+     (update-in db [:ui.facets/current :selection] mm/meta-merge selectable-search-results))))
 
 ;;; UI MANAGEMENT
 

@@ -1,4 +1,6 @@
-(ns ook.reframe.codes.db.selection)
+(ns ook.reframe.codes.db.selection
+  (:require
+    [meta-merge.core :as mm]))
 
 (defn- codelist? [option]
   (nil? (:scheme option)))
@@ -6,7 +8,8 @@
 (defn add-codelist [facet uri]
   (assoc-in facet [:selection uri] nil))
 
-(defn- add-codes [facet scheme code-uris]
+(defn- add-codes
+  [facet scheme code-uris]
   (update-in facet [:selection scheme] #(apply (fnil conj #{}) % code-uris)))
 
 (defn- add-to-selection [facet {:keys [ook/uri] :as option}]

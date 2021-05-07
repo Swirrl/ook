@@ -26,7 +26,8 @@
 (deftest build-code-for-each-scheme-test
   (testing "it spreads a single code result into one for each scheme it has,
             excluding schemes that are not in the dimension"
-    (is (= #{{:scheme "scheme-1" :ook/uri "code1"} {:scheme "scheme-2" :ook/uri "code1"}}
+    (is (= #{{:scheme "scheme-1" :used true :ook/uri "code1"}
+             {:scheme "scheme-2" :used true :ook/uri "code1"}}
            (set
             (sut/build-code-for-each-scheme
              #{"scheme-1" "scheme-2"}
@@ -34,7 +35,7 @@
               :_source {:label "label 1" :used "true" :scheme ["scheme-1" "scheme-2" "scheme-3"]}})))))
 
   (testing "it works with a single scheme"
-    (is (= [{:ook/uri "code1" :scheme "scheme-1"}]
+    (is (= [{:ook/uri "code1" :used true :scheme "scheme-1"}]
            (sut/build-code-for-each-scheme
             #{"scheme-1"}
             {:_id "code1"

@@ -41,3 +41,6 @@
          (map (partial filter-visible-uris result-uris))
          (remove nil?)
          (sort-by :ook/uri))))
+
+(defn selectable-results [db]
+  (->> db get-results (filter :used)))

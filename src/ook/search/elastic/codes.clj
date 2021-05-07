@@ -105,7 +105,8 @@
                         {:terms {:scheme codelists}}]}}}))
 
 (defn build-code-for-each-scheme [codelists {id :_id source :_source}]
-  (let [code {:ook/uri id}
+  (let [code {:ook/uri id
+              :used (-> source :used Boolean/parseBoolean)}
         schemes (-> source :scheme u/box set)]
     (->> schemes
          (filter codelists)
