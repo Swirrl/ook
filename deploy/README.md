@@ -1,5 +1,22 @@
 # Deploying OOK
 
+## tl;dr
+
+### To deploy a jar
+
+Check [the Book pipeline on Circle CI](https://app.circleci.com/pipelines/github/Swirrl/ook) for the omni package version number, e.g. `main-circle_297_f492fa` then do:
+
+    cd deploy
+    ./deploy_build.sh
+
+### New server from scratch
+
+    ./pack_base.sh
+    ./pack_image.sh # pass image name from last task e.g. ook-base-1620388107 and ook omni package version e.g. main-circle_297_f492fa
+    ./provision_image.sh # pass image name from last task e.g. ook-staging-1620389524
+
+Then add the server to the load-balancer group (and clear-up the old one).
+
 ## 0. Prerequisites
 
 ### Packer
