@@ -130,8 +130,9 @@
 
    (testing "searching when the only thing that matches is a codelist itself"
      (search-for "with shared codes 1")
-     (is (= ["with shared codes 1"] (qh/all-labels)))
-     (is (nil? (qh/find-expansion-toggle "with shared codes 1")))))
+
+     (testing "does not include the codelist in search results"
+       (is (= [] (qh/all-labels))))))
 
   (setup/cleanup!))
 
@@ -147,10 +148,10 @@
    (search-for "2-2 child 1")
 
    (testing "select all matches"
-     (testing "works"
-       (is (= [] (qh/all-selected-labels)))
-       (eh/click-text "select all matches")
-       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+     ;; (testing "works"
+     ;;   (is (= [] (qh/all-selected-labels)))
+     ;;   (eh/click-text "select all matches")
+     ;;   (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
      (testing "does not select unused codes")
 

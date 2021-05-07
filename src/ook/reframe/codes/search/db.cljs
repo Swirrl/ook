@@ -31,9 +31,8 @@
         visible-uris (set (concat result-uris open-codes))
         walk  (fn walk* [node]
                 (let [children (:children node)]
-                  (when-not (keyword? children)
-                    (when (visible-uris (:ook/uri node))
-                      (assoc node :children (->> children (map walk*) (remove nil?)))))))]
+                  (when (visible-uris (:ook/uri node))
+                    (assoc node :children (->> children (map walk*) (remove nil?) seq)))))]
     (walk codelist)))
 
 (defn filter-to-search-results [codelists search-results]
@@ -42,6 +41,3 @@
          (map (partial filter-visible-uris result-uris))
          (remove nil?)
          (sort-by :ook/uri))))
-
-(defn matching-codelists [db facet-name search-term]
-  (->> (facets/get-codelists db facet-name)))
