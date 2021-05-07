@@ -135,7 +135,7 @@
 
   (setup/cleanup!))
 
-(deftest code-search-results-selection-and-disclosur
+(deftest code-search-results-selection-and-disclosure
   (rft/run-test-sync
    (setup/stub-side-effects {:codelists codelists
                              :concept-trees concept-trees
@@ -144,9 +144,17 @@
    (setup/init! facets/configured-facets initial-state)
 
    (eh/click-text "Facet 2")
+   (search-for "2-2 child 1")
 
    (testing "select all matches"
-     ()
+     (testing "works"
+       (is (= [] (qh/all-selected-labels)))
+       (eh/click-text "select all matches")
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
+
+     (testing "does not select unused codes")
+
+     (testing "does not unselect any previously selected options")
      ;; select something
      ;; do a search that excludes that thing
      ;; select all matches

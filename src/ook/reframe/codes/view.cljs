@@ -125,7 +125,7 @@
          [:p.mt-3.ms-1 [:em.text-muted "No codes match"]]
          [code-selection codelists])]
 
-      :error [common/error-message "Sorry, there was an error searching for codes"]
+      :error [common/error-message "Sorry, there was an error submitting your search"]
 
       :loading [common/loading-spinner]
 
