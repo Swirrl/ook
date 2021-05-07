@@ -52,7 +52,7 @@
 
    (testing "apply filter button"
      (testing "does not show if no facet is selected"
-       (is (zero? (count (qh/all-labels))))
+       (is (zero? (count (qh/all-selectable-labels))))
        (is (nil? (qh/apply-filter-button))))
 
      (testing "shows when a facet is selected"
@@ -70,7 +70,7 @@
 
      (testing "is not disabled when a code is selected"
        (eh/click (qh/find-expansion-toggle "Codelist 1 Label"))
-       (is (= ["Codelist 1 Label" "1-1 child 1"] (qh/all-labels)))
+       (is (= ["Codelist 1 Label" "1-1 child 1"] (qh/all-selectable-labels)))
        (eh/click-text "1-1 child 1")
        (is (not (qh/disabled? (qh/apply-filter-button))))))
 
@@ -195,5 +195,5 @@
 
    (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
-     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-labels)))
+     (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-selectable-labels)))
      (is (= ["2-1 child 1"] (qh/all-selected-labels))))))

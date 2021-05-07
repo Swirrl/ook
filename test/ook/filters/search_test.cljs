@@ -67,21 +67,21 @@
      (is (nil? (qh/query-text "clear search"))))
 
    (testing "searching for a code with no matches"
-     (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))
+     (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-selectable-labels)))
      (search-for "no matches!")
 
      (testing "shows a relevant message and reset button, no select all button"
        (is (nil? (qh/query-text "select all matches")))
        (is (not (nil? (qh/query-text "clear search"))))
        (is (not (nil? (qh/query-text "No codes match"))))
-       (is (= [] (qh/all-labels))))
+       (is (= [] (qh/all-selectable-labels))))
 
      (testing "can be reset to show all the codelists again"
        (eh/click-text "clear search")
 
        (is (nil? (qh/query-text "No codes match")))
        (is (= "" (qh/search-input-val)))
-       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))))
+       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-selectable-labels)))))
 
    (testing "searching for a code by label that matches"
      (is (nil? @setup/concept-tree-request))
@@ -95,21 +95,18 @@
        (is (= "cl2" @setup/concept-tree-request)))
 
      (testing "shows only matching codes with all parents expanded"
-       (is (= ["Codelist 2 Label" "2-1 child 2" "2-2 child 1"] (qh/all-labels)))
-
-       (is (qh/open? (qh/find-expansion-toggle "Codelist 2 Label")))
-       (is (qh/open? (qh/find-expansion-toggle "2-1 child 2")))
+       (is (= ["Codelist 2 Label" "2-1 child 2" "2-2 child 1"] (qh/all-selectable-labels)))
 
        (eh/click-text "Facet 3")
-       (is (= ["with nested codes"] (qh/all-labels)))
+       (is (= ["with nested codes"] (qh/all-selectable-labels)))
        (search-for "5-3 child 1")
 
        (is (= "cl5" @setup/concept-tree-request))
-       (is (= ["with nested codes" "5-1 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-labels))))
+       (is (= ["with nested codes" "5-1 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selectable-labels))))
 
      (testing "can be reset to show all the codelists again"
        (eh/click-text "clear search")
-       (is (= ["with nested codes"] (qh/all-labels)))
+       (is (= ["with nested codes"] (qh/all-selectable-labels)))
        (is (qh/closed? (qh/find-expansion-toggle "with nested codes"))))
 
      (testing "it caches code trees"
@@ -122,17 +119,14 @@
      (search-for "this code is reused")
 
      (testing "shows the result under both expanded codelists"
-       (is (qh/open? (qh/find-expansion-toggle "with shared codes 1")))
-       (is (qh/open? (qh/find-expansion-toggle "with shared codes 2")))
-
        (is (= ["with shared codes 1" "this code is reused" "with shared codes 2" "this code is reused"]
-              (qh/all-labels)))))
+              (qh/all-selectable-labels)))))
 
    (testing "searching when the only thing that matches is a codelist itself"
      (search-for "with shared codes 1")
 
      (testing "does not include the codelist in search results"
-       (is (= [] (qh/all-labels))))))
+       (is (= [] (qh/all-selectable-labels))))))
 
   (setup/cleanup!))
 

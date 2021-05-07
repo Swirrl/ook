@@ -1,8 +1,10 @@
 (ns ook.reframe.facets.view
   (:require
    [re-frame.core :as rf]
-   [ook.reframe.codes.view :as codes]
-   [ook.ui.icons :as icons]))
+   [ook.ui.icons :as icons]
+   [ook.ui.common :as common]
+   [ook.reframe.codes.browse.view :as browse]
+   [ook.reframe.codes.search.view :as search]))
 
 (defn- facet-button [facet-name selected? applied?]
   [:button.btn.me-2.mb-2
@@ -24,6 +26,39 @@
     :aria-label "Close filter selection"
     :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
 
+(defn- apply-filter-button []
+  (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
+    [common/primary-button
+     {:class "mt-3"
+      :disabled (empty? current-selection)
+      :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
+     "Apply filter"]))
+
+(defn- codelists [name]
+  (when name
+    (let [codelists @(rf/subscribe [:ui.facets.current/visible-codes name])
+          search-status @(rf/subscribe [:ui.facets.current/search-results])]
+      (if (= :no-codelists codelists)
+        [:p.h6.mt-4 "No codelists for facet"]
+        [:<>
+         [apply-filter-button]
+         [:p.h6.mt-4 "Codelists"]
+         [search/code-search]
+         (if search-status
+           [search/search-info codelists]
+           [browse/code-selection codelists])]))))
+
+(defn- codelists-wrapper [selected-facet-status facet-name]
+  (when selected-facet-status
+    (condp = selected-facet-status
+      :loading [:div.mt-4.ms-1 [common/loading-spinner]]
+
+      :error [common/error-message "Sorry, there was an error fetching the codelists for this facet."]
+
+      :ready [codelists facet-name]
+
+      [common/error-message "Sorry, something went wrong."])))
+
 (defn configured-facets []
   (let [facets @(rf/subscribe [:facets/config])
         selected-facet-status @(rf/subscribe [:ui.facets.current/status])
@@ -39,4 +74,4 @@
           ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
        (when (and selected-facet-name (= :ready selected-facet-status))
          [cancel-facet-selection])]
-      [codes/codelist-selection selected-facet-status selected-facet-name]]]))
+      [codelists-wrapper selected-facet-status selected-facet-name]]]))

@@ -62,16 +62,16 @@
 (defn closed? [expand-toggle]
   (= icons/up-path (find-toggle-icon-path expand-toggle)))
 
-(def code-label-query ".filters input[type='checkbox'] + label")
+(def selectable-code-label-query ".filters input[type='checkbox'] + label")
 
-(defn all-labels []
-  (all-text-content code-label-query))
+(defn all-selectable-labels []
+  (all-text-content selectable-code-label-query))
 
 (defn all-selected-labels []
   (all-text-content ".filters input[type='checkbox']:checked + label"))
 
 (defn expanded-labels-under-label [label]
-  (-> label query-text .-parentNode (all-text-content code-label-query)))
+  (-> label query-text .-parentNode (all-text-content selectable-code-label-query)))
 
 (defn select-any-button [label]
   (-> label query-text .-parentNode (find-text "any")))

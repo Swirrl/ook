@@ -78,6 +78,12 @@
  (fn [db _]
    (search/get-results db)))
 
+(rf/reg-sub
+ :ui.facets.current/search-result?
+ (fn [db [_ uri]]
+   (let [result-uris (->> db search/get-results (map :ook/uri) set)]
+     (boolean (get result-uris uri)))))
+
 ;;;;;; FACETS
 
 (rf/reg-sub
@@ -86,7 +92,7 @@
    (:facets/applied db)))
 
 (rf/reg-sub
- :ui.facets/visible-codes
+ :ui.facets.current/visible-codes
  (fn [db [_ name]]
    (let [all-codelists (facets/get-codelists db name)
          search-results (search/get-results db)]

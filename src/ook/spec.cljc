@@ -26,6 +26,7 @@
 
 ;;;;;;; facets
 
+
 (s/def :facets/config (s/map-of :facet/name :ook/facet))
 
 (s/def :ook/facet (s/keys :req-un [:facet/name
@@ -36,7 +37,8 @@
 (s/def :facet/name string?)
 (s/def :facet/sort-priority number?)
 (s/def :facet/dimensions (s/coll-of string?))
-(s/def :facet/codelists (s/map-of :ook/uri :facet/codelist))
+(s/def :facet/codelists (s/or :no-codelists #{:no-codelists}
+                              :codelists (s/map-of :ook/uri :facet/codelist)))
 (s/def :facet/codelist (s/keys :req [:ook/uri]
                                :req-un [:ook/label]
                                :opt-un [:ook/children]))
@@ -54,7 +56,6 @@
 (s/def :facet/selection (s/nilable (s/map-of :ook/uri (s/nilable (s/coll-of :ook/uri)))))
 (s/def :ook/uri string?)
 
-
 (s/def :facets/applied (s/nilable (s/map-of :facet/name :facet/selection)))
 
 ;;;;;;; current facet
@@ -64,17 +65,17 @@
 
 ;;;;;;; datasets
 
+
 (s/def :datasets/count number?)
 
 (s/def :results.datasets/data (s/or :state #{:loading :error} :results (s/coll-of :ook/dataset)))
 (s/def :ook/dataset (s/keys :req [:ook/uri]
                             :req-un [:ook/label]
-                            :opt-un [:ook/matching-observation-count
-                                     :ook/comment
-                                     :ook/description
-                                     :ook/publisher
-                                     :dataset/facets]))
-
+                            :opt-un  [:ook/matching-observation-count
+                                      :ook/comment
+                                      :ook/description
+                                      :ook/publisher
+                                      :dataset/facets]))
 (s/def :ook/label string?)
 (s/def :ook/comment string?)
 (s/def :ook/description string?)
@@ -84,15 +85,12 @@
 
 (s/def :dataset/facets (s/coll-of :dataset/facet))
 (s/def :dataset/facet (s/keys :req-un [:facet/name
-                                       :facet/dimensions]))
+                                       :dataset.facet/dimensions]))
 
-;; (s/def :facet/name string?)
-;; (s/def :facet/dimensions (s/coll-of :facet/dimension))
-;; (s/def :facet/dimension (s/keys :req [:ook/uri]
-;;                                 :req-un [:ook/label]
-;;                                 :opt-un [:facet/codes]))
-;; (s/def :facet/codes (s/coll-of :facet/code))
-;; (s/def :facet/code (s/keys :opt [:ook/uri]
-;;                            :opt-un [:ook/label]))
-
-;; (s/def :results.datasets/error map?)
+(s/def :dataset.facet/dimensions (s/coll-of :dataset.facet/dimension))
+(s/def :dataset.facet/dimension (s/keys :req [:ook/uri]
+                                        :req-un [:ook/label]
+                                        :opt-un [:facet/codes]))
+(s/def :facet/codes (s/coll-of :facet/code))
+(s/def :facet/code (s/keys :opt [:ook/uri]
+                           :opt-un [:ook/label]))

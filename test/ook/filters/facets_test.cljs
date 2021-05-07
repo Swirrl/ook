@@ -54,10 +54,10 @@
    (testing "selecting a facet fetches the codelists"
      (eh/click-text "Facet 1")
      (is (not (nil? (qh/query-text "Codelists"))))
-     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-selectable-labels)))
 
      (eh/click-text "Facet 2")
-     (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels))))
+     (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-selectable-labels))))
 
    (testing "codelists are not selected by default"
      (is (= [] (qh/all-selected-labels))))
@@ -65,14 +65,14 @@
    (testing "codelists are cached"
      (is (= "Facet 2" @setup/codelist-request))
      (eh/click-text "Facet 1")
-     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-selectable-labels)))
      (is (= "Facet 2" @setup/codelist-request)))
 
    (testing "cancelling facet selection"
      (testing "works for a facet with codelists"
-       (is (seq (qh/all-labels)))
+       (is (seq (qh/all-selectable-labels)))
        (eh/click (qh/cancel-facet-selection-button))
-       (is (empty? (qh/all-labels))))
+       (is (empty? (qh/all-selectable-labels))))
 
      (testing "works for a facet with no codelists"
        (eh/click-text "Facet 5")
@@ -127,9 +127,9 @@
 
    (testing "codelists remain sorted by uri when expanded/collapsed"
      (eh/click-text "Facet 1")
-     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels)))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-selectable-labels)))
      (eh/click (qh/find-expansion-toggle "Codelist 1 Label"))
-     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-labels))))
+     (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-selectable-labels))))
 
    (testing "a message is shown when a codelist has no codes"
      (eh/click-text "Facet 3")
@@ -160,10 +160,10 @@
      (testing "when a code in another codelist is already selected"
        (eh/click-text "2-1 child 1")
        (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))
+       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-selectable-labels)))
 
        (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
-       (is (= ["Codelist 2 Label" "Codelist 3 Label" "3-1 child 1"] (qh/all-labels)))))
+       (is (= ["Codelist 2 Label" "Codelist 3 Label" "3-1 child 1"] (qh/all-selectable-labels)))))
 
    (testing "toggling selection"
      (testing "works for individual codes"
