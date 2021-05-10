@@ -48,3 +48,55 @@ button.applied-facet:hover svg {
   stroke: white;
   opacity: 1;
 }
+
+/* Custom branch lines for code tree views */
+
+.filters .search-results {
+  --child-space: 2.5rem;
+  --child-line-width: 2rem;
+}
+
+.filters ul.children,
+.filters ul.top-level {
+  list-style: none;
+  padding: 0;
+  position: relative;
+}
+
+.filters .child {
+  padding-top: 0.6rem;
+}
+
+.filters .children .child {
+  padding-left: 3.5rem;
+}
+
+.filters .search-results .children .child {
+  border-left: 1px solid #cecece;
+  margin-left: 4px;
+  position: relative;
+  padding-left: var(--child-space);
+}
+
+.filters .search-results .children .child:last-child {
+  border-left: 1px solid transparent;
+}
+
+.filters .search-results .children .child:before {
+  content: "";
+  width: var(--child-line-width);
+  display: block;
+  position: relative;
+  border-bottom: 1px solid #cecece;
+  top: 12px;
+  right: var(--child-space);
+}
+
+.filters .search-results .children .child:last-child::before {
+  border-left: 1px solid #cecece;
+  height: 22px;
+  width: calc(var(--child-line-width) + 1px);
+  position: absolute;
+  left: -1px;
+  top: 0px;
+}

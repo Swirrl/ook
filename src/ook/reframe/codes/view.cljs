@@ -4,21 +4,17 @@
    [ook.ui.common :as common]))
 
 (defn nested-list [opts & children]
-  [:ul.list-group-flush opts (common/with-react-keys children)])
+  [:ul.children opts (common/with-react-keys children)])
 
 (defn nested-list-item [opts & children]
-  [:li.list-group-item.border-0.pb-0 opts (common/with-react-keys children)])
-
-(defn top-tree-level [& children]
-  [:form.mt-3
-   [nested-list {:class "p-0"}
-    children]])
+  [:li.child opts
+   (common/with-react-keys children)])
 
 (defn checkbox-input [{:keys [ook/uri label used] :as option}]
   (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])
         id (str (gensym (str uri "-react-id-")))]
     [:<>
-     [:input.form-check-input.mx-2
+     [:input.form-check-input.me-2
       (cond-> {:type "checkbox"
                :name "code"
                :value uri

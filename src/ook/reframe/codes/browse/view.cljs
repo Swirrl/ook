@@ -6,7 +6,7 @@
    [ook.reframe.codes.view :as codes]))
 
 (defn- toggle-level-button [opts expanded?]
-  [:button.btn.as-link.p-0.m-0.expand-code-button
+  [:button.btn.as-link.p-0.m-0.expand-code-button.me-2
    (merge opts {:type "button"})
    (if expanded? icons/down icons/up)])
 
@@ -71,6 +71,6 @@
           [code-tree children])])]))
 
 (defn code-selection [codelists]
-  [codes/top-tree-level
+  [:ul.top-level
    (for [{:keys [ook/uri label] :as codelist} codelists]
      ^{:key [uri label]} [codelist-item codelist])])

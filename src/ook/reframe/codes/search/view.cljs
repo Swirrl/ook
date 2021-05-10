@@ -38,7 +38,7 @@
   [codes/nested-list-item
    (if @(rf/subscribe [:ui.facets.current/search-result? uri])
      [codes/checkbox-input code]
-     [:span icons/bullet label ])
+     [:span label])
    (when (seq children)
      [code-tree children])])
 
@@ -49,12 +49,12 @@
 
 (defn- codelist-item [{:keys [children label ook/uri]}]
   [codes/nested-list-item
-   [:span icons/bullet label]
+   [:span label]
    [codes/codelist-wrapper uri
     [code-tree children]]])
 
 (defn- search-results-tree [codelists]
-  [codes/top-tree-level
+  [:ul.top-level.search-results.ms-1
    (for [{:keys [ook/uri label] :as codelist} codelists]
      ^{:key [uri label]} [codelist-item codelist])])
 
