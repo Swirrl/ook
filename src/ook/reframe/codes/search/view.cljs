@@ -22,9 +22,9 @@
       :on-change #(rf/dispatch [:ui.event/search-term-change (-> % .-target .-value)])}]
     [common/primary-button {:type "submit"} "Search"]]])
 
-(defn- options [search-results]
+(defn- options [any-results?]
   [:<>
-   (when (seq search-results)
+   (when any-results?
      [common/text-button
       {:on-click #(rf/dispatch [:ui.event/select-all-matches])}
       "select all matches"])
@@ -53,25 +53,26 @@
    [codes/codelist-wrapper uri
     [code-tree children]]])
 
-(defn- search-results-tree [codelists]
-  [:ul.top-level.search-results.ms-1
-   (for [{:keys [ook/uri label] :as codelist} codelists]
-     ^{:key [uri label]} [codelist-item codelist])])
+(defn- search-results-tree [facet-name]
+  (let [codelists @(rf/subscribe [:ui.facets.current/filtered-codelists facet-name])]
+    [:ul.top-level.search-results.ms-1
+     (for [{:keys [ook/uri label] :as codelist} codelists]
+       ^{:key [uri label]} [codelist-item codelist])]))
 
-(defn- search-results [codelists]
-  (let [search-results @(rf/subscribe [:ui.facets.current/search-results])]
+(defn- search-results [facet-name]
+  (let [any-results? @(rf/subscribe [:ui.facets.current/any-results?])]
     [:<>
-     [options search-results]
-     (if (empty? search-results)
-       [:p.mt-3.ms-1 [:em.text-muted "No codes match"]]
-       [search-results-tree codelists])]))
+     [options any-results?]
+     (if any-results?
+       [search-results-tree facet-name]
+       [:p.mt-3.ms-1 [:em.text-muted "No codes match"]])]))
 
-(defn search-info [codelists]
+(defn search-info [facet-name]
   (let [search-status @(rf/subscribe [:ui.facets.current/search-status])]
     (condp = search-status
       :loading [:div.ms-1 [common/loading-spinner]]
 
-      :ready [search-results codelists]
+      :ready [search-results facet-name]
 
       :error [common/error-message "Sorry, there was an error submitting your search"]
 

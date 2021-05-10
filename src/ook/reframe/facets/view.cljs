@@ -48,19 +48,18 @@
      (when (get applied-facets facet-name)
        [remove-filter-button disabled? facet-name])]))
 
-(defn- codelists [name]
-  (when name
-    (let [codelists @(rf/subscribe [:ui.facets.current/visible-codes name])
-          search-status @(rf/subscribe [:ui.facets.current/search-results])]
-      (if (= :no-codelists codelists)
-        [:p.h6.mt-4 "No codelists for facet"]
+(defn- codelists [facet-name]
+  (when facet-name
+    (if @(rf/subscribe [:ui.facets/no-codelists? facet-name])
+      [:p.h6.mt-4 "No codelists for facet"]
+      (let [search-status @(rf/subscribe [:ui.facets.current/search-results])]
         [:<>
-         [facet-control-buttons name]
+         [facet-control-buttons facet-name]
          [:p.h6.mt-4 "Codelists"]
          [search/code-search]
          (if search-status
-           [search/search-info codelists]
-           [browse/code-selection codelists])]))))
+           [search/search-info facet-name]
+           [browse/code-selection facet-name])]))))
 
 (defn- codelists-wrapper [selected-facet-status facet-name]
   (when selected-facet-status

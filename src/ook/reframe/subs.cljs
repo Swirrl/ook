@@ -84,10 +84,22 @@
    (search/get-results db)))
 
 (rf/reg-sub
+ :ui.facets.current/any-results?
+ (fn [db _]
+   (boolean (seq (search/get-results db)))))
+
+(rf/reg-sub
  :ui.facets.current/search-result?
  (fn [db [_ uri]]
    (let [result-uris (->> db search/get-results (map :ook/uri) set)]
      (boolean (get result-uris uri)))))
+
+(rf/reg-sub
+ :ui.facets.current/filtered-codelists
+ (fn [db [_ facet-name]]
+   (let [all-codelists (facets/get-codelists db facet-name)
+         search-results (search/get-results db)]
+     (search/filter-to-search-results all-codelists search-results))))
 
 ;;;;;; FACETS
 
@@ -97,16 +109,14 @@
    (:facets/applied db)))
 
 (rf/reg-sub
- :ui.facets.current/visible-codes
- (fn [db [_ name]]
-   (let [all-codelists (facets/get-codelists db name)
-         search-results (search/get-results db)]
-     (cond
-       (= :no-codelists all-codelists) all-codelists
+ :ui.facets/no-codelists?
+ (fn [db [_ facet-name]]
+   (= :no-codelists (facets/get-codelists db facet-name))))
 
-       (seq search-results) (search/filter-to-search-results all-codelists search-results)
-
-       :else (sort-by :ook/uri all-codelists)))))
+(rf/reg-sub
+ :ui.facets/codelists
+ (fn [db [_ facet-name]]
+   (->> (facets/get-codelists db facet-name) (sort-by :label))))
 
 ;;;;;; DATASETS
 

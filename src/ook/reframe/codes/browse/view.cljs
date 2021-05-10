@@ -72,7 +72,8 @@
           [no-codes-message]
           [code-tree children])])]))
 
-(defn code-selection [codelists]
-  [:ul.top-level
-   (for [{:keys [ook/uri label] :as codelist} codelists]
-     ^{:key [uri label]} [codelist-item codelist])])
+(defn code-selection [facet-name]
+  (let [codelists @(rf/subscribe [:ui.facets/codelists facet-name])]
+    [:ul.top-level
+     (for [{:keys [ook/uri label] :as codelist} codelists]
+       ^{:key [uri label]} [codelist-item codelist])]))
