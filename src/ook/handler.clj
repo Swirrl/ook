@@ -33,12 +33,6 @@
 (defmethod ig/init-key :ook.handler/datasets [_ {:keys [search/db]}]
   (fn [request]
     (if (requesting-transit? request)
-      ;; Old implementation that applied a custom code selection.
-      ;; When this comes back, combine it with other filter facets
-      ;; (let [filters (p/parse-filters request)
-      ;;       result (db/get-datasets db filters)]
-      ;;   (-> (resp/response (t/write-string result))
-      ;;       transit-content-type))
       (let [facets (p/get-facets request)
             datasets (if facets
                        (db/get-datasets-for-facets db facets)

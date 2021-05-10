@@ -10,8 +10,6 @@
   (t/read-string filter-state))
 
 (defn get-facets
-  "Parse query param facet tuples into a map of facet-name [codelists] for
-  use in db queries, referred to as 'selection' elsewhere"
   [{:keys [query-params]}]
   (when (seq query-params)
     (-> query-params (get "filters") deserialize-filter-state)))

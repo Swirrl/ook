@@ -26,13 +26,27 @@
     :aria-label "Close filter selection"
     :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
 
-(defn- apply-filter-button []
-  (let [current-selection @(rf/subscribe [:ui.facets.current/selection])]
-    [common/primary-button
-     {:class "mt-3"
-      :disabled (empty? current-selection)
-      :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
-     "Apply filter"]))
+(defn- apply-filter-button [disabled?]
+  [common/primary-button
+   {:class "me-2"
+    :disabled disabled?
+    :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
+   "Apply filter"])
+
+(defn- remove-filter-button [disabled? facet-name]
+  [common/primary-button
+   {:disabled disabled?
+    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
+   "Remove filter"])
+
+(defn- facet-control-buttons [facet-name]
+  (let [current-selection @(rf/subscribe [:ui.facets.current/selection])
+        applied-facets @(rf/subscribe [:facets/applied])
+        disabled? (empty? current-selection)]
+    [:div.mt-3
+     [apply-filter-button disabled?]
+     (when (get applied-facets facet-name)
+       [remove-filter-button disabled? facet-name])]))
 
 (defn- codelists [name]
   (when name
@@ -41,7 +55,7 @@
       (if (= :no-codelists codelists)
         [:p.h6.mt-4 "No codelists for facet"]
         [:<>
-         [apply-filter-button]
+         [facet-control-buttons name]
          [:p.h6.mt-4 "Codelists"]
          [search/code-search]
          (if search-status

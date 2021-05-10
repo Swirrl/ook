@@ -1,6 +1,7 @@
 (ns ook.test.util.query-helpers
   (:require ["@testing-library/react" :as rt]
-            [ook.ui.icons :as icons]))
+            [ook.ui.icons :as icons]
+            [clojure.string :as str]))
 
 (defn find-query
   ([selector]
@@ -104,6 +105,9 @@
 (defn apply-filter-button []
   (query-text "Apply filter"))
 
+(defn remove-filter-button []
+  (query-text "Remove filter"))
+
 (defn all-dataset-titles []
   (-> (find-query ".ook-datasets") (all-text-content ".title-column strong")))
 
@@ -121,3 +125,6 @@
 
 (defn remove-facet-button [facet-name]
   (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))
+
+(defn applied-facets []
+  (->> (find-all-query ".ook-datasets th") (drop 1) (map text-content) (remove str/blank?)))

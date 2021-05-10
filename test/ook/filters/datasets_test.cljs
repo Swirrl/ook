@@ -114,6 +114,7 @@
        (is (= ["Publisher / Title / Description"] (qh/datset-results-columns))))
 
      (testing "re-adds the facet to the list of possible ones to choose from"
+       (is (nil? (qh/editable-facet-button "Facet 2")))
        (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))))
 
    (testing "switching facets applies the current facet, if there is one"
@@ -196,4 +197,68 @@
    (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
      (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "Codelist 3 Label"] (qh/all-checkbox-labels)))
-     (is (= ["2-1 child 1"] (qh/all-selected-labels))))))
+     (is (= ["2-1 child 1"] (qh/all-selected-labels))))
+
+   (setup/cleanup!)))
+
+(deftest removing-filter
+  (rft/run-test-sync
+   (setup/stub-side-effects {:datasets datasets :codelists codelists :concept-trees concept-trees})
+   (setup/init! views/search initial-state)
+
+   (testing "remove filter button"
+     (testing "does not show if no facet is selected"
+       (is (nil? (qh/remove-filter-button))))
+
+     (testing "does not show if the facet is not applied"
+       (eh/click-text "Facet 2")
+       (is (nil? (qh/remove-filter-button))))
+
+     (testing "does show if the facet is applied"
+       (eh/click-text "Codelist 2 Label")
+       (eh/click (qh/apply-filter-button))
+
+       (eh/click (qh/editable-facet-button "Facet 2"))
+       (is (not (nil? (qh/remove-filter-button)))))
+
+     (testing "is not disabled if any codes are selected"
+       (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
+       (is (not (qh/disabled? (qh/remove-filter-button)))))
+
+     (testing "is disabled when no options are selected"
+       (eh/click-text "Codelist 2 Label")
+       (is (zero? (count (qh/all-selected-labels))))
+       (is (qh/disabled? (qh/remove-filter-button)))))
+
+   (testing "removing applied filters"
+     (testing "works for an individual filter"
+       (eh/click-text "Codelist 2 Label")
+       (eh/click (qh/apply-filter-button))
+
+       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= ["Facet 2"] (qh/applied-facets)))
+
+       (eh/click (qh/editable-facet-button "Facet 2"))
+       (eh/click (qh/remove-filter-button))
+       (is (= "Showing all datasets" (qh/dataset-count-text)))
+       (is (= [] (qh/applied-facets))))
+
+     (testing "only removes one facet when multiple are applied"
+       (eh/click-text "Facet 2")
+       (eh/click-text "Codelist 2 Label")
+       (eh/click (qh/apply-filter-button))
+
+       (eh/click-text "Facet 1")
+       (eh/click-text "Codelist 1 Label")
+       (eh/click (qh/apply-filter-button))
+
+       (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
+              (qh/dataset-count-text)))
+
+       (eh/click-text "Facet 1")
+       (eh/click (qh/remove-filter-button))
+
+       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= ["Facet 2"] (qh/applied-facets)))))
+
+   (setup/cleanup!)))
