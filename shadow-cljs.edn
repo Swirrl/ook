@@ -4,6 +4,11 @@
  ;; set an nrepl port for connection to a REPL.
  :nrepl {:port 8777}
 
+ ;; serve the public directory over http at port 8700 for development
+ ;; serve tests at port 8021
+ :dev-http {8700 "target/dev/cljs/public/"
+            8021 "target/test/cljs/browser-test"}
+
  :builds
  {;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
   :ook {:target :browser
@@ -24,9 +29,6 @@
                                 day8.re-frame.tracing.trace-enabled? true}}
 
         :devtools {:reload-strategy :full
-                   ;; serve the public directory over http at port 8700
-                   :http-root "target/dev/cljs/public/"
-                   :http-port 8700
                    :preloads [devtools.preload
                               day8.re-frame-10x.preload]}
 
@@ -35,9 +37,7 @@
 
   :tests {:target    :browser-test
           :test-dir  "target/test/cljs/browser-test"
-          :ns-regexp "-test$"
-          :devtools  {:http-port 8021
-                      :http-root "target/test/cljs/browser-test"}}
+          :ns-regexp "-test$"}
 
   :ci {:target :karma
        :output-to "target/test/cljs/ci/tests.js"
