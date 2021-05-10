@@ -12,7 +12,6 @@
   {:facets {"Facet 1" {:name "Facet 1" :sort-priority 1 :dimensions ["dim1" "dim2"]}
             "Facet 2" {:name "Facet 2" :sort-priority 2 :dimensions ["dim3"]}
             "Facet 3" {:name "Facet 3" :sort-priority 3 :dimensions ["dim4"]}
-            "Facet 4" {:name "Facet 4" :sort-priority 4 :dimensions ["dim5"]}
             "Facet 5" {:name "Facet 5" :sort-priority 4 :dimensions ["dim5"]}}
    :dataset-count 20})
 
@@ -22,7 +21,6 @@
    "Facet 2" [{:ook/uri "cl2" :label "Codelist 2 Label"}
               {:ook/uri "cl3" :label "Codelist 3 Label"}]
    "Facet 3" [{:ook/uri "no-codes" :label "Codelist no codes"}]
-   "Facet 4" [{:ook/uri "deep-nested" :label "with nested codes"}]
    "Facet 5" []})
 
 (def concept-trees
@@ -31,12 +29,7 @@
           {:scheme "cl2" :ook/uri "cl2-code2" :label "2-1 child 2" :used true
            :children [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
                       {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]}]
-   "no-codes" []
-   "deep-nested" [{:scheme "deep-nested" :ook/uri "cl4-code1" :label "4-1 child 1" :used true}
-                  {:scheme "deep-nested" :ook/uri "cl5-code1" :label "5-1 child 1" :used true
-                   :children [{:scheme "deep-nested" :ook/uri "cl5-code3" :label "5-2 child 1" :used true}
-                              {:scheme "deep-nested" :ook/uri "cl5-code4" :label "5-2 child 2" :used true
-                               :children [{:scheme "deep-nested" :ook/uri "cl5-code5" :label "5-3 child 1" :used true}]}]}]})
+   "no-codes" []})
 
 (deftest selecting-facets
   (rft/run-test-sync
@@ -140,129 +133,5 @@
    (testing "expansion toggle still toggles when codelist is empty"
      (eh/click (qh/find-expansion-toggle "Codelist no codes"))
      (is (qh/closed? (qh/find-expansion-toggle "Codelist no codes")))))
-
-  (setup/cleanup!))
-
-(deftest selecting-codes
-  (rft/run-test-sync
-   (setup/stub-side-effects {:codelists codelists :concept-trees concept-trees})
-   (setup/init! facets/configured-facets initial-state)
-   (eh/click-text "Facet 2")
-
-   (testing "fetching codes does not change selection"
-     (eh/click-text "Codelist 2 Label")
-     (is (= 1 (count (qh/all-selected-labels))))
-
-     (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-     (is (= 1 (count (qh/all-selected-labels)))))
-
-   (testing "fetching codes does not change disclosure"
-     (testing "when a code in another codelist is already selected"
-       (eh/click-text "2-1 child 1")
-       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-       (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-checkbox-labels)))
-
-       (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
-       (is (= ["Codelist 2 Label" "Codelist 3 Label" "3-1 child 1"] (qh/all-checkbox-labels)))))
-
-   (testing "toggling selection"
-     (testing "works for individual codes"
-       (eh/click (qh/find-expansion-toggle "Codelist 3 Label"))
-       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-       (is (= ["2-1 child 1"] (qh/all-selected-labels)))
-
-       (eh/click (qh/find-expansion-toggle "2-1 child 2"))
-
-       (eh/click-text "2-2 child 1")
-       (is (= ["2-1 child 1" "2-2 child 1"] (qh/all-selected-labels)))
-
-       (eh/click-text "2-1 child 1")
-       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
-
-     (testing "un-selecting a code does not affect other codelists"
-       (eh/click-text "Codelist 3 Label")
-       (eh/click-text "2-2 child 1")
-       (is (= ["Codelist 3 Label"] (qh/all-selected-labels)))
-       (eh/click-text "Codelist 3 Label")))
-
-   (testing "all codelists have an 'any' button"
-     (is (not (nil? (qh/select-any-button "Codelist 2 Label"))))
-     (is (not (nil? (qh/select-any-button "Codelist 3 Label")))))
-
-   (testing "selecting any"
-     (testing "collapses children"
-       (eh/click-text "Codelist 2 Label")
-       (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
-       (is (= 5 (count (qh/expanded-labels-under-label "Codelist 2 Label"))))
-
-       (eh/click (qh/select-any-button "Codelist 2 Label"))
-       (is (= 1 (count (qh/expanded-labels-under-label "Codelist 2 Label")))))
-
-     (testing "selects parent and un-selects all children"
-       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-       (is (= 1 (count (qh/all-selected-labels))))
-
-       (eh/click-text "Codelist 2 Label")
-       (eh/click-text "2-1 child 1")
-       (eh/click-text "2-2 child 1")
-       (is (= 2 (count (qh/all-selected-labels))))
-
-       (eh/click (qh/select-any-button "Codelist 2 Label"))
-       (eh/click (qh/find-expansion-toggle "Codelist 2 Label"))
-       (is (= 1 (count (qh/all-selected-labels))))))
-
-   (testing "checking any child unselects the parent codelist"
-     (eh/click-text "2-1 child 2")
-     (is (= ["2-1 child 2"] (qh/all-selected-labels))))
-
-   (testing "unused codes are not selectable"
-     (eh/click-text "2-1 child 2")
-     (is (= [] (qh/all-selected-labels)))
-     (eh/click-text "2-2 child 2")
-     (is (= [] (qh/all-selected-labels))))
-
-   (testing "selecting 'all children' or 'none'"
-     (testing "selects all the children that are used"
-       (eh/click (qh/multi-select-button "2-1 child 2"))
-       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
-
-     (testing "unselects parent codelist if it was selected"
-       (eh/click-text "Codelist 2 Label")
-
-       (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
-       (eh/click (qh/multi-select-button "2-1 child 2"))
-       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
-
-     (testing "selects next-level children only for deeply nested code trees"
-       (eh/click-text "2-2 child 1")
-       (eh/click-text "Facet 4")
-       (eh/click (qh/find-expansion-toggle "with nested codes"))
-       (eh/click (qh/find-expansion-toggle "5-1 child 1"))
-       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
-
-       (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels))))
-
-     (testing "shows option to select no children only if all children are selected"
-       (is (= "none" (qh/text-content (qh/multi-select-button "5-1 child 1"))))
-       (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2")))))
-
-     (testing "expands to show children that were just selected"
-       (eh/click (qh/find-expansion-toggle "5-2 child 2"))
-       (is (qh/closed? (qh/find-expansion-toggle "5-2 child 2")))
-       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
-
-       (eh/click (qh/multi-select-button "5-2 child 2"))
-       (is (= ["5-2 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-selected-labels))))
-
-     (testing "clears only children for that level and changes button label back"
-       (is (= "none" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
-
-       (eh/click (qh/multi-select-button "5-2 child 2"))
-       (is (= ["5-2 child 1" "5-2 child 2"] (qh/all-selected-labels)))
-       (is (= "all children" (qh/text-content (qh/multi-select-button "5-2 child 2"))))
-
-       (eh/click (qh/multi-select-button "5-1 child 1"))
-       (is (= [] (qh/all-selected-labels))))))
 
   (setup/cleanup!))

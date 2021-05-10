@@ -48,11 +48,16 @@
    (disclosure/expanded? (:ui.facets/current db) uri)))
 
 (rf/reg-sub
- :ui.facets.current/all-children-selected?
- (fn [db [_ {:keys [scheme children]}]]
+ :ui.facets.current/all-used-children-selected?
+ (fn [db [_ {:keys [scheme children] :as code}]]
    (let [child-uris (->> children (map :ook/uri) set)
          current-selection (-> db :ui.facets/current :selection (get scheme))]
      (set/subset? child-uris current-selection))))
+
+(rf/reg-sub
+ :ui.facets.current/any-used-children?
+ (fn [db [_ code]]
+   (-> code selection/used-child-uris seq boolean)))
 
 ;;;;;; CODES
 

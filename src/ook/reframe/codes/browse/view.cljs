@@ -21,12 +21,14 @@
    expanded?])
 
 (defn- select-all-children-button [code]
-  (let [all-selected? @(rf/subscribe [:ui.facets.current/all-children-selected? code])]
-    [common/text-button
-     {:on-click (fn [] (if all-selected?
-                         (rf/dispatch [:ui.event/set-selection :remove-children code])
-                         (rf/dispatch [:ui.event/set-selection :add-children code])))}
-     (if all-selected? "none" "all children")]))
+  (let [any-used-children? @(rf/subscribe [:ui.facets.current/any-used-children? code])]
+    (when any-used-children?
+      (let [all-selected? @(rf/subscribe [:ui.facets.current/all-used-children-selected? code])]
+        [common/text-button
+         {:on-click (fn [] (if all-selected?
+                             (rf/dispatch [:ui.event/set-selection :remove-children code])
+                             (rf/dispatch [:ui.event/set-selection :add-children code])))}
+         (if all-selected? "none" "all children")]))))
 
 (defn- select-any-button [codelist]
   [common/text-button

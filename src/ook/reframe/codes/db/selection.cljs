@@ -42,11 +42,14 @@
     (remove-from-selection facet option)
     (add-to-selection facet option)))
 
-(defn- used-child-uris [{:keys [children]}]
+(defn used-child-uris [{:keys [children]}]
   (->> children (filter :used) (map :ook/uri) set))
 
-(defn add-children [facet {:keys [scheme] :as code}]
-  (add-codes facet scheme (used-child-uris code)))
+(defn add-children [facet-ui {:keys [scheme] :as code}]
+  (let [used-child-uris (used-child-uris code)]
+    (if (seq used-child-uris)
+      (add-codes facet-ui scheme used-child-uris)
+      facet-ui)))
 
 (defn remove-children [facet {:keys [scheme] :as code}]
   (update-in facet [:selection scheme]
