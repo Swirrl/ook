@@ -33,6 +33,15 @@
              [:dispatch [:ui.facets.current/get-codelists facet-name]])
            [:dispatch [:ui.codes/get-all-code-trees-with-selections facet-ui]]]})))
 
+(rf/reg-event-fx
+ :ui.event/apply-current-facet
+ [e/validation-interceptor]
+ (fn [{:keys [db]} _]
+   (let [current-facet (:ui.facets/current db)]
+     {:db (dissoc db :ui.facets/current)
+      :fx [[:dispatch [:ui.event/cancel-current-selection]]
+           [:dispatch [:facets/apply-facet current-facet]]]})))
+
 (rf/reg-event-db
  :ui.event/cancel-current-selection
  [e/validation-interceptor]

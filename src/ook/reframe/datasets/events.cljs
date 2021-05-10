@@ -23,8 +23,7 @@
  [e/validation-interceptor]
  (fn [{db :db} [_ filter-state]]
    {:db (assoc db :facets/applied (p/deserialize-filter-state filter-state))
-    :fx [[:dispatch [:ui.event/cancel-current-selection]]
-         [:dispatch [:datasets/get-datasets filter-state]]]}))
+    :fx [[:dispatch [:datasets/get-datasets filter-state]]]}))
 
 (rf/reg-event-fx
  :datasets/get-datasets

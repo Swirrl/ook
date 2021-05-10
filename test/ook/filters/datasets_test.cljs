@@ -117,14 +117,19 @@
        (is (nil? (qh/editable-facet-button "Facet 2")))
        (is (= ["Facet 1" "Facet 2"] (qh/all-available-facets)))))
 
-   (testing "switching facets applies the current facet, if there is one"
-     (eh/click-text "Facet 2")
-     (eh/click-text "Codelist 2 Label")
+   (testing "switching facets with a selection"
+     (testing "applies the current facet, if there is one"
+       (eh/click-text "Facet 2")
+       (eh/click-text "Codelist 2 Label")
 
-     (eh/click-text "Facet 1")
+       (eh/click-text "Facet 1")
 
-     (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
-     (is (= ["Dataset 1"] (qh/all-dataset-titles))))
+       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= ["Dataset 1"] (qh/all-dataset-titles))))
+
+     (testing "shows the new facet"
+       (is (not (nil? (qh/apply-filter-button))))
+       (is (= ["Codelist 1 Label"] (qh/all-labels)))))
 
    (testing "clearing all filters"
      (eh/click-text "Facet 1")
