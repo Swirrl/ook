@@ -54,3 +54,9 @@
 (defn remove-children [facet {:keys [scheme] :as code}]
   (update-in facet [:selection scheme]
              #(apply (fnil disj #{}) % (used-child-uris code))))
+
+(defn remove-codes [current-selection codes]
+  (reduce (fn [selection {:keys [scheme ook/uri]}]
+            (update-in selection [scheme] disj uri))
+          current-selection
+          codes))

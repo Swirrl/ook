@@ -50,9 +50,9 @@
 (rf/reg-sub
  :ui.facets.current/all-used-children-selected?
  (fn [db [_ {:keys [scheme children] :as code}]]
-   (let [child-uris (->> children (map :ook/uri) set)
+   (let [used-child-uris (->> children (filter :used) (map :ook/uri) set)
          current-selection (-> db :ui.facets/current :selection (get scheme))]
-     (set/subset? child-uris current-selection))))
+     (set/subset? used-child-uris current-selection))))
 
 (rf/reg-sub
  :ui.facets.current/any-used-children?
@@ -100,6 +100,20 @@
    (let [all-codelists (facets/get-codelists db facet-name)
          search-results (search/get-results db)]
      (search/filter-to-search-results all-codelists search-results))))
+
+(rf/reg-sub
+ :ui.search/all-matches-selected?
+ (fn [db _]
+   (let [used-search-result-uris (->> db search/get-results (filter :used) (map :ook/uri) set)
+         current-selection (->> db :ui.facets/current :selection vals (reduce concat) set)]
+     (set/subset? used-search-result-uris current-selection))))
+
+(rf/reg-sub
+ :ui.search/any-matches-selected?
+ (fn [db _]
+   (let [used-search-result-uris (->> db search/get-results (filter :used) (map :ook/uri) set)
+         current-selection (->> db :ui.facets/current :selection vals (reduce concat) set)]
+     (->> current-selection (filter used-search-result-uris) seq boolean))))
 
 ;;;;;; FACETS
 

@@ -25,9 +25,15 @@
 (defn- options [any-results?]
   [:<>
    (when any-results?
-     [common/text-button
-      {:on-click #(rf/dispatch [:ui.event/select-all-matches])}
-      "select all matches"])
+     [:<>
+      [common/text-button
+       {:on-click #(rf/dispatch [:ui.event/select-all-matches])
+        :disabled @(rf/subscribe [:ui.search/all-matches-selected?])}
+       "select all matches"]
+      [common/text-button
+       {:on-click #(rf/dispatch [:ui.event/unselect-all-matches])
+        :disabled (not @(rf/subscribe [:ui.search/any-matches-selected?]))}
+       "un-select all matches"]])
    [common/text-button
     {:on-click #(rf/dispatch [:ui.event/reset-search])}
     "reset search"]])

@@ -44,9 +44,16 @@
 
 (def search-results
   {"2-2 child 1" [{:scheme "cl2" :ook/uri "cl2-code3" :used true}]
-   "2-2 child" [{:scheme "cl2" :ook/uri "cl2-code3" :label "2-2 child 1" :used true}
-                {:scheme "cl2" :ook/uri "cl2-code4" :label "2-2 child 2" :used false}]
+
+   "2-2 child" [{:scheme "cl2" :ook/uri "cl2-code3"  :used true}
+                {:scheme "cl2" :ook/uri "cl2-code4" :used false}]
+
    "5-3 child 1" [{:scheme "cl5" :ook/uri "cl5-code5" :used true}]
+
+   "child 1" [{:scheme "cl5" :ook/uri "cl5-code1" :used true}
+              {:scheme "cl5" :ook/uri "cl5-code3" :used true}
+              {:scheme "cl5" :ook/uri "cl5-code5" :used true}]
+
    "this code is reused" [{:scheme "cl6" :ook/uri "reused-code" :used true}
                           {:scheme "cl7" :ook/uri "reused-code" :used true}]})
 
@@ -160,12 +167,42 @@
        (is (= ["2-2 child 1" "2-2 child 2"] (qh/all-checkbox-labels)))
 
        (eh/click-text "select all matches")
-       (is (= ["2-2 child 1"] (qh/all-selected-labels)))
+       (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
+     (testing "is only enabled if some codes are selectable"
+       (is (qh/disabled? (qh/query-text "select all matches")))
        (eh/click-text "2-2 child 1")
-       (eh/click-text "reset search")))
+       (is (not (qh/disabled? (qh/query-text "select all matches"))))))
+
+   (testing "un-select all matches"
+     (eh/click-text "Facet 3")
+     (search-for "child 1")
+
+     (testing "is disabled if nothing is selected"
+       (is (= [] (qh/all-selected-labels)))
+       (is (qh/disabled? (qh/query-text "un-select all matches"))))
+
+     (testing "is enabled if any (or all) codes are selected"
+       (eh/click-text "5-1 child 1")
+       (is (not (qh/disabled? (qh/query-text "un-select all matches"))))
+
+       (eh/click-text "select all matches")
+       (is (not (qh/disabled? (qh/query-text "un-select all matches")))))
+
+     (testing "un-selects all codes"
+       (is (= ["5-1 child 1" "5-2 child 1" "5-3 child 1"] (qh/all-selected-labels)))
+       (eh/click-text "un-select all matches")
+       (is (= [] (qh/all-selected-labels)))
+
+       (eh/click-text "5-2 child 1")
+       (is (= [ "5-2 child 1"] (qh/all-selected-labels)))
+
+       (eh/click-text "un-select all matches")
+       (is (= [] (qh/all-selected-labels)))))
 
    (testing "interactions with previous selection and disclosure"
+     (eh/click-text "Facet 2")
+
      (testing "clearing the search closes everything if no codes were selected"
        (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels)))
 

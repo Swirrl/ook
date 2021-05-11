@@ -6,7 +6,8 @@
    [ook.reframe.events :as e]
    [ook.reframe.codes.db.disclosure :as disclosure]
    [ook.reframe.facets.db :as facets]
-   [meta-merge.core :as mm]))
+   [meta-merge.core :as mm]
+   [ook.reframe.codes.db.selection :as selection]))
 
 ;;; USER INITIATED EVENT HANDLERS
 
@@ -35,6 +36,12 @@
  (fn [db _]
    (let [selectable-search-results (-> db search/selectable-results search/code-result->selection)]
      (update-in db [:ui.facets/current :selection] mm/meta-merge selectable-search-results))))
+
+(rf/reg-event-db
+  :ui.event/unselect-all-matches
+  (fn [db _]
+    (let [selectable-search-results (search/selectable-results db)]
+      (update-in db [:ui.facets/current :selection] selection/remove-codes selectable-search-results))))
 
 ;;; UI MANAGEMENT
 
