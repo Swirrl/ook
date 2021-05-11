@@ -1,0 +1,7 @@
+- name: Run ETL pipeline
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Execute pipeline
+      script: ./scripts/etl.sh
