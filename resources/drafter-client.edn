@@ -11,7 +11,7 @@
                        :leeway 2
                        :iss #ig/ref :auth0.client/endpoint
                        :audience "https://pmd"
-
-                       :client-id #ig/ref :auth0.client/id
-                       :client-secret #ig/ref :auth0.client/secret
+                       ;; can pass credentials by reference
+                       :client-id "CLIENT-ID-UNUSED" ;;#ig/ref :auth0.client/id
+                       :client-secret "CLIENT-SECRET-UNUSED" ;;#ig/ref :auth0.client/secret
                        :endpoint #ig/ref :auth0.client/endpoint}}

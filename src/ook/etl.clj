@@ -88,7 +88,7 @@
    (let [client (interceptors/accept client "text/csv")
          query-page (append-limit-offset query-string page-size offset)
          results (s/split-lines (slurp (io/reader (query client query-page))))]
-     (log/info "Fetching subject page at offset:" offset)
+     (log/info (str "Fetching subject page " offset " - " (+ offset page-size)))
      (if (< (dec (count results)) page-size)
        (list results)
        (cons results
@@ -244,7 +244,7 @@
   (dataset-pipeline system)
   (component-pipeline system)
   (code-pipeline system)
-  (let [system (assoc system :ook.etl/select-page-size 500)]
+  (let [system (assoc system :ook.etl/select-page-size 200)]
     (code-used-pipeline system))
   (observation-pipeline system)
   (log/info "All pipelines complete"))

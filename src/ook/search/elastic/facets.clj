@@ -46,11 +46,14 @@
 
 (defn dimension-selections
   "Given a map from facet name to a map from codelist to a (possibly empty) vector of codes,
-  return a map from dimension to a (possibly empty) vector of codes (merging across facets)"
+  return a map from facet name to a map from dimension to a (possibly empty) vector of codes"
   [codelist-selections dimensions-lookup]
-  (->> (for [[facet selection] codelist-selections]
-         (for [[codelist codes] selection]
-           (for [dimension (dimensions-lookup codelist)]
-             {dimension codes})))
+  (into {}
+   (for [[facet selection] codelist-selections]
+     [facet
+      (->>
+       (for [[codelist codes] selection]
+         (for [dimension (dimensions-lookup codelist)]
+           {dimension codes}))
        flatten
-       (apply merge-with join-code-selections)))
+       (apply merge-with join-code-selections))])))
