@@ -8,4 +8,4 @@ SELECT DISTINCT ?component WHERE {
   ?dataset pmdcat:datasetContents/qb:structure/qb:component ?component_specification .
   
   ?component_specification ?property ?component .
-} ORDER BY ?component
+}
