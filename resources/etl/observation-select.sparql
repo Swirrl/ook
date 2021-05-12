@@ -4,4 +4,5 @@ PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 SELECT ?observation WHERE {
   ?dataset pmdcat:datasetContents ?cube .
   ?observation qb:dataSet ?cube .
-} ORDER BY ?observation
+}
+#ORDER BY ?observation

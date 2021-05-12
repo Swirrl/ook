@@ -284,6 +284,14 @@
     (let [system (assoc system :ook.etl/select-page-size 200)]
       (code-used-pipeline system)))
 
+  (dev/with-system [system
+                    ["drafter-client.edn"
+                     "idp-beta.edn"
+                     "elasticsearch-development.edn"
+                     "project/trade/data.edn"]]
+
+    (let [system (assoc system :ook.etl/select-page-size 10000)]
+      (observation-pipeline system)))
 
   ;; recreate mid-pipeline error
   (dev/with-system [system
