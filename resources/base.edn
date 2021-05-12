@@ -8,4 +8,7 @@
                                     :default-handler #ig/ref :ook.concerns.reitit/default-handler}
 
  :ook.concerns.reitit/default-handler {}
- :ook.concerns.reitit/resource-handler {}}
+
+ :ook.handler/assets {}
+
+ :ook.concerns.asset-fingerprinting/fingerprinter {:assets/root #ig/ref :ook.assets/root}}

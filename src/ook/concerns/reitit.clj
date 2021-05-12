@@ -29,6 +29,3 @@
    {:not-found (constantly {:status 404, :body "404"})
     :method-not-allowed (constantly {:status 405, :body "405"})
     :not-acceptable (constantly {:status 406, :body "406"})}))
-
-(defmethod ig/init-key :ook.concerns.reitit/resource-handler [_ opts]
-  (ring/create-resource-handler opts))

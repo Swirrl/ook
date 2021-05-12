@@ -10,13 +10,16 @@
                                ["/code-search" {:get {:handler #ig/ref :ook.handler/code-search}}]
 
                                ;; assets
-                               ["/assets/*" #ig/ref :ook.concerns.reitit/resource-handler]]}
+                               ["/assets/*" #ig/ref :ook.handler/assets]]}
 
- :ook.handler/main          {:search/db #ig/ref :ook.search.elastic/db}
+ :ook.handler/main          {:search/db #ig/ref :ook.search.elastic/db
+                             :assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
 
  :ook.handler/datasets    {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/codes       {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/codelists   {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/code-search {:search/db #ig/ref :ook.search.elastic/db}
  :ook.search.elastic/db {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
-                         :ook/facets #ig/ref :ook.search/facets}}
+                         :ook/facets #ig/ref :ook.search/facets}
+
+ :ook.assets/root "public"}

@@ -14,7 +14,7 @@
           [:html.h-100 {:lang :en}
            contents]))
 
-(defn- head []
+(defn- head [fingerprint-path]
   [:head
    [:meta {:charset "utf-8"}]
    [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
@@ -24,7 +24,7 @@
            :rel "stylesheet"
            :integrity "sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
            :crossorigin "anonymous"}]
-   [:link {:href "/assets/css/styles.css" :rel "stylesheet" :type "text/css"}]])
+   [:link {:href (fingerprint-path "/assets/css/styles.css") :rel "stylesheet" :type "text/css"}]])
 
 (defn- header []
   [:header
@@ -44,9 +44,9 @@
      [:a {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
      "."]]])
 
-(defn- scripts []
+(defn- scripts [fingerprint-path]
   (list
-   [:script {:src "/assets/js/main.js" :type "text/javascript"}]
+   [:script {:src (fingerprint-path "/assets/js/main.js") :type "text/javascript"}]
    [:script "ook.main.init()"]))
 
 (defn- body [facets]
@@ -61,13 +61,13 @@
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 
      [:div {:id "app" :data-init (t/write-string facets)}]]]
-   (footer)
-   (scripts)])
+   (footer)])
 
-(defn main [facets]
+(defn main [fingerprint-path facets]
   (page
-   (head)
-   (body facets)))
+   (head fingerprint-path)
+   (body facets)
+   (scripts fingerprint-path)))
 
 (defn ->html [contents]
   (-> contents h/html str))

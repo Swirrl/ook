@@ -1,8 +1,12 @@
 {:ook.concerns/jetty {:opts {:port 3001 :join? false}}
 
- :ook.handler/main {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/main {:search/db #ig/ref :ook.search.fake/db
+                    :assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
 
- :ook.handler/datasets  {:search/db #ig/ref :ook.search.fake/db}
- :ook.handler/codelists {:search/db #ig/ref :ook.search.fake/db}
- :ook.handler/codes     {:search/db #ig/ref :ook.search.fake/db}
- :ook.search.fake/db {}}
+ :ook.handler/datasets    {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/codelists   {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/codes       {:search/db #ig/ref :ook.search.fake/db}
+ :ook.handler/code-search {:search/db #ig/ref :ook.search.fake/db}
+ :ook.search.fake/db {}
+
+ :ook.assets/root "ook/resources"}
