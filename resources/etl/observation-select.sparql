@@ -5,3 +5,4 @@ SELECT ?observation WHERE {
   ?dataset pmdcat:datasetContents ?cube .
   ?observation qb:dataSet ?cube .
 }
+#ORDER BY ?observation
