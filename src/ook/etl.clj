@@ -44,12 +44,12 @@
   "If an exception is raised by the expression, it is retried once after waiting 30s"
   [expr]
   `(try
-    (doall ~expr)
-    (catch Exception e#
-      (log/warn "Caught Exception: " (.toString e#))
-      (wait)
-      (log/info "Retrying")
-      (doall ~expr))))
+     ~expr
+     (catch Exception e#
+       (log/warn "Caught Exception: " (.toString e#))
+       (wait)
+       (log/info "Retrying")
+       ~expr)))
 
 
 ;; Query utilities
@@ -87,7 +87,8 @@
   ([client query-string page-size offset]
    (let [client (interceptors/accept client "text/csv")
          query-page (append-limit-offset query-string page-size offset)
-         results (s/split-lines (slurp (io/reader (query client query-page))))]
+         response (with-retry (query client query-page))
+         results (s/split-lines (slurp (io/reader response)))]
      (log/info (str "Fetching subject page " offset " - " (+ offset page-size)))
      (if (< (dec (count results)) page-size)
        (list results)
@@ -198,9 +199,10 @@
       (log/info "Processing page")
       (if uris
         (with-retry
-          (->> (extract system construct-query var-name uris)
-               (transform jsonld-frame)
-               (load-documents system index)))
+          (doall
+           (->> (extract system construct-query var-name uris)
+                (transform jsonld-frame)
+                (load-documents system index))))
         (log/warn (str "No compatible (" index ") subjects found!"))))
     (log/info (str "Pipeline Complete: " index))))
 
@@ -275,11 +277,11 @@
                      "idp-beta.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    (let [system (assoc system :ook.etl/select-page-size 50000)]
-      (ook.index/delete-index system "code")
-      (ook.index/create-index system "code")
+    ;(ook.index/delete-index system "code")
+    ;(ook.index/create-index system "code")
+    #_(let [system (assoc system :ook.etl/select-page-size 50000)]
       (code-pipeline system))
-    (let [system (assoc system :ook.etl/select-page-size 300)]
+    (let [system (assoc system :ook.etl/select-page-size 200)]
       (code-used-pipeline system)))
 
 
