@@ -71,32 +71,33 @@
         clause (str "\n  VALUES ?" var-name " { " terms " }\n")]
     (str top clause bottom)))
 
-(defn append-limit-offset
-  "Adds a LIMIT and OFFSET clause to a sparql query"
-  [query-string limit offset]
-  {:pre [(string? query-string) (int? limit) (int? offset)]}
-  (str query-string "\nLIMIT " limit " OFFSET " offset))
-
 (defn select-paged
-  "Executes a select query one page at a time returning a lazy seq of pages.
+  "Executes a select query returning results in a lazy seq of pages.
+   Query results are spilled to disk and read out one page at a time.
    Pages are vectors - the variable name followed by the values."
   ([client query-string]
    (select-paged client query-string 50000))
   ([client query-string page-size]
-   (select-paged client query-string page-size 0))
-  ([client query-string page-size offset]
-   (let [client (interceptors/accept client "text/csv")
-         query-page (append-limit-offset query-string page-size offset)
-         response (with-retry (query client query-page))
-         results (s/split-lines (slurp (io/reader response)))]
-     (log/info (str "Fetching subject page " offset " - " (+ offset page-size)))
-     (if (< (dec (count results)) page-size)
-       (list results)
-       (cons results
-             (lazy-seq (select-paged client
-                                     query-string
-                                     page-size
-                                     (+ offset page-size))))))))
+   (let [cache-file (File/createTempFile "ook-etl-subject-cache-" ".tmp")]
+     (try
+       ;; write results to tempfile cache
+       (let [client (interceptors/accept client "text/csv")]
+         (with-open [os (io/output-stream cache-file)]
+           (io/copy (io/input-stream (query client query-string)) os)))
+       ;; read results from tempfile cache
+       (let [rdr (io/reader cache-file)
+             var-name (.readLine rdr)
+             read-lines (fn this [r]
+                          (lazy-seq
+                           (if-let [line (.readLine r)]
+                             (cons line (this r))
+                             (.close r))))]
+         ;; paginate
+         (->> (read-lines rdr)
+              (partition-all page-size)
+              (map (fn [page]
+                     (cons var-name page)))))
+       (finally (.delete cache-file))))))
 
 
 
@@ -195,15 +196,18 @@
 (defn pipeline-fn [page-query construct-query jsonld-frame index]
   (fn [system]
     (log/info (str "Pipeline Started: " index))
-    (doseq [[var-name & uris] (subject-pages system page-query)]
-      (log/info "Processing page")
-      (if uris
-        (with-retry
-          (doall
-           (->> (extract system construct-query var-name uris)
-                (transform jsonld-frame)
-                (load-documents system index))))
-        (log/warn (str "No compatible (" index ") subjects found!"))))
+    (let [counter (atom 0)]
+      (doseq [[var-name & uris] (subject-pages system page-query)]
+        (log/info "Processing page starting with" index "subject" @counter)
+        (if uris
+          (do
+            (swap! counter + (count uris))
+            (with-retry
+              (doall
+               (->> (extract system construct-query var-name uris)
+                    (transform jsonld-frame)
+                    (load-documents system index)))))
+          (log/warn (str "No compatible (" index ") subjects found!")))))
     (log/info (str "Pipeline Complete: " index))))
 
 (def dataset-pipeline
@@ -290,8 +294,8 @@
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
 
-    (let [system (assoc system :ook.etl/select-page-size 10000)]
-      (observation-pipeline system)))
+    (let [system (assoc system :ook.etl/select-page-size 10)]
+      (component-pipeline system)))
 
   ;; recreate mid-pipeline error
   (dev/with-system [system
