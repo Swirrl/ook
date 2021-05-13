@@ -9,6 +9,6 @@
 
  :ook.concerns.reitit/default-handler {}
 
- :ook.handler/assets {}
+ :ook.handler/assets {:assets/root #ig/ref :ook.assets/root}
 
  :ook.concerns.asset-fingerprinting/fingerprinter {:assets/root #ig/ref :ook.assets/root}}

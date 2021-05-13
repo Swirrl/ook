@@ -22,9 +22,8 @@
 
 ;; Static resource handler
 
-(defmethod ig/init-key :ook.handler/assets [_ _]
-  (fn [request]
-    (assets/resource-response request)))
+(defmethod ig/init-key :ook.handler/assets [_ opts]
+  (partial assets/resource-handler opts))
 
 ;;; Internal transit API
 
