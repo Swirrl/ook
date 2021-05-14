@@ -47,11 +47,11 @@
    [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]])
 
 (defn- footer []
-  [:footer.footer.bg-light.p-3.mt-auto
+  [:footer.footer.bg-light.p-4
    [:div.container
-    [:p
+    [:p.m-0
      "Created by Swirrl and the ONS in collaboration with DIT as part of the "
-     [:a {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
+     [:a.link-dark {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
      "."]]])
 
 (defn- scripts [fingerprint-path]
