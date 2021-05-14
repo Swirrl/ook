@@ -2,18 +2,28 @@
   (:require [integrant.core :as ig]
             [ring.util.response :as resp]
             [ook.ui.layout :as layout]
+            [reitit.ring :as ring]
             [ook.search.db :as db]
+            [ook.concerns.asset-fingerprinting :as assets]
             [ook.params.parse :as p]
+            [clojure.pprint :as pp]
             [ook.concerns.transit :as t]
             [ook.util :as u]))
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ {:keys [search/db]}]
+(defmethod ig/init-key :ook.handler/main [_ {:keys [assets/fingerprinter search/db]}]
   (fn [_request]
     (let [facets (db/get-facets db)]
-      (resp/response (layout/->html (layout/main {:facets (u/lookup :name facets)
-                                                  :dataset-count (db/dataset-count db)}))))))
+      (resp/response (layout/->html (layout/main
+                                     fingerprinter
+                                     {:facets (u/lookup :name facets)
+                                      :dataset-count (db/dataset-count db)}))))))
+
+;; Static resource handler
+
+(defmethod ig/init-key :ook.handler/assets [_ opts]
+  (partial assets/resource-handler opts))
 
 ;;; Internal transit API
 

@@ -21,6 +21,7 @@
 (derive :drafter/endpoint-url :ook/const)
 (derive :ook.concerns.elastic/endpoint :ook/const)
 (derive :ook.search/facets :ook/const)
+(derive :ook.assets/root :ook/const)
 
 (defn env
   "Reader to lookup an env-var. If the default is an integer, the env-var's value
