@@ -37,6 +37,11 @@
                           :dest-path "ook-start.sh"
                           :mode "755"}
 
+                         {:type :selmer/template
+                          :path "etl-start.sh.template"
+                          :dest-path "etl-start.sh"
+                          :mode "755"}
+
                          "log4j2.xml"
 
                          {:type :selmer/template
@@ -50,6 +55,11 @@
                :systemd [{:type :selmer/template
                           :path "ook.service.template"
                           :dest-path "ook.service"
+                          :keys [:omni/install-dir]}
+
+                         {:type :selmer/template
+                          :path "etl.service.template"
+                          :dest-path "etl.service"
                           :keys [:omni/install-dir]}]
 
                :nginx [{:type :selmer/template

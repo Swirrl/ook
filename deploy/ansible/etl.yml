@@ -4,4 +4,4 @@
 
   tasks:
     - name: Execute pipeline
-      script: ./scripts/etl.sh
+      shell: systemd start etl
