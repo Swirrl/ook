@@ -1,3 +1,9 @@
+html {
+  /* set the default font size larger than bootstrap's default */
+  /* it's fine because they use rems for all the other font sizes */
+  font-size: 18px;
+}
+
 .ook-datasets {
   overflow-x: auto;
 }

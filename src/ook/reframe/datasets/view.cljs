@@ -64,15 +64,15 @@
   ^{:key uri}
   [:tr
    [:td.title-column
-    [:span.text-muted.me-2 (or (:altlabel publisher) "---")]
     (if label [:strong label] [:em.text-muted "Missing label for " uri])
-    [:small.vertical-truncate (or comment description)]]
+    [:p.text-muted.me-2 (or (:altlabel publisher) "---")]
+    [:p.vertical-truncate (or comment description)]]
    (for [[facet-name _] applied-facets]
      ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
    [:td
     (when matching-observation-count
       [:<>
-       [:small (str "Found " matching-observation-count " matching observations")]
+       [:p.m-0 (str "Found " matching-observation-count " matching observations")]
        [:a.d-block {:href (pu/link-to-pmd-dataset uri facets applied-facets)} "View Data"]])]])
 
 (defn- dataset-table [data]
