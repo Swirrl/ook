@@ -65,8 +65,8 @@
   [:tr
    [:td.title-column
     (if label [:strong label] [:em.text-muted "Missing label for " uri])
-    [:p.text-muted.me-2 (or (:altlabel publisher) "---")]
-    [:p.vertical-truncate (or comment description)]]
+    [:p.text-muted.me-2.mb-2 (or (:altlabel publisher) "---")]
+    [:p.m-0.vertical-truncate (or comment description)]]
    (for [[facet-name _] applied-facets]
      ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
    (when matching-observation-count

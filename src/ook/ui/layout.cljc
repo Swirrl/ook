@@ -41,13 +41,13 @@
    [:div.d-flex.justify-content-between.align-items-center.pt-5
     [:h1.mb-3
      [:a.link-dark #?(:clj {:href "/"}
-            :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
+                      :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
       "Find trade data"]]
     [:div [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]
    [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]])
 
 (defn- footer []
-  [:footer.footer.bg-light.p-4
+  [:footer.mt-auto.footer.bg-light.p-4
    [:div.container
     [:p.m-0
      "Created by Swirrl and the ONS in collaboration with DIT as part of the "

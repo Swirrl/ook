@@ -69,9 +69,9 @@
 ;;;;;; SEARCH
 
 (rf/reg-sub
-  :ui.facets.current/search-term
-  (fn [db _]
-    (some-> db :ui.facets/current :codes/search :search-term)))
+ :ui.facets.current/search-term
+ (fn [db _]
+   (some-> db :ui.facets/current :codes/search :search-term)))
 
 (rf/reg-sub
  :ui.facets.current/search-status
@@ -93,6 +93,16 @@
  (fn [db [_ uri]]
    (let [result-uris (->> db search/get-results (map :ook/uri) set)]
      (boolean (get result-uris uri)))))
+
+(rf/reg-sub
+ :ui.facets.current/search-result-code-count
+ (fn [db _]
+   (->> db search/get-results count)))
+
+(rf/reg-sub
+ :ui.facets.current/search-result-codelist-count
+ (fn [db _]
+   (->> db search/get-results (map :scheme) set count)))
 
 (rf/reg-sub
  :ui.facets.current/filtered-codelists

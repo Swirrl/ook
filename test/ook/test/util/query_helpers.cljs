@@ -69,7 +69,7 @@
   (all-text-content selectable-code-label-query))
 
 (defn all-labels []
-  (all-text-content (str ".filters .child > span, " selectable-code-label-query)))
+  (all-text-content (str ".filters .child > h4, .filters .child > span, " selectable-code-label-query)))
 
 (defn all-selected-labels []
   (all-text-content ".filters input[type='checkbox']:checked + label"))

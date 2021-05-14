@@ -55,7 +55,6 @@
       (let [search-status @(rf/subscribe [:ui.facets.current/search-results])]
         [:<>
          [facet-control-buttons facet-name]
-         [:p.h6.mt-4 "Codelists"]
          [search/code-search]
          (if search-status
            [search/search-info facet-name]
