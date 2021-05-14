@@ -6,4 +6,4 @@ SELECT DISTINCT ?code WHERE {
   ?code skos:inScheme ?scheme .
 
   ?dataset pmdcat:datasetContents/qb:structure/qb:component/qb:dimension/qb:codeList ?scheme .
-}
+} ORDER BY ?code

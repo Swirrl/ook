@@ -72,7 +72,6 @@
 
                        ;; just copy these file without changing them
                        "sites-available/monitoring-status"
-                       ".htpasswd"
 
                        ;; symlinks
 
