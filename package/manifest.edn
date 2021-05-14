@@ -21,10 +21,6 @@
                              :env-var PORT
                              :default 3010}
 
-             :ook/logs-dir {:doc "Location of the ook logs"
-                            :default "/var/log/ook"
-                            :optional false}
-
              :ook/domain {:doc "Domain hosting ook"
                           :default "_"
                           :optional false}}
@@ -42,9 +38,11 @@
                           :mode "755"}
 
                          {:type :selmer/template
-                          :path "log4j2.xml.template"
-                          :dest-path "log4j2.xml"
-                          :keys [:ook/logs-dir]}
+                          :path "etl-start.sh.template"
+                          :dest-path "etl-start.sh"
+                          :mode "755"}
+
+                         "log4j2.xml"
 
                          {:type :selmer/template
                           :path "ook-env.list.template"
@@ -57,6 +55,11 @@
                :systemd [{:type :selmer/template
                           :path "ook.service.template"
                           :dest-path "ook.service"
+                          :keys [:omni/install-dir]}
+
+                         {:type :selmer/template
+                          :path "etl.service.template"
+                          :dest-path "etl.service"
                           :keys [:omni/install-dir]}]
 
                :nginx [{:type :selmer/template

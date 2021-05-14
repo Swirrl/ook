@@ -1,0 +1,10 @@
+[Unit]
+Description=Job that runs the ook etl service
+After=network.target
+Wants=ook.service
+
+[Service]
+Type=simple
+UMask=077
+User=ook
+ExecStart={{omni/install-dir}}/etl-start.sh

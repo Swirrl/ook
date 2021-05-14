@@ -1,0 +1,6 @@
+#! /bin/bash
+
+cd {{omni/install-dir}}
+
+java -Dlog4j.configurationFile={{omni/install-dir}}/log4j2.xml \
+     -cp "{{ook/project-jar}}:lib/*" -Xmx3g clojure.main -m ook.index
