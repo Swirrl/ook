@@ -9,7 +9,7 @@ echo
 cd packer
 
 packer build \
-  -var gcloud_project=swirrl-staging-servers \
+  -var gcloud_project=ons-pilot \
   -var base_image_name=$base_image_name \
   -var template_name=ook-staging \
   -var ook_package_name=ook \

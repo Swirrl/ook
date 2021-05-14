@@ -3,7 +3,7 @@
   gather_facts: no
 
   vars:
-    project: "{{ settings[profile].project | default('swirrl-staging-servers') }}"
+    project: "{{ settings[profile].project | default('ons-pilot') }}"
     auth_kind: serviceaccount
     scopes:
       - https://www.googleapis.com/auth/compute
@@ -23,7 +23,7 @@
       gcp_compute_disk:
         name: "boot-disk-{{ server_name }}"
         size_gb: "{{ settings[profile].boot_disk_size }}"
-        source_image: "https://www.googleapis.com/compute/v1/projects/swirrl-staging-servers/global/images/{{source_image}}"
+        source_image: "https://www.googleapis.com/compute/v1/projects/ons-pilot/global/images/{{source_image}}"
         type: pd-ssd
         zone: "{{ zone }}"
         project: "{{ project }}"
