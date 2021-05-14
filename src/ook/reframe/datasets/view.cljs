@@ -17,23 +17,21 @@
     :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
    icons/close])
 
-(defn- dataset-count-message [data]
+(defn- dataset-count-heading [data]
   (let [dataset-count (count data)
         total-dataset-count @(rf/subscribe [:datasets/count])
         obs (total-observations data)]
     (cond
       (pos? obs)
-      [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
-       [:strong obs (u/pluralize " observation" obs)]]
+      [:h2
+       dataset-count (u/pluralize " dataset" dataset-count) " covering "
+       obs (u/pluralize " observation" obs)]
 
       (= dataset-count total-dataset-count)
-      [:p.my-4 "Showing all datasets"]
+      [:h2 "Datasets"]
 
       :else
-      [:p.my-4
-       [:strong dataset-count] " of "
-       [:strong total-dataset-count]
-       " datasets match"])))
+      [:h2 dataset-count " of " total-dataset-count " datasets match"])))
 
 (defn- matches-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)]
@@ -79,8 +77,8 @@
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
-    [:<>
-     (dataset-count-message data)
+    [:div.mt-3
+     (dataset-count-heading data)
      (when (seq applied-facets)
        [:p "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
      [:div.ook-datasets

@@ -77,14 +77,12 @@
         selected-facet-status @(rf/subscribe [:ui.facets.current/status])
         selected-facet-name @(rf/subscribe [:ui.facets.current/name])
         applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.card.my-4.filters
-     [:div.card-body
-      [:h2.h5.card-title.me-2.d-inline "Find data"]
-      [:span.text-muted "Add a filter"]
-      [:div.mt-3.d-flex.align-items-center.justify-content-between
-       [:div
-        (for [{:keys [name]} facets]
-          ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
-       (when (and selected-facet-name (= :ready selected-facet-status))
-         [cancel-facet-selection])]
-      [codelists-wrapper selected-facet-status selected-facet-name]]]))
+    [:div.filters
+     [:h2 "Filters"]
+     [:div.d-flex.align-items-center.justify-content-between
+      [:div
+       (for [{:keys [name]} facets]
+         ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
+      (when (and selected-facet-name (= :ready selected-facet-status))
+        [cancel-facet-selection])]
+     [codelists-wrapper selected-facet-status selected-facet-name]]))

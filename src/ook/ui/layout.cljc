@@ -43,8 +43,7 @@
      [:h1
       [:a.navbar-brand #?(:clj {:href "/"}
                           :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
-       "Trade Data Search"]]
-     [:span.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]])
+       "Trade Data Search"]]]]])
 
 (defn- footer []
   [:footer.footer.bg-light.p-3.mt-auto
@@ -61,12 +60,13 @@
 
 (defn- body [facets]
   [:body.d-flex.flex-column.h-100
-   (header)
+   ;;(header)
    [:main.flex-shrink-0
-    [:div.container
-     [:h1.display-4 "Structural Search"]
-     [:p.lead "Find the right trade data for your purpose"]
-     [:p "Search for observations within datasets based upon the dimensions and classification codes they involve."]
+    [:div.mt-3.container
+     [:div
+      [:h1.d-inline "Find trade data"]
+      [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]
+     [:p.lead "Search for observations from a range of datasets, using dimensions and classification codes."]
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 
