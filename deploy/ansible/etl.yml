@@ -1,6 +1,8 @@
 - name: Run ETL pipeline
   hosts: all
   gather_facts: no
+  become: yes
+  become_method: sudo
 
   tasks:
     - name: Execute pipeline
