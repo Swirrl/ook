@@ -2,7 +2,7 @@ plugin: gcp_compute
 zones:
   - europe-west1-b
 projects:
-  - swirrl-staging-servers
+  - ons-pilot
 filters:
   - labels.application=ook
 scopes:

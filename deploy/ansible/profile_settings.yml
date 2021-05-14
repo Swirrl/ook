@@ -1,6 +1,6 @@
 settings:
   ook_staging:
-    project: swirrl-staging-servers
+    project: ons-pilot
     zone: europe-west1-b
     cpus: 4
     memory: 16
