@@ -28,15 +28,6 @@ html {
   border-radius: .2rem;
 }
 
-.expand-code-button svg {
-  vertical-align: top;
-}
-
-.expand-code-button:focus,
-.expand-code-button ~ button:focus {
-  box-shadow: none;
-}
-
 button svg {
   fill: black;
   stroke: black;

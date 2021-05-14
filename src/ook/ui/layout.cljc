@@ -38,7 +38,7 @@
 
 (defn- header []
   [:div
-   [:div.d-flex.justify-content-between.align-items-center.pt-5
+   [:div.d-flex.justify-content-between.pt-5
     [:h1.mb-3
      [:a.link-dark #?(:clj {:href "/"}
                       :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})

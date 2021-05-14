@@ -6,18 +6,24 @@
    [ook.reframe.codes.view :as codes]))
 
 (defn- toggle-level-button [opts expanded?]
-  [:button.btn.as-link.p-0.m-0.expand-code-button.me-2
-   (merge opts {:type "button"})
+  [:button.btn.as-link.p-0.m-0.me-2.position-relative
+   (merge opts
+          {:type "button"
+           :aria-expanded expanded?
+           :style {:top "-4px"
+                   :width "1.3rem"}})
    (if expanded? icons/down icons/up)])
 
-(defn- toggle-code-expanded-button [uri expanded?]
+(defn- toggle-code-expanded-button [{:keys [ook/uri label]} expanded?]
   [toggle-level-button
-   {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])}
+   {:on-click #(rf/dispatch [:ui.event/toggle-disclosure uri])
+    :aria-label (str "Toggle disclosure of " label)}
    expanded?])
 
-(defn- toggle-codelist-expanded-button [uri expanded?]
+(defn- toggle-codelist-expanded-button [{:keys [ook/uri label]} expanded?]
   [toggle-level-button
-   {:on-click #(rf/dispatch [:ui.event/toggle-codelist uri])}
+   {:on-click #(rf/dispatch [:ui.event/toggle-codelist uri])
+    :aria-label (str "Toggle disclosure of " label)}
    expanded?])
 
 (defn- select-all-children-button [code]
@@ -46,7 +52,7 @@
   (let [expanded? @(rf/subscribe [:ui.facets.current/option-expanded? uri])]
     [codes/nested-list-item
      (when (seq children)
-       [toggle-code-expanded-button uri expanded?])
+       [toggle-code-expanded-button code expanded?])
      [codes/checkbox-input code]
      (when (seq children)
        [:<>
@@ -63,7 +69,7 @@
 (defn- codelist-item [{:keys [children ook/uri] :as codelist}]
   (let [expanded? @(rf/subscribe [:ui.facets.current/option-expanded? uri])]
     [codes/nested-list-item
-     [toggle-codelist-expanded-button uri expanded?]
+     [toggle-codelist-expanded-button codelist expanded?]
      [codes/checkbox-input (assoc codelist :used true)]
      [select-any-button codelist]
      (when expanded?
