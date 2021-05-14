@@ -11,7 +11,7 @@ cd packer
 packer build \
   -var gcloud_project=ons-pilot \
   -var base_image_name=$base_image_name \
-  -var template_name=ook-staging \
+  -var template_name=ook-production \
   -var ook_package_name=ook \
   -var ook_package_version=$ook_package_version \
   -var gcloud_account_file=$GCLOUD_ACCOUNT_FILE \
