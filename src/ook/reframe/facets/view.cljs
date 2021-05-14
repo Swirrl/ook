@@ -7,7 +7,7 @@
    [ook.reframe.codes.search.view :as search]))
 
 (defn- facet-button [facet-name selected? applied?]
-  [:button.btn.me-2.mb-2
+  [:button.btn.me-2
    {:type "button"
     :class (cond
              selected? "btn-dark"
@@ -21,7 +21,7 @@
      [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])
 
 (defn- cancel-facet-selection []
-  [:button.btn-close.border.border-dark
+  [:button.btn-close.border.border-dark.ms-2
    {:type "button"
     :aria-label "Close filter selection"
     :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
@@ -77,9 +77,9 @@
         selected-facet-status @(rf/subscribe [:ui.facets.current/status])
         selected-facet-name @(rf/subscribe [:ui.facets.current/name])
         applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.filters
-     [:h2 "Filters"]
-     [:div.d-flex.align-items-center.justify-content-between
+    [:div.pb-3.my-5.filters
+     [:h2.pb-2 "Filters"]
+     [:div.d-flex.align-items-center
       [:div
        (for [{:keys [name]} facets]
          ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]

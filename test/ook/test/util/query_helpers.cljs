@@ -115,13 +115,13 @@
   (all-text-content (str ".ook-datasets tr td:nth-child(" column-index-starting-from-1 ")")))
 
 (defn dataset-count-text []
-  (some-> (find-query ".filters") .-nextElementSibling text-content))
+  (some-> (find-query ".ook-datasets h2") text-content))
 
 (defn datset-results-columns []
   (all-text-content ".ook-datasets th"))
 
 (defn all-available-facets []
-  (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
+  (-> (find-query ".filters h2") .-nextElementSibling .-firstElementChild (all-text-content "button")))
 
 (defn remove-facet-button [facet-name]
   (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))

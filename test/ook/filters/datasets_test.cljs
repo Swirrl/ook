@@ -81,7 +81,7 @@
      (eh/click (qh/apply-filter-button))
 
      (testing "fetches datasets"
-       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= "1 dataset covering 123 observations" (qh/dataset-count-text)))
        (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
      (testing "adds current facet to results table"
@@ -107,7 +107,7 @@
        (is (nil? (qh/query-text "Codelists"))))
 
      (testing "resets the dataset list"
-       (is (= "Showing all datasets" (qh/dataset-count-text)))
+       (is (= "Datasets" (qh/dataset-count-text)))
        (is (= ["Dataset 1" "Dataset 2"] (qh/all-dataset-titles))))
 
      (testing "removes the column from the results table"
@@ -124,7 +124,7 @@
 
        (eh/click-text "Facet 1")
 
-       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= "1 dataset covering 123 observations" (qh/dataset-count-text)))
        (is (= ["Dataset 1"] (qh/all-dataset-titles))))
 
      (testing "shows the new facet"
@@ -136,8 +136,7 @@
      (eh/click-text "Codelist 1 Label")
      (eh/click (qh/apply-filter-button))
 
-     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
-            (qh/dataset-count-text)))
+     (is (= "No datasets matched the applied filters" (qh/dataset-count-text)))
 
      (eh/click-text "Clear filters")
 
@@ -157,7 +156,7 @@
    (testing "fetches codelists if they're not already cached (i.e. visiting from a permalink with filters)"
      (router/search-controller {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" nil}})}})
      (r/flush)
-     (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+     (is (= "1 dataset covering 123 observations" (qh/dataset-count-text)))
      (is (nil? @setup/codelist-request))
 
      (eh/click (qh/editable-facet-button "Facet 2"))
@@ -176,8 +175,7 @@
       {:query {:filters (p/serialize-filter-state {"Facet 2" {"cl2" #{"cl2-code3"}}})}})
      (r/flush)
 
-     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
-            (qh/dataset-count-text)))
+     (is (= "No datasets matched the applied filters" (qh/dataset-count-text)))
 
      (eh/click (qh/editable-facet-button "Facet 2"))
      (is (= "cl2" @setup/concept-tree-request)))
@@ -196,8 +194,7 @@
 
      (eh/click (qh/apply-filter-button))
      (is (= {"Facet 2" {"cl2" #{"cl2-code1"}}} @setup/dataset-request))
-     (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
-            (qh/dataset-count-text))))
+     (is (= "No datasets matched the applied filters" (qh/dataset-count-text))))
 
    (testing "it shows the right selection and disclosure"
      (eh/click (qh/editable-facet-button "Facet 2"))
@@ -240,12 +237,12 @@
        (eh/click-text "Codelist 2 Label")
        (eh/click (qh/apply-filter-button))
 
-       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= "1 dataset covering 123 observations" (qh/dataset-count-text)))
        (is (= ["Facet 2"] (qh/applied-facets)))
 
        (eh/click (qh/editable-facet-button "Facet 2"))
        (eh/click (qh/remove-filter-button))
-       (is (= "Showing all datasets" (qh/dataset-count-text)))
+       (is (= "Datasets" (qh/dataset-count-text)))
        (is (= [] (qh/applied-facets))))
 
      (testing "only removes one facet when multiple are applied"
@@ -257,13 +254,12 @@
        (eh/click-text "Codelist 1 Label")
        (eh/click (qh/apply-filter-button))
 
-       (is (= "No datasets matched the applied filters. Clear filters to reset and make a new selection."
-              (qh/dataset-count-text)))
+       (is (= "No datasets matched the applied filters" (qh/dataset-count-text)))
 
        (eh/click-text "Facet 1")
        (eh/click (qh/remove-filter-button))
 
-       (is (= "Found 1 dataset covering 123 observations" (qh/dataset-count-text)))
+       (is (= "1 dataset covering 123 observations" (qh/dataset-count-text)))
        (is (= ["Facet 2"] (qh/applied-facets)))))
 
    (setup/cleanup!)))

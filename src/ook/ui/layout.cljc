@@ -37,13 +37,14 @@
       [:p message]]]]))
 
 (defn- header []
-  [:header
-   [:nav.navbar.navbar-light.bg-light.mb-3
-    [:div.container
-     [:h1
-      [:a.navbar-brand #?(:clj {:href "/"}
-                          :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
-       "Trade Data Search"]]]]])
+  [:div
+   [:div.d-flex.justify-content-between.align-items-center.pt-5
+    [:h1.mb-3
+     [:a.link-dark #?(:clj {:href "/"}
+            :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
+      "Find trade data"]]
+    [:div [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]
+   [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]])
 
 (defn- footer []
   [:footer.footer.bg-light.p-3.mt-auto
@@ -60,13 +61,9 @@
 
 (defn- body [facets]
   [:body.d-flex.flex-column.h-100
-   ;;(header)
    [:main.flex-shrink-0
     [:div.mt-3.container
-     [:div
-      [:h1.d-inline "Find trade data"]
-      [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]
-     [:p.lead "Search for observations from a range of datasets, using dimensions and classification codes."]
+     (header)
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 

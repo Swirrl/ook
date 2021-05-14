@@ -77,20 +77,20 @@
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.mt-3
-     (dataset-count-heading data)
+    [:div.ook-datasets
+     [dataset-count-heading data]
      (when (seq applied-facets)
-       [:p "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
-     [:div.ook-datasets
+       [:p.pb-3 "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
+     [:div
       [:table.table
        [:thead (column-headers data applied-facets)]
        [:tbody (for [ds data]
                  (dataset-row ds applied-facets))]]]]))
 
 (defn- no-matches-message []
-  [:div.d-flex.align-items-center.mb-2
-   [:strong "No datasets matched the applied filters. "]
-   [:a.btn-link.mx-1
+  [:div.ook-datasets
+   [:h2 "No datasets matched the applied filters"]
+   [:a.btn-link
     {:role "button"
      :on-click #(rf/dispatch [:app/navigate :ook.route/home])}
     "Clear filters"]
