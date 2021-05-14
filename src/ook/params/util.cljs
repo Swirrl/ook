@@ -44,6 +44,7 @@
 
 (defn link-to-pmd-dataset [id dataset-facets applied-facets]
   (let [filter-facets (encode-filter-facets dataset-facets applied-facets)
-        query-string (str (ri/query-string (cond-> {:uri (str base-uri id) :apply-filters true}
-                                             (seq filter-facets) (assoc :filter-facets filter-facets))))]
+        query-string (str (ri/query-string (cond-> {:uri (str base-uri id)}
+                                             (seq filter-facets) (assoc :apply-filters true
+                                                                        :filter-facets filter-facets))))]
     (str pmd-uri "cube/explore?" query-string)))
