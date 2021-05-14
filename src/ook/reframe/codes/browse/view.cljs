@@ -30,10 +30,10 @@
                              (rf/dispatch [:ui.event/set-selection :add-children code])))}
          (if all-selected? "none" "all children")]))))
 
-(defn- select-any-button [codelist]
+(defn- select-any-button [{:keys [ook/uri label] :as codelist}]
   [common/text-button
    {:on-click #(rf/dispatch [:ui.event/set-selection :any codelist])}
-   "any"])
+   ^{:key uri}[:span "any" [:span.visually-hidden (str label " codes")]]])
 
 (defn- no-codes-message []
   [codes/nested-list
