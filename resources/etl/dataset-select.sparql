@@ -2,4 +2,4 @@ PREFIX pmdcat: <http://publishmydata.com/pmdcat#>
 
 SELECT (?dataset AS ?entry) WHERE {
   ?dataset a pmdcat:Dataset .
-} ORDER BY ?dataset
+}
