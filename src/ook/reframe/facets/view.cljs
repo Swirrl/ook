@@ -13,18 +13,20 @@
              selected? "btn-dark"
              applied? "btn-outline-dark applied-facet"
              :else "btn-outline-dark")
-    :on-click #(if applied?
-                 (rf/dispatch [:ui.event/edit-facet facet-name])
-                 (rf/dispatch [:ui.event/select-facet facet-name]))}
+    :aria-label (cond
+                  selected? (str "Close " facet-name " filter")
+                  applied? (str "Edit " facet-name " filter")
+                  :else (str "Open " facet-name " filter"))
+    :on-click #(cond
+                 selected? (rf/dispatch [:ui.event/cancel-current-selection])
+                 applied? (rf/dispatch [:ui.event/edit-facet facet-name])
+                 :else (rf/dispatch [:ui.event/select-facet facet-name]))}
    facet-name
    (when applied?
-     [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])
-
-(defn- cancel-facet-selection []
-  [:button.btn-close.border.border-dark.ms-2
-   {:type "button"
-    :aria-label "Close filter selection"
-    :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
+     [:span.ms-2.edit-facet
+      {:role "button" :style {:top "-1px" :position "relative"}} icons/edit])
+   (when selected?
+     [:span.ms-2.close-facet {:role "button"} icons/close])])
 
 (defn- apply-filter-button [disabled?]
   [common/primary-button
@@ -81,7 +83,5 @@
      [:div.d-flex.align-items-center
       [:div
        (for [{:keys [name]} facets]
-         ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
-      (when (and selected-facet-name (= :ready selected-facet-status))
-        [cancel-facet-selection])]
+         ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]]
      [codelists-wrapper selected-facet-status selected-facet-name]]))

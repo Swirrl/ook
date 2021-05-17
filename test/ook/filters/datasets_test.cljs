@@ -132,7 +132,6 @@
        (is (= ["Codelist 1 Label"] (qh/all-labels)))))
 
    (testing "clearing all filters"
-     (eh/click-text "Facet 1")
      (eh/click-text "Codelist 1 Label")
      (eh/click (qh/apply-filter-button))
 

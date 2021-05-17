@@ -84,10 +84,10 @@
   (some-> label query-text .-parentNode (find-query "button ~ button")))
 
 (defn cancel-facet-selection-button []
-  (find-query ".filters button.btn-close"))
+  (find-query ".filters .close-facet"))
 
 (defn editable-facet-button [facet-name]
-  (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
+  (-> (find-query ".filters") (query-text facet-name) (find-query ".edit-facet")))
 
 ;;; Search
 
