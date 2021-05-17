@@ -80,6 +80,9 @@
 
 (defn code-selection [facet-name]
   (let [codelists @(rf/subscribe [:ui.facets/codelists facet-name])]
-    [:ul.top-level
-     (for [{:keys [ook/uri label] :as codelist} codelists]
-       ^{:key [uri label]} [codelist-item codelist])]))
+    [:form
+     [:legend.visually-hidden (str "Codes available in the " facet-name " facet")]
+     [:fieldset
+      [:ul.top-level
+       (for [{:keys [ook/uri label] :as codelist} codelists]
+         ^{:key [uri label]} [codelist-item codelist])]]]))
