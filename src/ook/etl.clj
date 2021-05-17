@@ -82,8 +82,9 @@
      (try
        ;; write results to tempfile cache
        (let [client (interceptors/accept client "text/csv")]
-         (with-open [os (io/output-stream cache-file)]
-           (io/copy (io/input-stream (query client query-string)) os)))
+         (with-open [cache (io/output-stream cache-file)
+                     result (io/input-stream (query client query-string))]
+           (io/copy result cache)))
        ;; read results from tempfile cache
        (let [rdr (io/reader cache-file)
              var-name (.readLine rdr)
