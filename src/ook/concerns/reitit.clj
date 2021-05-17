@@ -25,7 +25,9 @@
   (ring/router routes))
 
 (defmethod ig/init-key :ook.concerns.reitit/default-handler [_ _]
-  (ring/create-default-handler
-   {:not-found (constantly {:status 404, :body "404"})
-    :method-not-allowed (constantly {:status 405, :body "405"})
-    :not-acceptable (constantly {:status 406, :body "406"})}))
+  (ring/routes
+   (ring/redirect-trailing-slash-handler)
+   (ring/create-default-handler
+    {:not-found (constantly {:status 404, :body "404" :headers {}})
+     :method-not-allowed (constantly {:status 405, :body "405" :headers {}})
+     :not-acceptable (constantly {:status 406, :body "406" :headers {}})})))
