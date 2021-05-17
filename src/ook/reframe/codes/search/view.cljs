@@ -66,7 +66,7 @@
   (let [code-count @(rf/subscribe [:ui.facets.current/search-result-code-count])
         codelist-count @(rf/subscribe [:ui.facets.current/search-result-codelist-count])]
     [:h3 (str "Found " code-count (u/pluralize " code" code-count)
-                  " in " codelist-count (u/pluralize " codelist" codelist-count))]))
+              " in " codelist-count (u/pluralize " codelist" codelist-count))]))
 
 (defn- search-results-tree [facet-name]
   (let [codelists @(rf/subscribe [:ui.facets.current/filtered-codelists facet-name])]
@@ -91,6 +91,9 @@
 
       :ready [search-results facet-name]
 
-      :error [common/error-message "Sorry, there was an error submitting your search"]
+      :error
+      [:<>
+       [options false]
+       [common/error-message "Sorry, there was an error submitting your search"]]
 
       [common/error-message "Sorry, something went wrong."])))

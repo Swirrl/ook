@@ -52,7 +52,7 @@
   (when facet-name
     (if @(rf/subscribe [:ui.facets/no-codelists? facet-name])
       [:p.h6.mt-4 "No codelists for facet"]
-      (let [search-status @(rf/subscribe [:ui.facets.current/search-results])]
+      (let [search-status @(rf/subscribe [:ui.facets.current/search-status])]
         [:<>
          [facet-control-buttons facet-name]
          [search/code-search]
