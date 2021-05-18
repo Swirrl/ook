@@ -17,18 +17,18 @@
 (defmethod ig/init-key :ook.concerns.reitit/router [_ {:keys [routes]}]
   (ring/router routes))
 
-(defmethod ig/init-key :ook.concerns.reitit/default-handler [_ _]
+(defmethod ig/init-key :ook.concerns.reitit/default-handler [_ {:keys [handler/exception-handler]}]
   (ring/routes
    (ring/redirect-trailing-slash-handler)
    (ring/create-default-handler
-    {:not-found (constantly {:status 404, :body "404" :headers {}})
-     :method-not-allowed (constantly {:status 405, :body "405" :headers {}})
-     :not-acceptable (constantly {:status 406, :body "406" :headers {}})})))
+    {:not-found (partial exception-handler 404 "Page not found." nil)
+     :method-not-allowed (partial exception-handler 405 "Method not allowed." nil)
+     :not-acceptable (partial exception-handler 406 "Request not acceptable." nil)})))
 
 (defmethod ig/init-key :ook.concerns.reitit/error-handler [_ {:keys [assets/fingerprinter]}]
-  (fn [message exception request]
-    {:status 500
-     :body (layout/->html (layout/error-page "500" message fingerprinter))}))
+  (fn [status message exception request]
+    {:status status
+     :body (layout/->html (layout/error-page status message fingerprinter))}))
 
 (defmethod ig/init-key :ook.concerns.reitit/exception-middleware [_ {:keys [handler/exception-handler]}]
   ;; custom-configured reitit exception middleware
@@ -36,9 +36,9 @@
   (exception/create-exception-middleware
    (merge
     exception/default-handlers
-    {java.net.ConnectException (partial exception-handler "Error connecting to elasticsearch.")
+    {java.net.ConnectException (partial exception-handler 500 "Error connecting to elasticsearch.")
 
-     ::exception/default (partial exception-handler "Error.")
+     ::exception/default (partial exception-handler 500 "Error.")
 
        ;; print stack-traces for all exceptions
      ::exception/wrap (fn [handler error request]

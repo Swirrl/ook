@@ -8,7 +8,7 @@
                                     :default-handler #ig/ref :ook.concerns.reitit/default-handler
                                     :middleware #ig/ref :ook.concerns.reitit/middleware}
 
- :ook.concerns.reitit/default-handler {}
+ :ook.concerns.reitit/default-handler {:handler/exception-handler #ig/ref :ook.concerns.reitit/error-handler}
  :ook.concerns.reitit/error-handler {:assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
 
  :ook.concerns.reitit/middleware {:middleware/exceptions #ig/ref :ook.concerns.reitit/exception-middleware}
