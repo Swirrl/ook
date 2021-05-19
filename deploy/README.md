@@ -74,7 +74,7 @@ packer build -var gcloud_project=<project-name> \
 e.g.
 
 ```#
-packer build -var gcloud_project=swirrl-staging-servers \
+packer build -var gcloud_project=ons-pilot \
   -var gcloud_account_file=$GCLOUD_ACCOUNT_FILE \
   -var output_image_name=ook-base \
   base.json
@@ -113,7 +113,7 @@ e.g. using a build from [CI](https://app.circleci.com/pipelines/github/Swirrl/oo
 cd packer
 
 packer build \
-  -var gcloud_project=swirrl-staging-servers \
+  -var gcloud_project=ons-pilot \
   -var base_image_name=ook-base-1614968110 \
   -var template_name=ook-staging \
   -var ook_package_name=ook \

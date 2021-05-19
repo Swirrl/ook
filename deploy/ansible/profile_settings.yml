@@ -7,3 +7,11 @@ settings:
     boot_disk_size: 50
     elasticsearch_disk_size: 100
     install_datadog: no
+  ook_production:
+    project: ons-pilot
+    zone: europe-west1-b
+    cpus: 4
+    memory: 16
+    boot_disk_size: 50
+    elasticsearch_disk_size: 100
+    install_datadog: no
