@@ -11,7 +11,7 @@
    (common/with-react-keys children)])
 
 (defn checkbox-input [{:keys [ook/uri label used] :as option}]
-  (let [selected? @(rf/subscribe [:ui.facets.current/option-selected? option])
+  (let [checked-state @(rf/subscribe [:ui.facets.current/checked-state option])
         id (str (gensym (str uri "-react-id-")))]
     [:<>
      [:input.form-check-input.me-2
@@ -19,9 +19,10 @@
                :name "code"
                :value uri
                :id id
-               :checked selected?
+               :checked (= :checked checked-state)
                :on-change #(rf/dispatch [:ui.event/toggle-selection option])}
-        (not used) (merge {:disabled true}))]
+        (not used) (assoc :disabled true)
+        (= :indeterminate checked-state) (assoc :class "indeterminate-checkbox"))]
      [:label.form-check-label.d-inline {:for id} label]]))
 
 (defn codelist-wrapper [codelist-uri code-tree]

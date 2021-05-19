@@ -38,9 +38,18 @@
    (some-> db :ui.facets/current :selection)))
 
 (rf/reg-sub
- :ui.facets.current/option-selected?
+ :ui.facets.current/checked-state
  (fn [db [_ option]]
-   (selection/option-selected? (:ui.facets/current db) option)))
+   (let [selected-uris (selection/all-selected-uris db)]
+     (cond
+       (selection/option-selected? (:ui.facets/current db) option)
+       :checked
+
+       (selection/indeterminate? selected-uris option)
+       :indeterminate
+
+       :else
+       :unchecked))))
 
 (rf/reg-sub
  :ui.facets.current/option-expanded?
@@ -49,7 +58,7 @@
 
 (rf/reg-sub
  :ui.facets.current/all-used-children-selected?
- (fn [db [_ {:keys [scheme children] :as code}]]
+ (fn [db [_ {:keys [scheme children]}]]
    (let [used-child-uris (->> children (filter :used) (map :ook/uri) set)
          current-selection (-> db :ui.facets/current :selection (get scheme))]
      (set/subset? used-child-uris current-selection))))
