@@ -15,6 +15,7 @@
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
 
+
 ;; Pipeline debugging
 
 (defn write-to-disk
@@ -71,49 +72,82 @@
         clause (str "\n  VALUES ?" var-name " { " terms " }\n")]
     (str top clause bottom)))
 
+(defn spill-to-disk
+  "Writes data to file"
+  [data file]
+  (with-open [os (io/output-stream file)
+              is (io/input-stream data)]
+    (io/copy is os)))
+
+(defn read-paged
+  "Reads lines out of file in lazy-seq of pages.
+  Pages are vectors - the variable name followed by the values."
+  [file page-size]
+  (let [rdr (io/reader file)
+        var-name (.readLine rdr)
+        read-lines (fn this [r]
+                     (lazy-seq
+                      (if-let [line (.readLine r)]
+                        (cons line (this r))
+                        (.close r))))]
+    (->> (read-lines rdr)
+         (partition-all page-size)
+         (map (fn [page] (cons var-name page))))))
+
 (defn select-paged
   "Executes a select query returning results in a lazy seq of pages.
-   Query results are spilled to disk and read out one page at a time.
-   Pages are vectors - the variable name followed by the values."
-  ([client query-string]
-   (select-paged client query-string 50000))
-  ([client query-string page-size]
-   (let [cache-file (File/createTempFile "ook-etl-subject-cache-" ".tmp")]
+  Pages are vectors - the variable name followed by the values.
+  Query results are spilled to disk and read out in page-size partitions.
+  If a graph query is provided the subject-query is first paged by graph,
+  one-at-a-time."
+  ([client subject-query page-size]
+   (let [subject-cache (File/createTempFile "ook-etl-subject-cache-" ".tmp")]
      (try
-       ;; write results to tempfile cache
        (let [client (interceptors/accept client "text/csv")]
-         (with-open [cache (io/output-stream cache-file)
-                     result (io/input-stream (query client query-string))]
-           (io/copy result cache)))
-       ;; read results from tempfile cache
-       (let [rdr (io/reader cache-file)
-             var-name (.readLine rdr)
-             read-lines (fn this [r]
-                          (lazy-seq
-                           (if-let [line (.readLine r)]
-                             (cons line (this r))
-                             (.close r))))]
-         ;; paginate
-         (->> (read-lines rdr)
-              (partition-all page-size)
-              (map (fn [page]
-                     (cons var-name page)))))
-       (finally (.delete cache-file))))))
+         (spill-to-disk (query client subject-query) subject-cache))
+       (read-paged subject-cache page-size)
+       (finally (.delete subject-cache)))))
+  ([client graph-query subject-query page-size]
+   (let [graph-cache (File/createTempFile "ook-etl-graph-cache-" ".tmp")]
+     (try
+       (let [client (interceptors/accept client "text/csv")]
+         (spill-to-disk (query client graph-query) graph-cache))
+       (mapcat (fn [[var-name values]]
+                 (let [subject-query (insert-values-clause subject-query var-name [values])]
+                   (select-paged client subject-query page-size)))
+               (read-paged graph-cache 1)) ;; read multi-graph datasets one graph
+       (finally (.delete graph-cache))))))
 
 
 
 ;; Extract
+(defn with-dataset-scope [query datasets]
+  "Scopes query to target datasets if present"
+  (if datasets
+    (insert-values-clause query "dataset" datasets)
+    query))
 
 (defn subject-pages
   "Executes a query to get a collection of URIs. Returns pages of URIs for
    inserting into another query. Each page is a vector beginning with the var name
-   followed by the URIs. NB: Only expecting a single variable to be bound in the results.
-   See `insert-values-clause`."
-  [{:keys [drafter-client/client ook.etl/target-datasets ook.etl/select-page-size] :as system} subject-query]
-  (let [subject-query (if target-datasets
-                        (insert-values-clause subject-query "dataset" target-datasets)
-                        subject-query)]
-    (select-paged client subject-query (or select-page-size 50000))))
+   followed by the URIs."
+  ([{:keys [drafter-client/client
+            ook.etl/target-datasets
+            ook.etl/select-page-size]
+     :as system
+     :or {select-page-size 50000}} subject-query]
+   (select-paged client
+                 (with-dataset-scope subject-query target-datasets)
+                 select-page-size))
+  ([{:keys [drafter-client/client
+            ook.etl/target-datasets
+            ook.etl/select-page-size]
+     :as system
+     :or {select-page-size 50000}} graph-query subject-query]
+   (select-paged client
+                 (with-dataset-scope graph-query target-datasets)
+                 (with-dataset-scope subject-query target-datasets)
+                 select-page-size)))
 
 (defn extract
   "Executes the construct query binding in values from page"
@@ -194,11 +228,11 @@
 
 ;; Pipeline
 
-(defn pipeline-fn [page-query construct-query jsonld-frame index]
+(defn pipeline-fn* [pager-fn construct-query jsonld-frame index]
   (fn [system]
     (log/info (str "Pipeline Started: " index))
     (let [counter (atom 0)]
-      (doseq [[var-name & uris] (subject-pages system page-query)]
+      (doseq [[var-name & uris] (pager-fn system)]
         (log/info "Processing page starting with" index "subject" @counter)
         (if uris
           (do
@@ -210,6 +244,16 @@
                     (load-documents system index)))))
           (log/warn (str "No compatible (" index ") subjects found!")))))
     (log/info (str "Pipeline Complete: " index))))
+
+(defn pipeline-fn
+  ([subject-query construct-query jsonld-frame index]
+   (pipeline-fn*
+    (fn [system] (subject-pages system subject-query))
+    construct-query jsonld-frame index))
+  ([graph-query subject-query construct-query jsonld-frame index]
+   (pipeline-fn*
+    (fn [system] (subject-pages system graph-query subject-query))
+    construct-query jsonld-frame index)))
 
 (def dataset-pipeline
   (pipeline-fn
@@ -241,6 +285,7 @@
 
 (def observation-pipeline
   (pipeline-fn
+   (slurp (io/resource "etl/observation-graph.sparql"))
    (slurp (io/resource "etl/observation-select.sparql"))
    (slurp (io/resource "etl/observation-construct.sparql"))
    (slurp (io/resource "etl/observation-frame.json"))
