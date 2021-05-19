@@ -26,6 +26,16 @@
            :crossorigin "anonymous"}]
    [:link {:href (fingerprint-path "/assets/css/styles.css") :rel "stylesheet" :type "text/css"}]])
 
+(defn error-page [status message fingerprinter]
+  (page
+   (head fingerprinter)
+   [:body.mt-5
+    [:main
+     [:div.container
+      [:h1 status]
+      [:p.lead "Sorry, something went wrong."]
+      [:p message]]]]))
+
 (defn- header []
   [:header
    [:nav.navbar.navbar-light.bg-light.mb-3

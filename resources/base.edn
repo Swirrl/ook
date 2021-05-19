@@ -5,9 +5,14 @@
  :ook.concerns.elastic/endpoint "http://127.0.0.1:9200"
 
  :ook.concerns.reitit/ring-handler {:router #ig/ref :ook.concerns.reitit/router
-                                    :default-handler #ig/ref :ook.concerns.reitit/default-handler}
+                                    :default-handler #ig/ref :ook.concerns.reitit/default-handler
+                                    :middleware #ig/ref :ook.concerns.reitit/middleware}
 
- :ook.concerns.reitit/default-handler {}
+ :ook.concerns.reitit/default-handler {:handler/exception-handler #ig/ref :ook.concerns.reitit/error-handler}
+ :ook.concerns.reitit/error-handler {:assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
+
+ :ook.concerns.reitit/middleware {:middleware/exceptions #ig/ref :ook.concerns.reitit/exception-middleware}
+ :ook.concerns.reitit/exception-middleware {:handler/exception-handler #ig/ref :ook.concerns.reitit/error-handler}
 
  :ook.handler/assets {:assets/root #ig/ref :ook.assets/root}
 

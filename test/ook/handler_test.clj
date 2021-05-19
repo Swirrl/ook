@@ -28,7 +28,7 @@
         (testing "/not-a-route returns 404"
           (let [response (request-html "not-a-route")]
             (is (= 404 (:status response)))
-            (is (= "404" (:body response))))))
+            (is (str/includes? (:body response) "not found")))))
 
       (testing "internal api routes"
         (testing "/datasets"
