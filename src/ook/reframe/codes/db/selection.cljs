@@ -39,13 +39,17 @@
     (-> selection (get scheme) (get uri) boolean)
     (and (contains? selection uri) (nil? (get selection uri)))))
 
-(defn indeterminate? [selected-uris option]
+(defn- all-child-uris [node]
   (let [walk (fn walk* [node]
                (cons (:ook/uri node)
                      (when-let [children (:children node)]
                        (when-not (= :no-children children)
-                         (mapcat walk* children)))))
-        all-child-uris (set (walk option))]
+                         (mapcat walk* children)))))]
+    (set (walk node))))
+
+(defn indeterminate? [selected-uris option]
+  (let [walk (memoize all-child-uris)
+        all-child-uris (walk option)]
     (boolean (seq (set/intersection selected-uris all-child-uris)))))
 
 (defn toggle [facet option]
