@@ -6,4 +6,6 @@
 
   tasks:
     - name: Execute pipeline
-      shell: systemd start etl
+      systemd:
+        name: etl
+        state: started
