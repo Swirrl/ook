@@ -146,7 +146,7 @@
      :or {select-page-size 50000}} graph-query subject-query]
    (select-paged client
                  (with-dataset-scope graph-query target-datasets)
-                 (with-dataset-scope subject-query target-datasets)
+                 subject-query
                  select-page-size)))
 
 (defn extract
