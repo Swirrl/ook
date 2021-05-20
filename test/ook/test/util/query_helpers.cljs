@@ -69,7 +69,7 @@
   (all-text-content selectable-code-label-query))
 
 (defn all-labels []
-  (all-text-content (str ".filters .child > span, " selectable-code-label-query)))
+  (all-text-content (str ".filters .child > h4, .filters .child > span, " selectable-code-label-query)))
 
 (defn all-selected-labels []
   (all-text-content ".filters input[type='checkbox']:checked + label"))
@@ -84,10 +84,10 @@
   (some-> label query-text .-parentNode (find-query "button ~ button")))
 
 (defn cancel-facet-selection-button []
-  (find-query ".filters button.btn-close"))
+  (find-query ".filters .close-facet"))
 
 (defn editable-facet-button [facet-name]
-  (-> (find-query ".filters") (query-text facet-name) (find-query "svg")))
+  (-> (find-query ".filters") (query-text facet-name) (find-query ".edit-facet")))
 
 ;;; Search
 
@@ -115,13 +115,13 @@
   (all-text-content (str ".ook-datasets tr td:nth-child(" column-index-starting-from-1 ")")))
 
 (defn dataset-count-text []
-  (some-> (find-query ".filters") .-nextElementSibling text-content))
+  (some-> (find-query ".ook-datasets h2") text-content))
 
 (defn datset-results-columns []
   (all-text-content ".ook-datasets th"))
 
 (defn all-available-facets []
-  (-> (find-text "Add a filter") .-nextElementSibling .-firstElementChild (all-text-content "button")))
+  (-> (find-query ".filters h2") .-nextElementSibling .-firstElementChild (all-text-content "button")))
 
 (defn remove-facet-button [facet-name]
   (some-> (find-query ".ook-datasets") (query-text facet-name) .-parentNode (find-query "button")))

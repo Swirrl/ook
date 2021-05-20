@@ -1,3 +1,9 @@
+html {
+  /* set the default font size larger than bootstrap's default */
+  /* it's fine because they use rems for all the other font sizes */
+  font-size: 18px;
+}
+
 .ook-datasets {
   overflow-x: auto;
 }
@@ -20,15 +26,6 @@
   font-size: .65rem;
   line-height: .5;
   border-radius: .2rem;
-}
-
-.expand-code-button svg {
-  vertical-align: top;
-}
-
-.expand-code-button:focus,
-.expand-code-button ~ button:focus {
-  box-shadow: none;
 }
 
 button svg {
@@ -64,7 +61,7 @@ button.applied-facet:hover svg {
 }
 
 .filters .child {
-  padding-top: 0.6rem;
+  padding-top: 0.4rem;
 }
 
 .filters .children .child {

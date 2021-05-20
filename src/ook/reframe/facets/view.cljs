@@ -7,24 +7,26 @@
    [ook.reframe.codes.search.view :as search]))
 
 (defn- facet-button [facet-name selected? applied?]
-  [:button.btn.me-2.mb-2
+  [:button.btn.me-2
    {:type "button"
     :class (cond
              selected? "btn-dark"
              applied? "btn-outline-dark applied-facet"
              :else "btn-outline-dark")
-    :on-click #(if applied?
-                 (rf/dispatch [:ui.event/edit-facet facet-name])
-                 (rf/dispatch [:ui.event/select-facet facet-name]))}
+    :aria-label (cond
+                  selected? (str "Close " facet-name " filter")
+                  applied? (str "Edit " facet-name " filter")
+                  :else (str "Open " facet-name " filter"))
+    :on-click #(cond
+                 selected? (rf/dispatch [:ui.event/cancel-current-selection])
+                 applied? (rf/dispatch [:ui.event/edit-facet facet-name])
+                 :else (rf/dispatch [:ui.event/select-facet facet-name]))}
    facet-name
    (when applied?
-     [:span.ms-2 {:style {:top "-1px" :position "relative"}} icons/edit])])
-
-(defn- cancel-facet-selection []
-  [:button.btn-close.border.border-dark
-   {:type "button"
-    :aria-label "Close filter selection"
-    :on-click #(rf/dispatch [:ui.event/cancel-current-selection])}])
+     [:span.ms-2.edit-facet
+      {:role "button" :style {:top "-1px" :position "relative"}} icons/edit])
+   (when selected?
+     [:span.ms-2.close-facet {:role "button"} icons/close])])
 
 (defn- apply-filter-button [disabled?]
   [common/primary-button
@@ -52,10 +54,9 @@
   (when facet-name
     (if @(rf/subscribe [:ui.facets/no-codelists? facet-name])
       [:p.h6.mt-4 "No codelists for facet"]
-      (let [search-status @(rf/subscribe [:ui.facets.current/search-results])]
+      (let [search-status @(rf/subscribe [:ui.facets.current/search-status])]
         [:<>
          [facet-control-buttons facet-name]
-         [:p.h6.mt-4 "Codelists"]
          [search/code-search]
          (if search-status
            [search/search-info facet-name]
@@ -77,14 +78,10 @@
         selected-facet-status @(rf/subscribe [:ui.facets.current/status])
         selected-facet-name @(rf/subscribe [:ui.facets.current/name])
         applied-facets @(rf/subscribe [:facets/applied])]
-    [:div.card.my-4.filters
-     [:div.card-body
-      [:h2.h5.card-title.me-2.d-inline "Find data"]
-      [:span.text-muted "Add a filter"]
-      [:div.mt-3.d-flex.align-items-center.justify-content-between
-       [:div
-        (for [{:keys [name]} facets]
-          ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]
-       (when (and selected-facet-name (= :ready selected-facet-status))
-         [cancel-facet-selection])]
-      [codelists-wrapper selected-facet-status selected-facet-name]]]))
+    [:div.pb-3.my-5.filters
+     [:h2.pb-2 "Filters"]
+     [:div.d-flex.align-items-center
+      [:div
+       (for [{:keys [name]} facets]
+         ^{:key name} [facet-button name (= name selected-facet-name) (get applied-facets name)])]]
+     [codelists-wrapper selected-facet-status selected-facet-name]]))

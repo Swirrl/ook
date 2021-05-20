@@ -14,7 +14,7 @@
              {"Product" {"def/trade/concept-scheme/product" ["def/trade/concept/product/A" "def/trade/concept/product/B"]}}))))
 
   (testing "does not include filter facet params for facets with no matching codes"
-    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id&apply-filters=true"
+    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id"
            (sut/link-to-pmd-dataset
              "data/dataset-id"
              [{:name "Facet"
@@ -24,7 +24,7 @@
              {"Facet" {"some/scheme" ["some/code"]}}))))
 
   (testing "does not include filter facet params for facets specified with codelists (despite finding matching codes)"
-    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id&apply-filters=true"
+    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id"
            (sut/link-to-pmd-dataset
              "data/dataset-id"
              [{:name "Facet"

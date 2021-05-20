@@ -37,21 +37,21 @@
       [:p message]]]]))
 
 (defn- header []
-  [:header
-   [:nav.navbar.navbar-light.bg-light.mb-3
-    [:div.container
-     [:h1
-      [:a.navbar-brand #?(:clj {:href "/"}
-                          :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
-       "Trade Data Search"]]
-     [:span.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]])
+  [:div
+   [:div.d-flex.justify-content-between.pt-5
+    [:h1.mb-3
+     [:a.link-dark #?(:clj {:href "/"}
+                      :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
+      "Find trade data"]]
+    [:div [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]
+   [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]])
 
 (defn- footer []
-  [:footer.footer.bg-light.p-3.mt-auto
+  [:footer.mt-auto.footer.bg-light.p-4
    [:div.container
-    [:p
+    [:p.m-0
      "Created by Swirrl and the ONS in collaboration with DIT as part of the "
-     [:a {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
+     [:a.link-dark {:href "https://beta.gss-data.org.uk/"} "Integrated Data Programme"]
      "."]]])
 
 (defn- scripts [fingerprint-path]
@@ -61,12 +61,9 @@
 
 (defn- body [facets]
   [:body.d-flex.flex-column.h-100
-   (header)
    [:main.flex-shrink-0
-    [:div.container
-     [:h1.display-4 "Structural Search"]
-     [:p.lead "Find the right trade data for your purpose"]
-     [:p "Search for observations within datasets based upon the dimensions and classification codes they involve."]
+    [:div.mt-3.container
+     (header)
      [:noscript "For full functionality of this site it is necessary to enable JavaScript.
  Here are the " [:a {:href "https://enable-javascript.com/"} "instructions for how to enable JavaScript in your web browser."]]
 

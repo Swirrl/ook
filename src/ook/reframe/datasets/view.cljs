@@ -17,23 +17,21 @@
     :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
    icons/close])
 
-(defn- dataset-count-message [data]
+(defn- dataset-count-heading [data]
   (let [dataset-count (count data)
         total-dataset-count @(rf/subscribe [:datasets/count])
         obs (total-observations data)]
     (cond
       (pos? obs)
-      [:p.my-4 "Found " [:strong dataset-count (u/pluralize " dataset" dataset-count)] " covering "
-       [:strong obs (u/pluralize " observation" obs)]]
+      [:h2
+       dataset-count (u/pluralize " dataset" dataset-count) " covering "
+       obs (u/pluralize " observation" obs)]
 
       (= dataset-count total-dataset-count)
-      [:p.my-4 "Showing all datasets"]
+      [:h2 "Datasets"]
 
       :else
-      [:p.my-4
-       [:strong dataset-count] " of "
-       [:strong total-dataset-count]
-       " datasets match"])))
+      [:h2 dataset-count " of " total-dataset-count " datasets match"])))
 
 (defn- matches-for-facet [facet-name ds-facets]
   (let [facet (->> ds-facets (filter #(= facet-name (:name %))) first)]
@@ -63,36 +61,39 @@
 
 (defn- dataset-row [{:keys [label publisher comment description ook/uri matching-observation-count facets]}
                     applied-facets]
-  ^{:key uri}
-  [:tr
-   [:td.title-column
-    [:span.text-muted.me-2 (or (:altlabel publisher) "---")]
-    (if label [:strong label] [:em.text-muted "Missing label for " uri])
-    [:small.vertical-truncate (or comment description)]]
-   (for [[facet-name _] applied-facets]
-     ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
-   [:td
-    (when matching-observation-count
-      [:<>
-       [:small (str "Found " matching-observation-count " matching observations")]
-       [:a.d-block {:href (pu/link-to-pmd-dataset uri facets applied-facets)} "View Data"]])]])
+  (let [pmd-link (pu/link-to-pmd-dataset uri facets applied-facets)]
+    ^{:key uri}
+    [:tr
+     [:td.title-column
+      (if label
+        [:strong [:a.link-dark {:href pmd-link} label]]
+          [:em.text-muted "Missing label for " uri])
+      [:p.text-muted.me-2.mb-2 (or (:altlabel publisher) "---")]
+      [:p.m-0.vertical-truncate (or comment description)]]
+     (for [[facet-name _] applied-facets]
+       ^{:key [uri facet-name]} [:td (matches-for-facet facet-name facets)])
+     (when matching-observation-count
+       [:td
+        [:<>
+         [:p.m-0 (str "Found " matching-observation-count " matching observations")]
+         [:a.d-block {:href pmd-link} "View Data"]]])]))
 
 (defn- dataset-table [data]
   (let [applied-facets @(rf/subscribe [:facets/applied])]
-    [:<>
-     (dataset-count-message data)
+    [:div.ook-datasets
+     [dataset-count-heading data]
      (when (seq applied-facets)
-       [:p "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
-     [:div.ook-datasets
+       [:p.pb-3 "For each dataset we show up to 3 examples of codes that match each facet. Empty cells indicate that the dataset doesn't match the criteria."])
+     [:div
       [:table.table
        [:thead (column-headers data applied-facets)]
        [:tbody (for [ds data]
                  (dataset-row ds applied-facets))]]]]))
 
 (defn- no-matches-message []
-  [:div.d-flex.align-items-center.mb-2
-   [:strong "No datasets matched the applied filters. "]
-   [:a.btn-link.mx-1
+  [:div.ook-datasets
+   [:h2 "No datasets matched the applied filters"]
+   [:a.btn-link
     {:role "button"
      :on-click #(rf/dispatch [:app/navigate :ook.route/home])}
     "Clear filters"]

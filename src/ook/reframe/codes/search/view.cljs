@@ -3,7 +3,8 @@
    [re-frame.core :as rf]
    [ook.ui.common :as common]
    [ook.reframe.codes.view :as codes]
-   [ook.ui.icons :as icons]))
+   [ook.ui.icons :as icons]
+   [ook.util :as u]))
 
 (defn- submit-search [event]
   (.preventDefault event)
@@ -11,32 +12,34 @@
 
 (defn code-search []
   [:<>
-   [:form.d-flex.my-3 {:id "search" :on-submit submit-search}
+   [:form.d-flex.mb-3.mt-4 {:id "search" :on-submit submit-search}
     [:input.form-control.form-control.lg.me-2
      {:id "search-term"
       :name "search-term"
       :type "search"
       :placeholder "Search codes by name"
       :aria-label "Search"
+      :style {:max-width "41rem"}
       :value @(rf/subscribe [:ui.facets.current/search-term])
       :on-change #(rf/dispatch [:ui.event/search-term-change (-> % .-target .-value)])}]
-    [common/primary-button {:type "submit"} "Search"]]])
+    [common/primary-button {:type "submit" :aria-label "Submit search"}
+     [:span.d-block icons/search]]]])
 
 (defn- options [any-results?]
-  [:<>
+  [:div.my-4
    (when any-results?
      [:<>
       [common/text-button
        {:on-click #(rf/dispatch [:ui.event/select-all-matches])
         :disabled @(rf/subscribe [:ui.search/all-matches-selected?])}
-       "select all matches"]
+       "Select all matches"]
       [common/text-button
        {:on-click #(rf/dispatch [:ui.event/unselect-all-matches])
         :disabled (not @(rf/subscribe [:ui.search/any-matches-selected?]))}
-       "un-select all matches"]])
+       "Un-select all matches"]])
    [common/text-button
     {:on-click #(rf/dispatch [:ui.event/reset-search])}
-    "reset search"]])
+    "Reset search"]])
 
 (declare code-tree)
 
@@ -55,15 +58,23 @@
 
 (defn- codelist-item [{:keys [children label ook/uri]}]
   [codes/nested-list-item
-   [:span label]
+   [:h4.mt-3 label]
    [codes/codelist-wrapper uri
     [code-tree children]]])
 
+(defn- results-count-message []
+  (let [code-count @(rf/subscribe [:ui.facets.current/search-result-code-count])
+        codelist-count @(rf/subscribe [:ui.facets.current/search-result-codelist-count])]
+    [:h3 (str "Found " code-count (u/pluralize " code" code-count)
+              " in " codelist-count (u/pluralize " codelist" codelist-count))]))
+
 (defn- search-results-tree [facet-name]
   (let [codelists @(rf/subscribe [:ui.facets.current/filtered-codelists facet-name])]
-    [:ul.top-level.search-results.ms-1
-     (for [{:keys [ook/uri label] :as codelist} codelists]
-       ^{:key [uri label]} [codelist-item codelist])]))
+    [:<>
+     [results-count-message]
+     [:ul.top-level.search-results.ms-1
+      (for [{:keys [ook/uri label] :as codelist} codelists]
+        ^{:key [uri label]} [codelist-item codelist])]]))
 
 (defn- search-results [facet-name]
   (let [any-results? @(rf/subscribe [:ui.facets.current/any-results?])]
@@ -80,6 +91,9 @@
 
       :ready [search-results facet-name]
 
-      :error [common/error-message "Sorry, there was an error submitting your search"]
+      :error
+      [:<>
+       [options false]
+       [common/error-message "Sorry, there was an error submitting your search"]]
 
       [common/error-message "Sorry, something went wrong."])))

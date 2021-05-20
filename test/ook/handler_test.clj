@@ -18,12 +18,12 @@
       (testing "html routes"
         (testing "/ returns html" ;; note this won't have js, really a smoke test
           (let [response-body (:body (request-html ""))]
-            (is (str/includes? response-body "Structural Search"))
+            (is (str/includes? response-body "Find trade data"))
             (is (not (str/includes? response-body "Found")))))
 
         (testing "/search returns html"
           (let [response-body (:body (request-html "search"))]
-            (is (str/includes? response-body "Structural Search"))))
+            (is (str/includes? response-body "Find trade data"))))
 
         (testing "/not-a-route returns 404"
           (let [response (request-html "not-a-route")]

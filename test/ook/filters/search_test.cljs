@@ -72,21 +72,21 @@
    (eh/click-text "Facet 2")
 
    (testing "search options are not visible if no search has been submitted"
-     (is (nil? (qh/query-text "select all matches")))
-     (is (nil? (qh/query-text "reset search"))))
+     (is (nil? (qh/query-text "Select all matches")))
+     (is (nil? (qh/query-text "Reset search"))))
 
    (testing "searching for a code with no matches"
      (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-checkbox-labels)))
      (search-for "no matches!")
 
      (testing "shows a relevant message and reset button, no select all button"
-       (is (nil? (qh/query-text "select all matches")))
-       (is (not (nil? (qh/query-text "reset search"))))
+       (is (nil? (qh/query-text "Select all matches")))
+       (is (not (nil? (qh/query-text "Reset search"))))
        (is (not (nil? (qh/query-text "No codes match"))))
        (is (= [] (qh/all-checkbox-labels))))
 
      (testing "can be reset to show all the codelists again"
-       (eh/click-text "reset search")
+       (eh/click-text "Reset search")
 
        (is (nil? (qh/query-text "No codes match")))
        (is (= "" (qh/search-input-val)))
@@ -97,8 +97,8 @@
      (search-for "2-2 child 1")
 
      (testing "shows select all and reset options"
-       (is (not (nil? (qh/query-text "select all matches"))))
-       (is (not (nil? (qh/query-text "reset search")))))
+       (is (not (nil? (qh/query-text "Select all matches"))))
+       (is (not (nil? (qh/query-text "Reset search")))))
 
      (testing "fetches code trees that were not already cached"
        (is (= "cl2" @setup/concept-tree-request)))
@@ -116,7 +116,7 @@
        (is (= ["with nested codes" "5-1 child 1" "5-2 child 2" "5-3 child 1"] (qh/all-labels))))
 
      (testing "can be reset to show all the codelists again"
-       (eh/click-text "reset search")
+       (eh/click-text "Reset search")
        (is (= ["with nested codes"] (qh/all-checkbox-labels)))
        (is (qh/closed? (qh/find-expansion-toggle "with nested codes"))))
 
@@ -151,12 +151,12 @@
 
    (eh/click-text "Facet 2")
 
-   (testing "select all matches"
+   (testing "Select all matches"
      (testing "selects all codes"
        (search-for "2-2 child 1")
        (is (= [] (qh/all-selected-labels)))
 
-       (eh/click-text "select all matches")
+       (eh/click-text "Select all matches")
        (is (= ["2-2 child 1"] (qh/all-selected-labels)))
 
        (eh/click-text "2-2 child 1"))
@@ -166,38 +166,38 @@
        (is (= [] (qh/all-selected-labels)))
        (is (= ["2-2 child 1" "2-2 child 2"] (qh/all-checkbox-labels)))
 
-       (eh/click-text "select all matches")
+       (eh/click-text "Select all matches")
        (is (= ["2-2 child 1"] (qh/all-selected-labels))))
 
      (testing "is only enabled if some codes are selectable"
-       (is (qh/disabled? (qh/query-text "select all matches")))
+       (is (qh/disabled? (qh/query-text "Select all matches")))
        (eh/click-text "2-2 child 1")
-       (is (not (qh/disabled? (qh/query-text "select all matches"))))))
+       (is (not (qh/disabled? (qh/query-text "Select all matches"))))))
 
-   (testing "un-select all matches"
+   (testing "Un-select all matches"
      (eh/click-text "Facet 3")
      (search-for "child 1")
 
      (testing "is disabled if nothing is selected"
        (is (= [] (qh/all-selected-labels)))
-       (is (qh/disabled? (qh/query-text "un-select all matches"))))
+       (is (qh/disabled? (qh/query-text "Un-select all matches"))))
 
      (testing "is enabled if any (or all) codes are selected"
        (eh/click-text "5-1 child 1")
-       (is (not (qh/disabled? (qh/query-text "un-select all matches"))))
+       (is (not (qh/disabled? (qh/query-text "Un-select all matches"))))
 
-       (eh/click-text "select all matches")
-       (is (not (qh/disabled? (qh/query-text "un-select all matches")))))
+       (eh/click-text "Select all matches")
+       (is (not (qh/disabled? (qh/query-text "Un-select all matches")))))
 
      (testing "un-selects all codes"
        (is (= ["5-1 child 1" "5-2 child 1" "5-3 child 1"] (qh/all-selected-labels)))
-       (eh/click-text "un-select all matches")
+       (eh/click-text "Un-select all matches")
        (is (= [] (qh/all-selected-labels)))
 
        (eh/click-text "5-2 child 1")
        (is (= [ "5-2 child 1"] (qh/all-selected-labels)))
 
-       (eh/click-text "un-select all matches")
+       (eh/click-text "Un-select all matches")
        (is (= [] (qh/all-selected-labels)))))
 
    (testing "interactions with previous selection and disclosure"
@@ -209,7 +209,7 @@
        (search-for "2-2 child 1")
        (is (= ["Codelist 2 Label" "2-1 child 2" "2-2 child 1"] (qh/all-labels)))
 
-       (eh/click-text "reset search")
+       (eh/click-text "Reset search")
        (is (= ["Codelist 2 Label" "Codelist 3 Label"] (qh/all-labels))))
 
      (testing "clearing the search resets ui to expose all selected codes"
@@ -217,7 +217,7 @@
        (search-for "2-2 child 1")
 
        (eh/click-text "2-2 child 1")
-       (eh/click-text "reset search")
+       (eh/click-text "Reset search")
        (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2" "Codelist 3 Label"]
               (qh/all-labels)))
 
@@ -230,8 +230,8 @@
        (is (= ["3-1 child 1"] (qh/all-selected-labels)))
 
        (search-for "2-2 child 1")
-       (eh/click-text "select all matches")
-       (eh/click-text "reset search")
+       (eh/click-text "Select all matches")
+       (eh/click-text "Reset search")
 
        (is (= ["2-2 child 1" "3-1 child 1"] (qh/all-selected-labels)))
        (is (= ["Codelist 2 Label" "2-1 child 1" "2-1 child 2" "2-2 child 1" "2-2 child 2"

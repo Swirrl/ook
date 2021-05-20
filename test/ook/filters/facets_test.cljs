@@ -46,7 +46,6 @@
 
    (testing "selecting a facet fetches the codelists"
      (eh/click-text "Facet 1")
-     (is (not (nil? (qh/query-text "Codelists"))))
      (is (= ["Another codelist" "Codelist 1 Label"] (qh/all-checkbox-labels)))
 
      (eh/click-text "Facet 2")
