@@ -115,6 +115,5 @@ workflows:
             branches:
               only:
                 - main
-                - develop
           requires:
             - run_tests
