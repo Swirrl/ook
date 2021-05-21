@@ -20,14 +20,29 @@
          (map :_source)
          (map esu/normalize-keys))))
 
-(defn- build-code [{id :_id source :_source}]
-  {:ook/uri id
-   :label (:label source)
-   :children (:narrower source)
-   :used (-> source :used Boolean/parseBoolean)})
+(defn lift-coll
+  "Lifts value to collection. Nil becomes an empty collection."
+  [x]
+  (if x (u/box x) (list)))
 
-(defn- assoc-scheme [codelist-id code]
-  (assoc code :scheme codelist-id))
+(defn build-code [scheme-uri doc]
+  (-> doc
+      (select-keys [:ook/uri :label])
+      (assoc :children (lift-coll (:narrower doc)))
+      (assoc :used (Boolean/parseBoolean (:used doc)))
+      (assoc :scheme scheme-uri)))
+
+(defn get-codes-in-scheme
+  "Find codes using the scheme URI"
+  [scheme-uri {:keys [elastic/endpoint]}]
+  (let [conn (esu/get-connection endpoint)]
+    (->> (esd/search conn "code" "_doc"
+                     {:query {:term {:scheme scheme-uri}}
+                      :size 10000}) ;; TODO paginate
+         :hits :hits
+         (map :_source)
+         (map esu/normalize-keys)
+         (map (partial build-code scheme-uri)))))
 
 (defn- build-codes
   "Map the codes from the elasticsearch result format to a more succinct format used internally.
@@ -38,8 +53,9 @@
   [results codelist-id]
   (->> results
        :hits :hits
-       (map build-code)
-       (map (partial assoc-scheme codelist-id))
+       (map :_source)
+       (map esu/normalize-keys)
+       (map (partial build-code codelist-id))
        seq))
 
 (defn- no-broader-codes [conn codelist-id]
@@ -63,31 +79,31 @@
       (build-codes codelist-id)))
 
 (defn get-top-concepts [conn codelist-id]
-  (or (no-broader-codes conn codelist-id)
-      (specified-top-concepts conn codelist-id)))
+  (or (specified-top-concepts conn codelist-id)
+      (no-broader-codes conn codelist-id)))
 
 (declare find-narrower-concepts)
 
-(defn- build-sub-tree [conn codelist-id code-uris]
-  (let [codes (-> (get-codes* conn code-uris)
-                  (build-codes codelist-id))]
+(defn- build-sub-tree [code-lookup child-uris]
+  (let [children (->> child-uris (map code-lookup) (remove nil?))] ;; can be nil if child not in scheme (since children are merged across schemes)
     (doall
-      (map (fn [code]
-             (if (:children code)
-               (find-narrower-concepts conn codelist-id code)
-               code))
-           codes))))
+     (map (fn [code]
+            (if (:children code)
+              (find-narrower-concepts code-lookup code)
+              code))
+          children))))
 
-(defn- find-narrower-concepts [conn codelist-id {:keys [children] :as concept}]
+(defn- find-narrower-concepts [code-lookup {:keys [children] :as concept}]
   (if (seq children)
-    (assoc concept :children (build-sub-tree conn codelist-id children))
+    (assoc concept :children (build-sub-tree code-lookup children))
     concept))
 
-(defn build-concept-tree [codelist-id {:keys [elastic/endpoint]}]
+(defn build-concept-tree [codelist-id {:keys [elastic/endpoint] :as opts}]
   (if codelist-id
-    (let [conn (esu/get-connection endpoint)]
+    (let [conn (esu/get-connection endpoint)
+          code-lookup (u/id-lookup (get-codes-in-scheme codelist-id opts))]
       (doall
-       (map (partial find-narrower-concepts conn codelist-id)
+       (map (partial find-narrower-concepts code-lookup)
             (get-top-concepts conn codelist-id))))
     []))
 
