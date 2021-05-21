@@ -49,7 +49,7 @@
 ;;;;;;; OOK-specific UI helpers
 
 (defn find-expansion-toggle [label]
-  (let [toggle (some-> (query-text label) .-parentNode (find-query "button"))]
+  (let [toggle (find-query (str "button[aria-label='Toggle disclosure of " label "']"))]
     (if toggle
       toggle
       (js/console.error "Could not find toggle for option: " label))))
@@ -81,7 +81,8 @@
   (-> label query-text .-parentNode (find-text "any")))
 
 (defn multi-select-button [label]
-  (some-> label query-text .-parentNode (find-query "button ~ button")))
+  (or (find-query (str "button[aria-label='select all children of " label "']"))
+      (find-query (str "button[aria-label='un-select all children of " label "']"))))
 
 (defn cancel-facet-selection-button []
   (find-query ".filters .close-facet"))
