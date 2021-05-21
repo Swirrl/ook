@@ -40,8 +40,9 @@
  [validation-interceptor]
  (fn [{:keys [db]} [_ route]]
    (let [query-params (db/filters->query-params db)]
-     {:app/navigate! (cond-> {:route route}
-                       (= :ook.route/search route) (merge {:query query-params}))})))
+     (if (or (= :ook.route/home route) (empty? query-params))
+       {:app/navigate! {:route :ook.route/home}}
+       {:app/navigate! {:route route :query query-params} }))))
 
 (rf/reg-fx
  :app/navigate!
