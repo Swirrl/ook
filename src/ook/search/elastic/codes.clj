@@ -36,10 +36,7 @@
   "Find codes using the scheme URI"
   [scheme-uri {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
-    (->> (esd/search conn "code" "_doc"
-                     {:query {:term {:scheme scheme-uri}}
-                      :size 10000}) ;; TODO paginate
-         :hits :hits
+    (->> (esu/all-hits conn "code" {:query {:term {:scheme scheme-uri}}})
          (map :_source)
          (map esu/normalize-keys)
          (map (partial build-code scheme-uri)))))
@@ -70,12 +67,12 @@
 
 (defn- specified-top-concepts [conn codelist-id]
   (-> conn
-      (esd/search  "code" "_doc"
-                   {:size 5000
-                    :query
-                    {:bool
-                     {:must [{:term {:scheme codelist-id}}
-                             {:term {:topConceptOf codelist-id}}]}}})
+      (esd/search "code" "_doc"
+                  {:size 5000
+                   :query
+                   {:bool
+                    {:must [{:term {:scheme codelist-id}}
+                            {:term {:topConceptOf codelist-id}}]}}})
       (build-codes codelist-id)))
 
 (defn get-top-concepts [conn codelist-id]
