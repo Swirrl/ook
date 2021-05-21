@@ -9,7 +9,7 @@ html {
 }
 
 .ook-datasets .vertical-truncate {
-  max-height: 100px;
+  max-height: 105px;
   text-overflow: ellipsis;
   overflow: hidden;
   display: -webkit-box;
