@@ -36,7 +36,8 @@
         day8.re-frame/async-flow-fx {:mvn/version "0.2.0"}
         reagent/reagent {:mvn/version "1.0.0"}
         com.cognitect/transit-cljs {:mvn/version "0.8.264"}
-        cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.1"}
+        mvxcvi/alphabase {:mvn/version "2.1.0"}}
 
  :mvn/repos
  {"swirrl-jars-releases" {:url "s3://swirrl-jars/releases/"}
