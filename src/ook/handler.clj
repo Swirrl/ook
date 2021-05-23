@@ -2,11 +2,9 @@
   (:require [integrant.core :as ig]
             [ring.util.response :as resp]
             [ook.ui.layout :as layout]
-            [reitit.ring :as ring]
             [ook.search.db :as db]
             [ook.concerns.asset-fingerprinting :as assets]
             [ook.params.parse :as p]
-            [clojure.pprint :as pp]
             [ook.concerns.transit :as t]
             [ook.util :as u]))
 

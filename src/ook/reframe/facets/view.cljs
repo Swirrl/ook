@@ -35,10 +35,9 @@
     :on-click #(rf/dispatch [:ui.event/apply-current-facet])}
    "Apply filter"])
 
-(defn- remove-filter-button [disabled? facet-name]
+(defn- remove-filter-button [facet-name]
   [common/primary-button
-   {:disabled disabled?
-    :on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
+   {:on-click #(rf/dispatch [:ui.event/remove-facet facet-name])}
    "Remove filter"])
 
 (defn- facet-control-buttons [facet-name]
@@ -48,7 +47,7 @@
     [:div.mt-3
      [apply-filter-button disabled?]
      (when (get applied-facets facet-name)
-       [remove-filter-button disabled? facet-name])]))
+       [remove-filter-button facet-name])]))
 
 (defn- codelists [facet-name]
   (when facet-name
