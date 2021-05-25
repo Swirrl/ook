@@ -46,7 +46,7 @@
 
           (testing "with filters works"
             (let [response (request-transit
-                            "datasets?filters=%5B%22%5E%20%22%2C%22facet1%22%2C%5B%22%5E%20%22%2C%22codelist1%22%2C%5B%22code1%22%5D%5D%5D")]
+                            "datasets?filters=2GTHaVo1UkANYaYQfCLr44iQXQkArX445bRsRrWMzXwE7aQG5EbdQJQdUoD42FG8E7uDJvcnw6NJ4Udmq")]
               (is (= 200 (:status response)))
               (is (= "application/transit+json" (get-in response [:headers "Content-Type"])))
               (is (str/includes? (:body response) "valid response"))))))

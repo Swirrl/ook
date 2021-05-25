@@ -12,7 +12,7 @@
        :cljs [[reagent.dom :as rdom]
               [re-frame.core :as rf]
               [ook.reframe.router :as router]
-              [ook.concerns.transit :as transit]
+              [ook.params.parse :as p]
               [day8.re-frame.async-flow-fx]
               [ook.reframe.events]
               [ook.reframe.subs]
@@ -122,8 +122,8 @@
        (rf/reg-event-fx
         :http/fetch-datasets
         (fn [_ [_ filters]]
-          (reset! dataset-request (transit/read-string filters))
-          {:dispatch [:http.datasets/success (get datasets (transit/read-string filters) [])]})))
+          (reset! dataset-request (p/deserialize-filter-state filters))
+          {:dispatch [:http.datasets/success (get datasets (p/deserialize-filter-state filters) [])]})))
 
      (def last-navigation (atom nil))
 

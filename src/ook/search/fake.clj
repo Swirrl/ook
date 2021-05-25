@@ -7,7 +7,7 @@
   db/SearchBackend
 
   (get-datasets-for-facets [_ filters]
-    (if (= filters {"facet1" {"codelist1" ["code1"]}})
+    (if (= filters {"facet1" {"codelist1" #{"code1"}}})
       "valid response"
       "something wrong with filter parsing..."))
 
