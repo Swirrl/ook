@@ -226,10 +226,10 @@
        (is (= ["Codelist 2 Label"] (qh/all-selected-labels)))
        (is (not (qh/disabled? (qh/remove-filter-button)))))
 
-     (testing "is disabled when no options are selected"
+     (testing "is also not disabled when no options are selected"
        (eh/click-text "Codelist 2 Label")
        (is (zero? (count (qh/all-selected-labels))))
-       (is (qh/disabled? (qh/remove-filter-button)))))
+       (is (not (qh/disabled? (qh/remove-filter-button))))))
 
    (testing "removing applied filters"
      (testing "works for an individual filter"

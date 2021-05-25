@@ -8,8 +8,18 @@ html {
   overflow-x: auto;
 }
 
+.ook-datasets table tr :is(th, td):is(:first-child, :last-child) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ook-datasets table tr :is(th, td):not(:is(:first-child, :last-child)) {
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+}
+
 .ook-datasets .vertical-truncate {
-  max-height: 100px;
+  max-height: 105px;
   text-overflow: ellipsis;
   overflow: hidden;
   display: -webkit-box;
@@ -65,7 +75,7 @@ button.applied-facet:hover svg {
 }
 
 .filters .children .child {
-  padding-left: 3.5rem;
+  padding-left: 2.5rem;
 }
 
 .filters .search-results .children .child {

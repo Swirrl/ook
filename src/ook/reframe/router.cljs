@@ -16,9 +16,7 @@
 
 (defn search-controller [params]
   (let [filter-state (-> params :query :filters)]
-    (if filter-state
-      (rf/dispatch [:filters/apply-filter-state filter-state])
-      (rf/dispatch [:app/navigate :ook.route/home]))))
+    (rf/dispatch [:filters/apply-filter-state filter-state])))
 
 (def ^:private routes
   [["/" home-route-data]
