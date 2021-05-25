@@ -18,14 +18,18 @@
   {:name "Geography"
    :parent-dimension "sdmxd:refArea"
    :sort-priority 3
-   :dimensions ["data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
+   :dimensions ["data/gss_data/trade/hmrc-overseas-trade-statistics/hmrc-overseas-trade-statistics-sitc#dimension/country_id"
+                "data/gss_data/trade/hmrc-overseas-trade-statistics/hmrc-overseas-trade-statistics-cn8#dimension/country_id"
+                "data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services#dimension/country"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/uk-region"
                 "data/gss_data/trade/hmrc-regional-trade-statistics#dimension/country"
                 "data/gss_data/trade/ons_mrets#dimension/trade-area"
                 "data/gss_data/trade/ons-uk-total-trade#dimension/country"]}
   {:name "Flow"
    :sort-priority 4
-   :parent-dimension "def/trade/property/dimension/flow-directions"}
+   :parent-dimension "def/trade/property/dimension/flow-directions"
+   :dimensions ["data/gss_data/trade/hmrc-overseas-trade-statistics/hmrc-overseas-trade-statistics-sitc#dimension/flow_type"
+                "data/gss_data/trade/hmrc-overseas-trade-statistics/hmrc-overseas-trade-statistics-cn8#dimension/flow_type"]}
   {:name "Date"
    :sort-priority 5
    :parent-dimension "sdmxd:refPeriod"}
