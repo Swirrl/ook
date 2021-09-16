@@ -10,7 +10,7 @@
             8021 "target/test/cljs/browser-test"}
 
  :builds
- {;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
+ { ;; dev build of cljs (compilation outputs from here are used by our repl environemnt)
   :ook {:target :browser
         :asset-path "/assets/js"
 
