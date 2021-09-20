@@ -22,9 +22,9 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "deps.edn" }}
+            - v2-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-dependencies-
 
       - restore_cache:
           keys:
@@ -58,7 +58,7 @@ commands:
             - ~/.m2
             - ~/repo/.cpcache
             - ~/.gitlibs
-          key: v1-dependencies-{{ checksum "deps.edn" }}
+          key: v2-dependencies-{{ checksum "deps.edn" }}
 
       - save_cache:
           paths:
