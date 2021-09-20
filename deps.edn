@@ -29,7 +29,7 @@
         de.bwaldvogel/log4j-systemd-journal-appender {:mvn/version "2.4.0"} ;; systemd logging
 
         clojurewerkz/elastisch {:mvn/version "5.0.0-beta1"}
-        org.clojure/data.json {:mvn/version "2.4.0"}
+        ;; org.clojure/data.json {:mvn/version "2.4.0"}
 
         hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
 
