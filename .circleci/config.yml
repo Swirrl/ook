@@ -43,7 +43,7 @@ commands:
       - run:
           name: Fetch clojure deps
           command: |
-            cp .circleci/settings.xml ~/.m2
+            # cp .circleci/settings.xml ~/.m2/settings.xml
             # force tools.deps to resolve with `-Sthreads 1` to avoid parallel resolution bug
             clojure -Sthreads 1 -A:dev -e "(println \"Fetched deps\")"
 
