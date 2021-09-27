@@ -1,7 +1,7 @@
 (ns ook.params.util
   (:require [reitit.impl :as ri]
             [clojure.string :as str]
-            [swirrl.qb-filters-dsl :as dsl]))
+            [swirrl.qb-filters.dsl :as dsl]))
 
 (def base-uri "http://gss-data.org.uk/")
 (def pmd-uri "https://beta.gss-data.org.uk/")

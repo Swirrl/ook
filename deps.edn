@@ -8,8 +8,8 @@
         com.cognitect/transit-clj {:mvn/version "1.0.324"}
         org.clojure/core.async {:mvn/version "1.3.610"}
         com.cemerick/url {:mvn/version "0.1.1"}
-        io.github.swirrl/qb-filters-dsl {:git/url "git@github.com:Swirrl/qb-filters-dsl"
-                                         :sha "1e5878df38f4518bb1eed66d1ce7faf84f9f3a87"}
+        io.github.swirrl/qb-filters {:git/url "git@github.com:Swirrl/qb-filters"
+                                     :sha "dd986ad270f6e338d03c299f4870d5448d6d055e"}
 
         ;; Drafter
         drafter-client/drafter-client {:git/url "git@github.com:Swirrl/drafter.git"

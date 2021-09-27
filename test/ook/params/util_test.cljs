@@ -4,7 +4,7 @@
 
 (deftest link-to-pmd-dataset
   (testing "works for matches with all expected data"
-    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&qb-filters=http%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fproperty%2Fdimension%2Fproduct%0Aihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FA%0Aihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FB"
+    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&qb-filters=http%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fproperty%2Fdimension%2Fproduct%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FA%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FB"
            (sut/link-to-pmd-dataset
             "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
             [{:name "Product"
