@@ -22,9 +22,9 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "deps.edn" }}
+            - v2-dependencies-{{ checksum "deps.edn" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-dependencies-
 
       - restore_cache:
           keys:
@@ -43,7 +43,8 @@ commands:
       - run:
           name: Fetch clojure deps
           command: |
-            cp .circleci/settings.xml ~/.m2
+            mkdir -p ~/.m2
+            cp .circleci/settings.xml ~/.m2/settings.xml
             # force tools.deps to resolve with `-Sthreads 1` to avoid parallel resolution bug
             clojure -Sthreads 1 -A:dev -e "(println \"Fetched deps\")"
 
@@ -58,7 +59,7 @@ commands:
             - ~/.m2
             - ~/repo/.cpcache
             - ~/.gitlibs
-          key: v1-dependencies-{{ checksum "deps.edn" }}
+          key: v2-dependencies-{{ checksum "deps.edn" }}
 
       - save_cache:
           paths:

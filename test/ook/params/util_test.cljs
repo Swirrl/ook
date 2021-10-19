@@ -4,33 +4,33 @@
 
 (deftest link-to-pmd-dataset
   (testing "works for matches with all expected data"
-    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&filter-facets=http%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fproperty%252Fdimension%252Fproduct%2Chttp%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fconcept%252Fproduct%252FA&filter-facets=http%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fproperty%252Fdimension%252Fproduct%2Chttp%253A%252F%252Fgss-data.org.uk%252Fdef%252Ftrade%252Fconcept%252Fproduct%252FB"
+    (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&qb-filters=http%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fproperty%2Fdimension%2Fproduct%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FA%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FB"
            (sut/link-to-pmd-dataset
-             "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
-             [{:name "Product"
-               :dimensions [{:ook/uri "def/trade/property/dimension/product"
-                             :codes [{:ook/uri "def/trade/concept/product/A" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}
-                                     {:ook/uri "def/trade/concept/product/B" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}]}]}]
-             {"Product" {"def/trade/concept-scheme/product" ["def/trade/concept/product/A" "def/trade/concept/product/B"]}}))))
+            "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
+            [{:name "Product"
+              :dimensions [{:ook/uri "def/trade/property/dimension/product"
+                            :codes [{:ook/uri "def/trade/concept/product/A" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}
+                                    {:ook/uri "def/trade/concept/product/B" :scheme [{:ook/uri "def/trade/concept-scheme/product"}]}]}]}]
+            {"Product" {"def/trade/concept-scheme/product" ["def/trade/concept/product/A" "def/trade/concept/product/B"]}}))))
 
   (testing "does not include filter facet params for facets with no matching codes"
     (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id"
            (sut/link-to-pmd-dataset
-             "data/dataset-id"
-             [{:name "Facet"
-               :dimensions [{:ook/uri "some/dim"
+            "data/dataset-id"
+            [{:name "Facet"
+              :dimensions [{:ook/uri "some/dim"
                              ;; no matching codes!
-                             }]}]
-             {"Facet" {"some/scheme" ["some/code"]}}))))
+                            }]}]
+            {"Facet" {"some/scheme" ["some/code"]}}))))
 
   (testing "does not include filter facet params for facets specified with codelists (despite finding matching codes)"
     (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id"
            (sut/link-to-pmd-dataset
-             "data/dataset-id"
-             [{:name "Facet"
-               :dimensions [{:ook/uri "some/dim"
-                             :codes [{:ook/uri "matching/code"  :scheme [{:ook/uri "some/scheme"}]}]}]}]
-             {"Facet" {"some/scheme" []}})))))
+            "data/dataset-id"
+            [{:name "Facet"
+              :dimensions [{:ook/uri "some/dim"
+                            :codes [{:ook/uri "matching/code"  :scheme [{:ook/uri "some/scheme"}]}]}]}]
+            {"Facet" {"some/scheme" []}})))))
 
 (deftest absolute-uri-test
   (testing "reverses json-ld prefixing"
