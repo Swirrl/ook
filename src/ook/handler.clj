@@ -10,13 +10,21 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/main [_ {:keys [assets/fingerprinter search/db]}]
+#_(defmethod ig/init-key :ook.handler/main [_ {:keys [assets/fingerprinter search/db]}]
   (fn [_request]
     (let [facets (db/get-facets db)]
       (resp/response (layout/->html (layout/main
                                      fingerprinter
                                      {:facets (u/lookup :name facets)
                                       :dataset-count (db/dataset-count db)}))))))
+
+;; Replace SPA body with simple form
+(defmethod ig/init-key :ook.handler/main [_ {:keys [assets/fingerprinter search/db]}]
+  (fn [request]
+    (let [query (p/query request)
+          datasets (if query (db/search db query) [])
+          data {:query query :datasets datasets}]
+      (resp/response (layout/->html (layout/search fingerprinter data))))))
 
 ;; Static resource handler
 

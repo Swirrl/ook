@@ -40,3 +40,6 @@
 (defn get-search-params [{:keys [query-params]}]
   {:search-term (query-params "search-term")
    :codelists (u/box (query-params "codelists"))})
+
+(defn query [{:keys [query-params]}]
+  (query-params "query"))
