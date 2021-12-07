@@ -1,7 +1,7 @@
 {:ook.concerns.reitit/router {:routes
                               [;; permalink-able routes that return html
                                ["/" {:get {:handler #ig/ref :ook.handler/main}}]
-                               ["/search" {:get {:handler #ig/ref :ook.handler/main}}]
+                               ["/old" {:get {:handler #ig/ref :ook.handler/old}}]
 
                                ;; internal API routes
                                ["/datasets" {:get {:handler #ig/ref :ook.handler/datasets}}]
@@ -13,6 +13,8 @@
                                ["/assets/*" #ig/ref :ook.handler/assets]]}
 
  :ook.handler/main          {:search/db #ig/ref :ook.search.elastic/db
+                             :assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
+ :ook.handler/old           {:search/db #ig/ref :ook.search.elastic/db
                              :assets/fingerprinter #ig/ref :ook.concerns.asset-fingerprinting/fingerprinter}
 
  :ook.handler/datasets    {:search/db #ig/ref :ook.search.elastic/db}

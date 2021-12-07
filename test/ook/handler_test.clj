@@ -21,8 +21,8 @@
             (is (str/includes? response-body "Structural Search"))
             (is (not (str/includes? response-body "Found")))))
 
-        (testing "/search returns html"
-          (let [response-body (:body (request-html "search"))]
+        (testing "/old returns html"
+          (let [response-body (:body (request-html "old"))]
             (is (str/includes? response-body "Structural Search"))))
 
         (testing "/not-a-route returns 404"
