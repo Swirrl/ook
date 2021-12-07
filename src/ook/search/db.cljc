@@ -29,4 +29,7 @@
     "Resolve facets from configuration and database")
 
   (get-concept-tree [db codelist]
-    "Resolve concept tree for codelist"))
+    "Resolve concept tree for codelist")
+
+  (search [db query]
+    "Search for datasets featuring codes with labels matching the query"))

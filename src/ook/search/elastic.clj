@@ -5,6 +5,7 @@
    [ook.search.elastic.codes :as codes]
    [ook.search.elastic.components :as components]
    [ook.search.elastic.facets :as facets]
+   [ook.search.elastic.text :as text]
    [integrant.core :as ig]))
 
 (defrecord Elasticsearch [opts]
@@ -38,7 +39,10 @@
     (facets/get-facets opts))
 
   (get-concept-tree [_ codelist]
-    (codes/build-concept-tree codelist opts)))
+    (codes/build-concept-tree codelist opts))
+
+  (search [_ query]
+    (text/dataset-search query opts)))
 
 (defmethod ig/init-key :ook.search.elastic/db [_ opts]
   (->Elasticsearch opts))
