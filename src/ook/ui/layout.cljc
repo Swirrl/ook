@@ -2,6 +2,7 @@
   (:require [hiccup2.core :as h]
             [hiccup.util :as h.u]
             #?@(:cljs [[reframe.core :as rf]])
+            [ook.params.util :refer [pmd-link-from-dataset]]
             [ook.concerns.transit :as t]
             [clojure.string :as st]))
 
@@ -111,7 +112,7 @@
        [:br]
        [:div.d-flex.w-100.justify-content-between
         [:a.text-decoration-none
-         {:href uri}
+         {:href (pmd-link-from-dataset dataset)}
          [:h3 label]]
         ;;[:small "X matching observations"]
         ]]

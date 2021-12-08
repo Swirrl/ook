@@ -61,7 +61,7 @@
 
 (defn- dataset-row [{:keys [label publisher comment description ook/uri matching-observation-count facets]}
                     applied-facets]
-  (let [pmd-link (pu/link-to-pmd-dataset uri facets applied-facets)]
+  (let [pmd-link (pu/pmd-link-from-facets uri facets applied-facets)]
     ^{:key uri}
     [:tr
      [:td.title-column
