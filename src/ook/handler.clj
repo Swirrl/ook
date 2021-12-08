@@ -22,7 +22,7 @@
 (defmethod ig/init-key :ook.handler/main [_ {:keys [assets/fingerprinter search/db]}]
   (fn [request]
     (let [query (p/query request)
-          datasets (if query (db/search db query) [])
+          datasets (if query (db/search db query) nil)
           data {:query query :datasets datasets}]
       (resp/response (layout/->html (layout/search fingerprinter data))))))
 

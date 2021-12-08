@@ -140,7 +140,7 @@
     [:div.mt-3.container
      (header)
      (search-form query)
-     (if (not (empty? datasets))
+     (if (not (nil? datasets))
        (search-results datasets))]]
    (footer)])
 
