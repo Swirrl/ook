@@ -30,7 +30,8 @@
   [query {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)
         codes (->> (esd/search conn "code" "_doc"
-                               {:query {:bool {:must [{:match {:label query}}
+                               {:query {:bool {:must [{:match {:label {:query query
+                                                                       :analyzer "std_english"}}}
                                                       {:term {:used "true"}}]}}
                                 :size size-limit})
                    :hits :hits
@@ -54,3 +55,8 @@
                    (map :_source)
                    (map esu/normalize-keys))]
     (map (partial add-snippet codes conn) cubes)))
+
+(comment
+  (let [opts {:elastic/endpoint "http://localhost:9200"}]
+    (dataset-search "of" opts))
+  )
