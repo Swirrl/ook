@@ -70,8 +70,11 @@
 ;; without facets...
 (defn pmd-link-from-dataset [dataset]
   (let [uri (:ook/uri dataset)
-        matches (->> dataset :snippet :dimensions (remove #(nil? (get-in % [:codelist :matches]))))
-        filters (map (fn [d] [(:ook/uri d) (map :ook/uri (get-in d [:codelist :matches]))]) matches)
+        filters (->> dataset
+                     :component
+                     (filter #(contains? % :matches))
+                     (map (fn [{:keys [ook/uri matches]}]
+                            [uri (map :ook/uri matches)])))
         params (cond-> {:uri (absolute-uri uri)}
                  (seq filters)
                  (assoc

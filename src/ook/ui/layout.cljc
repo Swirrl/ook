@@ -104,7 +104,7 @@
                  label
                  cube
                  comment
-                 snippet]
+                 component]
           :as dataset} datasets]
      [:div.mb-5
       [:div
@@ -120,20 +120,22 @@
        [:p comment]
        [:div.container
         [:div.row
-         (for [{:keys [:ook/uri label codelist]} (:dimensions snippet)]
+         (for [{:keys [:ook/uri label codelist matches]} component]
            (let [ldim (if (and (contains? codelist :label)
                                (not= label (:label codelist)))
                         (str label " (" (:label codelist) ")")
                         label)
-                 lvalue (if-let [matches (:matches codelist)]
+                 lvalue (if (seq? matches)
                           (->> matches
                                (map :label)
-                               (st/join " | ")
-                               (str ": ")))]
+                               (st/join " | ")))]
              [:div.col-12
               [:span.text-muted
-               [:strong ldim]
-               lvalue]]))]]]])])
+               ldim
+               (if lvalue
+                 [:span
+                  ": "
+                  [:strong lvalue]])]]))]]]])])
 
 (defn search-body [{:keys [query datasets]}]
   [:body.d-flex.flex-column.h-100

@@ -35,3 +35,6 @@
         lookup-y (lookup y-key y)
         joined (merge-with merge lookup-x lookup-y)]
     (vals joined)))
+
+(defn map-values [m f]
+  (zipmap (keys m) (map f (vals m))))

@@ -37,24 +37,17 @@
     (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fgss_data%2Ftrade%2Fons-uk-trade-in-goods-cpa-08-catalog-entry&apply-filters=true&qb-filters=http%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fproperty%2Fdimension%2Fproduct%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FA%7Cihttp%3A%2F%2Fgss-data.org.uk%2Fdef%2Ftrade%2Fconcept%2Fproduct%2FB"
            (sut/pmd-link-from-dataset
             {:ook/uri "data/gss_data/trade/ons-uk-trade-in-goods-cpa-08-catalog-entry"
-             :snippet
-             {:dimensions
-              [{:ook/uri "def/trade/property/dimension/product"
-                :codelist
-                {:ook/uri "def/trade/concept-scheme/product"
-                 :matches
-                 [{:ook/uri "def/trade/concept/product/A"}
-                  {:ook/uri "def/trade/concept/product/B"}]}}]}}))))
+             :component
+             [{:ook/uri "def/trade/property/dimension/product"
+               :matches
+               [{:ook/uri "def/trade/concept/product/A"}
+                {:ook/uri "def/trade/concept/product/B"}]}]}))))
   (testing "ignores dimensions without matching codes"
     (is (= "https://beta.gss-data.org.uk/cube/explore?uri=http%3A%2F%2Fgss-data.org.uk%2Fdata%2Fdataset-id"
            (sut/pmd-link-from-dataset
             {:ook/uri "data/dataset-id"
-             :snippet
-             {:dimensions
-              [{:ook/uri "some/dim"
-                :codelist
-                {:ook/uri "some/scheme"
-                 :matches nil}}]}})))))
+             :component
+             [{:ook/uri "some/dim"}]})))))
 
 (deftest absolute-uri-test
   (testing "reverses json-ld prefixing"
