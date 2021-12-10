@@ -49,12 +49,13 @@
        ;; print stack-traces for all exceptions
      ::exception/wrap (fn [handler error request]
                         (log/error "Error fetching uri: " (:uri request))
-                        (log/info
-                         "500:"
+                        (log/error
                          (if-let [data (-> error Throwable->map)]
                            (str (:cause data)
                                 (if-let [body (get-in data [:data :body])]
-                                  body))))
+                                  body))
+                           (if-let [trace (.getStackTrace error)]
+                             trace)))
                         (handler error request))})))
 
 (defmethod ig/init-key :ook.concerns.reitit/middleware [_ {:keys [middleware/exceptions]}]
