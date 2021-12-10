@@ -40,6 +40,17 @@
           (is (= 24
                  (get-in observations [:hits :total :value])))))
 
+      (testing "ordered datasets"
+        (let [datasets [{:ook/uri "match-only-one-dimension"
+                         :component [{:ook/uri "space"}
+                                     {:ook/uri "time" :matches [{:ook/uri "today"}]}]}
+                        {:ook/uri "match-both-dimensions"
+                         :component [{:ook/uri "space" :matches [{:ook/uri "earth"}]}
+                                     {:ook/uri "time" :matches [{:ook/uri "today"}]}]}]]
+          (is (= ["match-both-dimensions"
+                  "match-only-one-dimension"]
+                 (map :ook/uri (sut/ordered datasets))))))
+
       (testing "dataset-search"
 
         (testing "matches datasets"

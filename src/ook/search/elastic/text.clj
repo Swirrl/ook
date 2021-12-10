@@ -159,14 +159,22 @@
         add-matches (match-adder cubes codes)]
     (map add-matches datasets)))
 
+(defn ordered [datasets]
+  (let [rank (fn [dataset]
+               (count (filter #(contains? % :matches)
+                              (:component dataset))))]
+    (sort-by rank > datasets)))
+
 (defn dataset-search
   "Find datasets by search code labels"
   [query opts]
-  (let [codes (codes query opts)
-        selection (codes-to-selection codes opts)
-        hits (observation-hits selection opts)
-        datasets (datasets-from-results hits codes opts)]
-    datasets))
+  (let [codes (codes query opts)]
+    (if (seq codes)
+      (let [selection (codes-to-selection codes opts)
+            hits (observation-hits selection opts)
+            datasets (datasets-from-results hits codes opts)]
+        (ordered datasets))
+      (list))))
 
 (comment
   (let [opts {:elastic/endpoint "http://localhost:9200"}]
