@@ -40,7 +40,7 @@
 
 (defn- header []
   [:div.row
-   [:div.d-flex.justify-content-between.pt-5
+   [:div.col.d-flex.justify-content-between.pt-5
     [:h1.mb-3
      [:a.link-dark.text-decoration-none #?(:clj {:href "/"}
                       :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
@@ -97,45 +97,50 @@
       :value "Search"
       :aria-label "Submit search"}]]])
 
+(defn- component-matches
+  [{:keys [:ook/uri label codelist matches]}]
+  (let [ldim (if (and (contains? codelist :label)
+                      (not= label (:label codelist)))
+               (str label " (" (:label codelist) ")")
+               label)
+        lvalue (if (seq? matches)
+                 (->> matches
+                      (map :label)
+                      (st/join " | ")))]
+    [:div.col-12
+     [:span
+      ldim
+      (if lvalue
+        [:span
+         ": "
+         [:strong lvalue]])]]
+    #_[[:div.col-sm-4 ldim]
+     [:div.col-sm-8 [:strong lvalue]]]))
+
 (defn search-results [datasets]
   [:div.row
-   [:p (str "Found " (count datasets) " results")]
-   (for [{:keys [:ook/uri
-                 label
-                 cube
-                 comment
-                 component]
-          :as dataset} datasets]
-     [:div.mb-5
-      [:div
-       [:span.text-secondary cube]
-       [:br]
-       [:div.d-flex.w-100.justify-content-between
-        [:a.text-decoration-none
-         {:href (pmd-link-from-dataset dataset)}
-         [:h3 label]]
-        ;;[:small "X matching observations"]
-        ]]
-      [:div
-       [:p comment]
-       [:div.container
-        [:div.row
-         (for [{:keys [:ook/uri label codelist matches]} component]
-           (let [ldim (if (and (contains? codelist :label)
-                               (not= label (:label codelist)))
-                        (str label " (" (:label codelist) ")")
-                        label)
-                 lvalue (if (seq? matches)
-                          (->> matches
-                               (map :label)
-                               (st/join " | ")))]
-             [:div.col-12
-              [:span.text-muted
-               ldim
-               (if lvalue
-                 [:span
-                  ": "
-                  [:strong lvalue]])]]))]]]])])
+   [:div.col
+    [:p (str "Found " (count datasets) " results")]
+    (for [{:keys [:ook/uri
+                  label
+                  cube
+                  comment
+                  component]
+           :as dataset} datasets]
+      [:div.mb-5
+       [:div
+        [:span.text-secondary cube]
+        [:br]
+        [:div.d-flex.w-100.justify-content-between
+         [:a.text-decoration-none
+          {:href (pmd-link-from-dataset dataset)}
+          [:h3 label]]
+         ;;[:small "X matching observations"]
+         ]]
+       [:div
+        [:p.mb-2.text-muted comment]
+        [:dl.row
+         (map component-matches component)]]])]])
 
 (defn search-body [{:keys [query datasets]}]
   [:body.d-flex.flex-column.h-100
