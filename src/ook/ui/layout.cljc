@@ -125,7 +125,8 @@
                   label
                   cube
                   comment
-                  component]
+                  component
+                  matching-observation-count]
            :as dataset} datasets]
       [:div.mb-5
        [:div
@@ -135,7 +136,7 @@
          [:a.text-decoration-none
           {:href (pmd-link-from-dataset dataset)}
           [:h3 label]]
-         ;;[:small "X matching observations"]
+         [:small (str matching-observation-count " matching observations")]
          ]]
        [:div
         [:p.mb-2.text-muted comment]

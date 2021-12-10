@@ -96,8 +96,8 @@
                         { uri (codes-for-codelist (:ook/uri codelist))})
                       components))))
 
-(defn- match-adder
-  "Returns a function to add matching codes to a datasets components"
+(defn- match-describer
+  "Returns a function to add description to a dataset explaining how it matches"
   [cubes codes]
   (fn [dataset]
     (let [cube (first (filter #(= (:cube dataset) (:key %)) cubes))
@@ -115,18 +115,21 @@
                                            (select-keys [:ook/uri :label]))))
                                 ;; drop codes not matching the query that appear because
                                 ;; the observations match another dimension
-                                (remove empty?)))))] 
-      (update
-       dataset
-       :component
-       (fn [components]
-         (map (fn [component]
-                (let [component-id (-> component :ook/uri append-id keyword)
-                      matches (match-lookup component-id)]
-                  (if (seq? matches)
-                    (assoc component :matches matches)
-                    component)))
-              components))))))
+                                (remove empty?)))))]
+      (-> dataset
+          (assoc
+           :matching-observation-count
+           (:doc_count cube))
+          (update
+           :component
+           (fn [components]
+             (map (fn [component]
+                    (let [component-id (-> component :ook/uri append-id keyword)
+                          matches (match-lookup component-id)]
+                      (if (seq? matches)
+                        (assoc component :matches matches)
+                        component)))
+                  components)))))))
 
 (defn datasets-with-components
   "Retrieves dataset definitions (with components defined) for cube-uris"
@@ -156,8 +159,8 @@
         conn (esu/get-connection endpoint)
         cube-uris (map (fn [d] {:ook/uri (:key d)}) cubes)
         datasets (datasets-with-components cube-uris opts)
-        add-matches (match-adder cubes codes)]
-    (map add-matches datasets)))
+        describe-matches (match-describer cubes codes)]
+    (map describe-matches datasets)))
 
 (defn ordered [datasets]
   (let [rank (fn [dataset]

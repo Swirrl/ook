@@ -65,6 +65,10 @@
               :label "Alcohol Bulletin - Duty Receipts"
               :comment "Monthly Duty Receipts statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs"))
 
+          (testing "adds observation counts"
+            (is (= 304
+                   (result :matching-observation-count))))
+
           (testing "adds matches to components"
             (let [components (:component result)]
               (testing "including all dimensions"
