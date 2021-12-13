@@ -6,9 +6,9 @@ echo '>> INSTALL PACKAGES'
 
 # install basics
 sudo apt-get update -y -q
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -q
+sudo apt-get upgrade -y -q
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
+sudo apt-get install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
 
 # timezone and ntp
 sudo timedatectl set-timezone UTC
