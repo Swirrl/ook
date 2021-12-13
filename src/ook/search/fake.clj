@@ -28,6 +28,11 @@
   (get-concept-tree [_ codelist]
     (if codelist
       (str "concept tree for " codelist)
+      []))
+
+  (search [_ query]
+    (if query
+      ["results"]
       [])))
 
 (defmethod ig/init-key :ook.search.fake/db [_ _]

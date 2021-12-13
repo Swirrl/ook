@@ -16,7 +16,8 @@
   ([system index]
    (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
   ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")})))
+   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
+                                         :settings {:analysis {:analyzer {:std_english {:type "standard" :stopwords "_english_"}}}}})))
 
 (defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
   (esi/delete (connect endpoint) index))
@@ -70,7 +71,7 @@
   (let [loader ["drafter-client.edn"
                 "elasticsearch-prod.edn"
                 "load-data.edn"]
-        target (or args ["project/trade/data.edn"
+        target (or args ["project/all/data.edn"
                          "idp-beta.edn"])
         profiles (concat loader target)]
     (println "Starting index loader with profiles: " profiles)

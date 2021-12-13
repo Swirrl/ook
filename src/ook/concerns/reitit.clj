@@ -38,12 +38,24 @@
     exception/default-handlers
     {java.net.ConnectException (partial exception-handler 500 "Error connecting to elasticsearch.")
 
+     ;; ex-data with :type ::error
+     ::exception/error (partial exception-handler "error")
+
+     ;; ex-data with ::exception or ::failure
+     ::exception/exception (partial exception-handler "exception")
+
      ::exception/default (partial exception-handler 500 "Error.")
 
        ;; print stack-traces for all exceptions
      ::exception/wrap (fn [handler error request]
                         (log/error "Error fetching uri: " (:uri request))
-                        (log/info "500:" (-> error Throwable->map :cause))
+                        (log/error
+                         (if-let [data (-> error Throwable->map)]
+                           (str (:cause data)
+                                (if-let [body (get-in data [:data :body])]
+                                  body))
+                           (if-let [trace (.getStackTrace error)]
+                             trace)))
                         (handler error request))})))
 
 (defmethod ig/init-key :ook.concerns.reitit/middleware [_ {:keys [middleware/exceptions]}]

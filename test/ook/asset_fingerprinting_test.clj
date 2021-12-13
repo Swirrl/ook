@@ -4,6 +4,8 @@
    [clojure.set :as set]
    [clojure.java.io :as io]
    [clojure.string :as str]
+   [clojure.tools.logging :as logging]
+   [clojure.tools.logging.impl :as logimpl]
    [ring.mock.request :as req]
    [ook.concerns.asset-fingerprinting :as sut]))
 
@@ -27,7 +29,9 @@
 
   (testing "for a file that doesn't exist"
     (testing "returns nil"
-      (is (nil? (sut/get-fingerprinted-path "ook/resources" "/does/not/exist.js")))))
+      (is (nil? (binding [logging/*logger-factory*
+                          logimpl/disabled-logger-factory]
+                  (sut/get-fingerprinted-path "ook/resources" "/does/not/exist.js"))))))
 
   (reset! sut/asset-db {}))
 

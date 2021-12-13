@@ -4,6 +4,6 @@
 # You can start and stop the ES container as you wish
 
 docker-compose up -d elasticsearch-test
-clojure -A:dev:test
+clojure -M:dev:test
 #docker-compose stop elasticsearch-test
 
