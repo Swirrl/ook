@@ -296,7 +296,7 @@
   (dataset-pipeline system)
   (component-pipeline system)
   (code-pipeline system)
-  (let [system (assoc system :ook.etl/select-page-size 100)]
+  (let [system (assoc system :ook.etl/select-page-size 200)]
     (code-used-pipeline system))
   (observation-pipeline system)
   (log/info "All pipelines complete"))
