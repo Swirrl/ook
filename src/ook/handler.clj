@@ -10,7 +10,7 @@
 
 ;; App entry handler
 
-(defmethod ig/init-key :ook.handler/old [_ {:keys [assets/fingerprinter search/db]}]
+(defmethod ig/init-key :ook.handler/facets [_ {:keys [assets/fingerprinter search/db]}]
   (fn [_request]
     (let [facets (db/get-facets db)]
       (resp/response (layout/->html (layout/main
