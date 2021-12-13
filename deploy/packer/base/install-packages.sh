@@ -1,15 +1,14 @@
 #!/bin/bash
 
-set -e #exit on error
+set -xe #print commands and exit on error
 
 echo '>> INSTALL PACKAGES'
 
 # install basics
+sudo apt-get update -y -q
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -q
 
-sudo apt update -y -q
-sudo apt upgrade -y -q
-
-sudo apt install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q gcc make unattended-upgrades curl nginx git unzip build-essential apache2-utils lxc wget libarchive-tools openjdk-11-jdk htop rpl awscli
 
 # timezone and ntp
 sudo timedatectl set-timezone UTC
