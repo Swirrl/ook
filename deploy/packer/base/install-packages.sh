@@ -24,7 +24,7 @@ sudo chmod 644 /var/log/nginx/*.log
 echo '>>> install elasticsearch'
 
 # install elasticsearch open-source
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
+wget -q https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
 
 sudo dpkg -i elasticsearch-oss-7.10.2-amd64.deb
 
