@@ -19,7 +19,7 @@
                  "keyword")
               (str "Code mapping is " mapping))))
       (testing "Stop words analyser is configured"
-        (let [conn (-> "http://localhost:9200" sut/connect)
+        (let [conn (-> system :ook.concerns.elastic/endpoint sut/connect)
               input "but for many such words as there are"
               ;; clojurewerkz.elastisch.rest.document/analyze doesn't work here
               ;; seems like ES is expecting a json request body on a get request!
