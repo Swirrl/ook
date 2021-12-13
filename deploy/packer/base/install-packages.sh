@@ -29,6 +29,9 @@ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10
 
 sudo dpkg -i elasticsearch-oss-7.10.2-amd64.deb
 
+# https://discuss.elastic.co/t/apache-log4j2-remote-code-execution-rce-vulnerability-cve-2021-44228-esa-2021-31/291476
+echo "-Dlog4j2.formatMsgNoLookups=true" | sudo tee /etc/elasticsearch/jvm.options.d/CVE-2021-44228.options
+
 # add opendistro for elasticsearch plug-ins
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
 
