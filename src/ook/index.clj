@@ -71,7 +71,7 @@
   (let [loader ["drafter-client.edn"
                 "elasticsearch-prod.edn"
                 "load-data.edn"]
-        target (or args ["project/trade/data.edn"
+        target (or args ["project/all/data.edn"
                          "idp-beta.edn"])
         profiles (concat loader target)]
     (println "Starting index loader with profiles: " profiles)
