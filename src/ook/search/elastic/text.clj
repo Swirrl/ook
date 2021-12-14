@@ -65,7 +65,8 @@
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "code" "_doc"
                      {:query {:bool {:must [{:match {:label {:query query
-                                                             :analyzer "std_english"}}}
+                                                             :analyzer "std_english"
+                                                             :fuzziness "AUTO"}}}
                                             {:term {:used "true"}}]}}
                       :size size-limit})
          :hits :hits
