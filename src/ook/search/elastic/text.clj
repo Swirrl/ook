@@ -164,7 +164,7 @@
 
 (defn ordered [datasets]
   (let [rank (fn [dataset]
-               (count (filter #(contains? % :matches)
+               (count (filter #(not-empty (:matches %))
                               (:component dataset))))]
     (sort-by rank > datasets)))
 
@@ -181,4 +181,4 @@
 
 (comment
   (let [opts {:elastic/endpoint "http://localhost:9200"}]
-    (dataset-search "of" opts)))
+    (dataset-search "imports of cars from Germany" opts)))
