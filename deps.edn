@@ -22,10 +22,10 @@
 
         ;; Logging
         org.clojure/tools.logging {:mvn/version "1.1.0"}
-        org.apache.logging.log4j/log4j-api {:mvn/version "2.15.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-core {:mvn/version "2.15.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.15.0"} ; Redirect all SLF4J logs over the log4j2 backend
-        org.apache.logging.log4j/log4j-web {:mvn/version "2.15.0"} ; Ensure servlet logs are closed
+        org.apache.logging.log4j/log4j-api {:mvn/version "2.16.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-core {:mvn/version "2.16.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.16.0"} ; Redirect all SLF4J logs over the log4j2 backend
+        org.apache.logging.log4j/log4j-web {:mvn/version "2.16.0"} ; Ensure servlet logs are closed
         de.bwaldvogel/log4j-systemd-journal-appender {:mvn/version "2.4.0"} ;; systemd logging
 
         clojurewerkz/elastisch {:mvn/version "5.0.0-beta1"}
