@@ -23,21 +23,16 @@ sudo chmod 644 /var/log/nginx/*.log
 
 echo '>>> install elasticsearch'
 
-# install elasticsearch open-source
-wget -q https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
+# ELASTICSEARCH
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+sudo apt-get install apt-transport-https
+echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
+sudo apt-get update && sudo apt-get install elasticsearch
 
-sudo dpkg -i elasticsearch-oss-7.10.2-amd64.deb
-
-# https://discuss.elastic.co/t/apache-log4j2-remote-code-execution-rce-vulnerability-cve-2021-44228-esa-2021-31/291476
-echo "-Dlog4j2.formatMsgNoLookups=true" | sudo tee /etc/elasticsearch/jvm.options.d/CVE-2021-44228.options
-
+# OPEN DISTRO
 # add opendistro for elasticsearch plug-ins
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
-
 #wget -qO - https://d3g5vo6xdbdb9a.cloudfront.net/GPG-KEY-opendistroforelasticsearch | sudo apt-key add -
-
 #echo "deb https://d3g5vo6xdbdb9a.cloudfront.net/apt stable main" | sudo tee -a   /etc/apt/sources.list.d/opendistroforelasticsearch.list
-
 #sudo apt-get update -y -q
-
 #sudo apt install opendistroforelasticsearch -y -q
