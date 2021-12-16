@@ -19,12 +19,12 @@
     (rf/dispatch [:filters/apply-filter-state filter-state])))
 
 (def ^:private routes
-  [["/" home-route-data]
-   ["/search" {:name :ook.route/search
-               :view views/search
-               :parameters {:query {:filters [string?]}}
-               :controllers [{:start search-controller
-                              :parameters {:query [:filters]}}]}]])
+  [["/facets" home-route-data]
+   ["/facets/search" {:name :ook.route/search
+                      :view views/search
+                      :parameters {:query {:filters [string?]}}
+                      :controllers [{:start search-controller
+                                     :parameters {:query [:filters]}}]}]])
 
 (defn- handle-navigation [new-match]
   (let [old-match @(rf/subscribe [:app/current-route])]

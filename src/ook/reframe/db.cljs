@@ -5,7 +5,7 @@
             [clojure.set :as set]))
 
 (def initial-db
-  {:app/current-route (rt/map->Match {:template "/" :path "/" :data router/home-route-data})
+  {:app/current-route (rt/map->Match {:template "/facets" :path "/facets" :data router/home-route-data})
    :results.datasets/data :loading})
 
 (defn filters->query-params [db]

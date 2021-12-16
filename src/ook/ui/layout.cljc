@@ -148,9 +148,17 @@
    [:main.flex-shrink-0
     [:div.mt-3.container
      (header)
+     
      (search-form query)
      (if (not (nil? datasets))
-       (search-results datasets))]]
+       (search-results datasets))
+
+     [:div.row
+      [:div.col
+       [:p
+        "Alternatively you find data by "
+        [:a {:href "/facets"} "browsing facets"]
+        " instead."]]]]]
    (footer)])
 
 (defn search [fingerprint-path data]
