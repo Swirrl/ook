@@ -1,0 +1,9 @@
+- name: Restore Elasticsearch snapshot
+  gather_facts: no
+  hosts: all
+
+  tasks:
+    - name: Restore snapshot
+      uri:
+        method: POST
+        url: "http://localhost:9200/_snapshot/gcs_repository/{{ snapshot_name | default('%3Csnapshot_%7Bnow%2Fd%7D%3E')}}/_restore"
