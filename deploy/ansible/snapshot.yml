@@ -1,0 +1,18 @@
+- name: Create Elasticsearch snapshot
+  gather_facts: no
+  hosts: all
+
+  tasks:
+    - name: Ensure repository is registered
+      uri:
+        method: PUT
+        url: "http://localhost:9200/_snapshot/gcs_repository"
+        body_format: "json"
+        body:
+          type: "gcs"
+          settings:
+            bucket: "ook-es-repository"
+    - name: Create snapshot
+      uri:
+        method: PUT
+        url: "http://localhost:9200/_snapshot/gcs_repository/{{ snapshot_name | default('%3Csnapshot_%7Bnow%2Fd%7D%3E')}}"

@@ -164,3 +164,9 @@ env ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook server.yml \
 We can also update ook on an already provisioned server using ansible.
 
 The [deploy_build.sh](./deploy_build.sh) script uses omni to install a given build (package version).
+
+## 3. Backing-up and restoring the elasticsearch indices
+
+The [ensure_bucket.sh](./ensure_bucket.sh) script will ensure that a GCS bucket called `ook-es-repository` is in place.
+
+The [create_snapshot.sh](./create_snapshot.sh) script will instruction ES to backup it's indices to the bucket. You can use the [restore_snapshot.sh](./restore_snapshot.sh) script to get it back out again.
