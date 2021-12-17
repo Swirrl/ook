@@ -2,7 +2,8 @@
   "variables": {
     "gcloud_project": "",
     "gcloud_account_file": "",
-    "output_image_name": ""
+    "output_image_name": "",
+    "es_snapshot_account_file": ""
   },
   "builders": [
     {
@@ -23,9 +24,20 @@
       ]
     },
     {
+      "type": "file",
+      "source": "{{ user `es_snapshot_account_file` }}",
+      "destination": "/tmp/es-snapshot-account-file.json"
+    },
+    {
       "type": "shell",
       "scripts": [
         "./base/install-packages.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+	"rm /tmp/es-snapshot-account-file.json"
       ]
     }
   ]

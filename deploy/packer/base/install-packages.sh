@@ -29,6 +29,13 @@ sudo apt-get install apt-transport-https
 echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
 sudo apt-get update && sudo apt-get install elasticsearch
 
+# Google Cloud Storage Plugin
+sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install -b repository-gcs
+sudo /usr/share/elasticsearch/bin/elasticsearch-keystore add-file gcs.client.default.credentials_file /tmp/es-snapshot-account-file.json
+sudo systemctl start elasticsearch.service
+curl -X PUT "localhost:9200/_snapshot/gcs_repository" -H 'Content-Type: application/json' -d'{"type":"gcs", "settings": {"bucket": "ook-es-repository"}}'
+sudo systemctl stop elasticsearch.service
+
 # OPEN DISTRO
 # add opendistro for elasticsearch plug-ins
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
