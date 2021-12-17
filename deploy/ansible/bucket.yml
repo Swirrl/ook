@@ -1,0 +1,26 @@
+- name: Create a storage bucket
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    project: "{{ settings[profile].project | default('ons-pilot') }}"
+  vars_files:
+    - profile_settings.yml
+
+  tasks:
+    - name: Create Bucket
+      gcp_storage_bucket:
+        name: "ook-es-repository"
+        auth_kind: serviceaccount
+        project: "{{ project }}"
+        location: eu
+        storage_class: COLDLINE
+        state: present
+      register: bucket
+    - name: Set ACL on Bucket
+      gcp_storage_bucket_access_control:
+        auth_kind: serviceaccount
+        bucket: "{{ bucket }}"
+        entity: "user-ook-es-snapshot-user@ons-pilot.iam.gserviceaccount.com"
+        role: "WRITER"
+
