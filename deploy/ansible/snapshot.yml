@@ -3,6 +3,15 @@
   hosts: all
 
   tasks:
+    - name: Ensure repository is registered
+      uri:
+        method: PUT
+        url: "http://localhost:9200/_snapshot/gcs_repository"
+        body_format: "json"
+        body:
+          type: "gcs"
+          settings:
+            bucket: "ook-es-repository"
     - name: Create snapshot
       uri:
         method: PUT

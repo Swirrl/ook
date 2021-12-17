@@ -32,9 +32,6 @@ sudo apt-get update && sudo apt-get install elasticsearch
 # Google Cloud Storage Plugin
 sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install -b repository-gcs
 sudo /usr/share/elasticsearch/bin/elasticsearch-keystore add-file gcs.client.default.credentials_file /tmp/es-snapshot-account-file.json
-sudo systemctl start elasticsearch.service
-curl -X PUT "localhost:9200/_snapshot/gcs_repository" -H 'Content-Type: application/json' -d'{"type":"gcs", "settings": {"bucket": "ook-es-repository"}}'
-sudo systemctl stop elasticsearch.service
 
 # OPEN DISTRO
 # add opendistro for elasticsearch plug-ins
