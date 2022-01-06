@@ -53,8 +53,7 @@
         machine_type: "custom-{{settings[profile].cpus}}-{{settings[profile].memory * 1024}}"
         tags:
           items:
-            - http-server
-            - https-server
+            - load-bal
         labels:
           application: ook
         disks:
