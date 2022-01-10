@@ -46,7 +46,13 @@
                       :cljs {:on-click #(rf/dispatch [:app/navigate :ook.route/home])})
       "Structural Search"]]
     [:div [:span.align-top.badge.bg-warning.text-dark "Alpha-Stage Prototype"]]]
-   [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]])
+   [:p.lead.pb-3 "Search for observations from a range of datasets, using dimensions and classification codes."]
+   [:div.alert.alert-warning {:role :alert}
+    [:p "This prototype doesn't yet achieve the speed and precision you would expect from a finished product."]
+    [:p "We "
+     [:a.alert-link {:href "mailto:searchprototype@swirrl.com"}
+      "welcome your feedback"]
+     " particularly if your search led to results that you weren't expecting."]]])
 
 (defn- footer []
   [:footer.mt-auto.footer.bg-light.p-4
@@ -156,7 +162,7 @@
      [:div.row
       [:div.col
        [:p
-        "Alternatively you find data by "
+        "Alternatively you can find data by "
         [:a {:href "/facets"} "browsing facets"]
         " instead."]]]]]
    (footer)])
