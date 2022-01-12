@@ -4,4 +4,7 @@
 #
 # For non-cider/intellij users starts a repl with standard project setup
 
-clojure -A:dev
+docker-compose up -d elasticsearch-test
+docker-compose up -d elasticsearch-development
+clj -M:dev
+docker-compose down
