@@ -228,22 +228,28 @@
 
 ;; Pipeline
 
+(defmacro with-deferred
+  "Evaluates deferred after evaluating body, but returns the result of
+   evaluating body."
+  [deferred & body]
+  `(let [res# (do ~@body)] ~deferred res#))
+
 (defn pipeline-fn* [pager-fn construct-query jsonld-frame index]
   (fn [system]
     (log/info (str "Pipeline Started: " index))
-    (let [counter (atom 0)]
-      (doseq [[var-name & uris] (pager-fn system)]
-        (log/info "Processing page starting with" index "subject" @counter)
-        (if uris
-          (do
-            (swap! counter + (count uris))
-            (with-retry
-              (doall
-               (->> (extract system construct-query var-name uris)
-                    (transform jsonld-frame)
-                    (load-documents system index)))))
-          (log/warn (str "No compatible (" index ") subjects found!")))))
-    (log/info (str "Pipeline Complete: " index))))
+    (with-deferred (log/info (str "Pipeline Complete: " index))
+      (reduce
+       (fn [counter [var-name & uris]]
+         (log/info "Processing page starting with" index "subject" counter)
+         (if uris
+           (with-retry
+             (->> (extract system construct-query var-name uris)
+                  (transform jsonld-frame)
+                  (load-documents system index)))
+           (log/warn (str "No compatible (" index ") subjects found!")))
+         (+ counter (count uris)))
+       0
+       (pager-fn system)))))
 
 (defn pipeline-fn
   ([subject-query construct-query jsonld-frame index]
@@ -293,13 +299,13 @@
 
 (defn pipeline [system]
   (log/info "Running all pipelines")
-  (dataset-pipeline system)
-  (component-pipeline system)
-  (code-pipeline system)
-  (let [system (assoc system :ook.etl/select-page-size 200)]
-    (code-used-pipeline system))
-  (observation-pipeline system)
-  (log/info "All pipelines complete"))
+  (with-deferred (log/info "All pipelines complete")
+    (+ (dataset-pipeline system)
+       (component-pipeline system)
+       (code-pipeline system)
+       (let [system (assoc system :ook.etl/select-page-size 200)]
+         (code-used-pipeline system))
+       (observation-pipeline system))))
 
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
