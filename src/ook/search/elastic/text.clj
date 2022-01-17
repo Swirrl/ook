@@ -49,24 +49,24 @@
   All criteria are combined with 'should' i.e. OR. Provides counts of observations by dataset
   and identifies the top three codes by dimension"
   [selection]
+  (println "Matching " (->> selection (mapcat val) count) " selections")
   {:size 0
-   :query {:bool {:should (terms-clauses selection)}}
+   :query {:bool {:should (terms-clauses selection)}} ;;:minimum_should_match "2"
    :aggregations {:cubes {:terms {:field "qb:dataSet.@id" :size size-limit} ;; roll-up dimensions within each dataset
-                             :aggregations (dimension-rollup selection)}}})
+                          :aggregations (dimension-rollup selection)
+                          }}})
 
 (defn observation-hits [selection {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
-    (->> (esd/search conn "observation" "_doc"
-                     (observation-query selection)))))
+    (doall (->> (esd/search conn "observation" "_doc"
+                            (observation-query selection))))))
 
 (defn codes
   "Queries for codes"
   [query {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
     (->> (esd/search conn "code" "_doc"
-                     {:query {:bool {:must [{:match {:label {:query query
-                                                             :analyzer "std_english"
-                                                             :fuzziness "AUTO"}}}
+                     {:query {:bool {:must [{:match {:label {:query query}}}
                                             {:term {:used "true"}}]}}
                       :size size-limit})
          :hits :hits
@@ -127,7 +127,7 @@
              (map (fn [component]
                     (let [component-id (-> component :ook/uri append-id keyword)
                           matches (match-lookup component-id)]
-                      (if (seq? matches)
+                      (if (not-empty matches)
                         (assoc component :matches matches)
                         component)))
                   components)))))))

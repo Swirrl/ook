@@ -17,7 +17,12 @@
    (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
   ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
    (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
-                                         :settings {:analysis {:analyzer {:std_english {:type "standard" :stopwords "_english_"}}}}})))
+                                         :settings
+                                         {:analysis
+                                          {:analyzer
+                                           {:ook_std
+                                            {:tokenizer "standard"
+                                             :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
 (defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
   (esi/delete (connect endpoint) index))
