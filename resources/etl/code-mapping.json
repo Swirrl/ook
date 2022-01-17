@@ -3,7 +3,7 @@
     "properties": {
       "@id": { "type": "keyword" },
       "@type": { "type": "keyword" },
-      "label": { "type": "text" },
+      "label": { "type": "text", "analyzer": "ook_std" },
       "scheme": { "type": "keyword" },
       "notation": { "type": "keyword" },
       "broader": { "type": "keyword" },
