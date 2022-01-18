@@ -289,6 +289,13 @@
    (slurp (io/resource "etl/code-used-frame.json"))
    "code"))
 
+(def graph-pipeline
+  (pipeline-fn
+   (slurp (io/resource "etl/observation-graph.sparql"))
+   (slurp (io/resource "etl/graph-construct.sparql"))
+   (slurp (io/resource "etl/graph-frame.json"))
+   "graph"))
+
 (def observation-pipeline
   (pipeline-fn
    (slurp (io/resource "etl/observation-graph.sparql"))
@@ -305,8 +312,8 @@
        (code-pipeline system)
        (let [system (assoc system :ook.etl/select-page-size 200)]
          (code-used-pipeline system))
+       (graph-pipeline system)
        (observation-pipeline system))))
-
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql

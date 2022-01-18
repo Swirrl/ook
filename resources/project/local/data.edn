@@ -1,0 +1,3 @@
+{:ook.etl/target-datasets
+ ["http://muttnik.gov/catalog/data/entry/alcohol-bulletin-duty-receipts"
+  "http://muttnik.gov/catalog/data/entry/alcohol-bulletin-production"]}

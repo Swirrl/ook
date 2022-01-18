@@ -103,12 +103,11 @@
 (deftest observation-pipeline-test
   (testing "Observation pipeline schema"
     (with-system [system ["drafter-client.edn"
-                          "idp-beta.edn"
+                          "local.edn"
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)
       ;; TODO vcr
-      (is (= 2799 (etl/observation-pipeline system)))
+      (is (= 4206 (etl/pipeline system)))
       ;; TODO modify just one graph, run pipeline again, assert fewer changes
-
-      (def db (setup/get-db system)))))
+      )))

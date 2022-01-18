@@ -1,0 +1,9 @@
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+CONSTRUCT {
+  ?graph dcterms:modified ?modified
+} WHERE {
+  GRAPH <http://publishmydata.com/graphs/drafter/graph-modified-times> {
+    ?graph dcterms:modified ?modified
+  }
+}
