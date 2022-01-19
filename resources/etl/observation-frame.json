@@ -10,7 +10,11 @@
     "pmdcat": "http://publishmydata.com/pmdcat#",
     "dimension": "http://gss-data.org.uk/def/dimension/",
     "measure": "http://gss-data.org.uk/def/measure/",
-    "skos": "http://www.w3.org/2004/02/skos/core#"
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "graph": {
+      "@id": "pmdcat:graph",
+      "@type": "@id"
+    }
   },
   "@type": "qb:Observation"
 }

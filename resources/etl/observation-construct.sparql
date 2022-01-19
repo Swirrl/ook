@@ -5,7 +5,10 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 
 CONSTRUCT {
   ?observation ?p ?o .
+  # is this an abuse of pmdcat? is there a common predicate for this already?
+  ?observation pmdcat:graph ?graph .
 } WHERE {
-  ?observation ?p ?o .
-#  FILTER isIRI(?o)
+  GRAPH ?graph {
+    ?observation ?p ?o .
+  }
 }
