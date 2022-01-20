@@ -34,8 +34,9 @@
   (esi/get-mapping (connect endpoint) index))
 
 
-(defn each-index [f]
-  (let [indicies ["dataset" "component" "code" "observation"]]
+(defn each-index [f & {:keys [exclude] :or {exclude #{}}}]
+  (let [indicies (remove exclude
+                         ["dataset" "component" "code" "observation" "graph"])]
     (zipmap (map keyword indicies)
             (map f indicies))))
 
@@ -46,8 +47,7 @@
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
-  (each-index (partial delete-index system)))
-
+  (each-index (partial delete-index system) :exclude (comment #{"observation" "graph"})))
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")

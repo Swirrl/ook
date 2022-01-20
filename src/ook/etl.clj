@@ -1,16 +1,19 @@
 (ns ook.etl
   (:require
-   [drafter-client.client.impl :as dci]
-   [drafter-client.client.interceptors :as interceptors]
+   [clojure.data.json :as json]
    [clojure.java.io :as io]
-   [grafter-2.rdf4j.io :as gio]
-   [grafter-2.rdf.protocols :as gpr]
+   [clojure.string :as s]
+   [clojure.tools.logging :as log]
    [clojurewerkz.elastisch.rest :as es]
    [clojurewerkz.elastisch.rest.bulk :as esb]
-   [clojure.data.json :as json]
-   [clojure.tools.logging :as log]
-   [clojure.string :as s]
-   [integrant.core :as ig])
+   [clojurewerkz.elastisch.rest.document :as esd]
+   [clojurewerkz.elastisch.rest.index :as esi]
+   [drafter-client.client.impl :as dci]
+   [drafter-client.client.interceptors :as interceptors]
+   [grafter-2.rdf.protocols :as gpr]
+   [grafter-2.rdf4j.io :as gio]
+   [integrant.core :as ig]
+   [ook.search.elastic.util :as esu])
   (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
@@ -107,16 +110,12 @@
          (spill-to-disk (query client subject-query) subject-cache))
        (read-paged subject-cache page-size)
        (finally (.delete subject-cache)))))
-  ([client graph-query subject-query page-size]
-   (let [graph-cache (File/createTempFile "ook-etl-graph-cache-" ".tmp")]
-     (try
-       (let [client (interceptors/accept client "text/csv")]
-         (spill-to-disk (query client graph-query) graph-cache))
-       (mapcat (fn [[var-name values]]
-                 (let [subject-query (insert-values-clause subject-query var-name [values])]
-                   (select-paged client subject-query page-size)))
-               (read-paged graph-cache 1)) ;; read multi-graph datasets one graph
-       (finally (.delete graph-cache))))))
+  ([client graphs subject-query page-size]
+   (mapcat (fn [graph]
+             (select-paged client
+                           (insert-values-clause subject-query "graph" [graph])
+                           page-size))
+           graphs)))
 
 
 
@@ -140,14 +139,10 @@
                  (with-dataset-scope subject-query target-datasets)
                  select-page-size))
   ([{:keys [drafter-client/client
-            ook.etl/target-datasets
             ook.etl/select-page-size]
      :as system
-     :or {select-page-size 50000}} graph-query subject-query]
-   (select-paged client
-                 (with-dataset-scope graph-query target-datasets)
-                 subject-query
-                 select-page-size)))
+     :or {select-page-size 50000}} graphs subject-query]
+   (select-paged client graphs subject-query select-page-size)))
 
 (defn extract
   "Executes the construct query binding in values from page"
@@ -256,9 +251,9 @@
    (pipeline-fn*
     (fn [system] (subject-pages system subject-query))
     construct-query jsonld-frame index))
-  ([graph-query subject-query construct-query jsonld-frame index]
+  ([graphs subject-query construct-query jsonld-frame index]
    (pipeline-fn*
-    (fn [system] (subject-pages system graph-query subject-query))
+    (fn [system] (subject-pages system graphs subject-query))
     construct-query jsonld-frame index)))
 
 (def dataset-pipeline
@@ -289,20 +284,72 @@
    (slurp (io/resource "etl/code-used-frame.json"))
    "code"))
 
-(def graph-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/observation-graph.sparql"))
-   (slurp (io/resource "etl/graph-construct.sparql"))
-   (slurp (io/resource "etl/graph-frame.json"))
-   "graph"))
+;; TODO refactor ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; copied from index.clj to avoid circular import
 
-(def observation-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/observation-graph.sparql"))
-   (slurp (io/resource "etl/observation-select.sparql"))
-   (slurp (io/resource "etl/observation-construct.sparql"))
-   (slurp (io/resource "etl/observation-frame.json"))
-   "observation"))
+(defn create-index
+  ([system index]
+   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
+  ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
+   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
+                                         :settings
+                                         {:analysis
+                                          {:analyzer
+                                           {:ook_std
+                                            {:tokenizer "standard"
+                                             :filter ["lowercase" "stop" "stemmer"]}}}}})))
+
+(defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
+  (esi/delete (connect endpoint) index))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TODO reuse a single connection
+;; TODO have all the pipelines handle their own index so we don't need
+;; exceptions in index.clj for graph and observation
+
+(defn graph-pipeline [system]
+  (delete-index system "graph")
+  (create-index system "graph")
+  ((pipeline-fn
+    (slurp (io/resource "etl/observation-graph.sparql"))
+    (slurp (io/resource "etl/graph-construct.sparql"))
+    (slurp (io/resource "etl/graph-frame.json"))
+    "graph")
+   system))
+
+(defn graph->modified [system]
+  ;; 10000 is the most hits you can return in one go from a search. If we're
+  ;; ever likely to have more than 10000 graphs, we will have to use the scroll
+  ;; API, paginate with search_after, or store the data elsewhere. (Just write
+  ;; it to disk as a blob of EDN?)
+  (->> (esd/search (:es-conn system) "graph" "_doc" {:size 10000})
+       :hits :hits
+       (map (juxt :_id (comp :modified :_source)))
+       ;; TODO remove, this is just for testing
+       (map (fn [[graph modified]]
+              [graph (rand-nth ["a" "b"])]))
+       (into {})))
+
+(defn graph-diff [system]
+  (let [prev (graph->modified system)
+        _ (graph-pipeline system)
+        curr (graph->modified system)]
+    {:rem (remove #(= (curr %) (prev %)) (keys prev))
+     :add (remove #(= (prev %) (curr %)) (keys curr))}))
+
+(defn observation-pipeline [system]
+  (let [{:keys [rem add]} (graph-diff system)]
+    (log/info "removing observations from" (count rem) "graphs")
+    (esd/delete-by-query (:es-conn system) "observation" "_doc"
+                         {:terms {:graph rem}})
+    (log/info "adding observations from" (count add) "graphs")
+    ((pipeline-fn (map #(str "http://gss-data.org.uk/" %) add)
+                  (slurp (io/resource "etl/observation-select.sparql"))
+                  (slurp (io/resource "etl/observation-construct.sparql"))
+                  (slurp (io/resource "etl/observation-frame.json"))
+                  "observation")
+     system)))
 
 (defn pipeline [system]
   (log/info "Running all pipelines")
@@ -312,8 +359,17 @@
        (code-pipeline system)
        (let [system (assoc system :ook.etl/select-page-size 200)]
          (code-used-pipeline system))
-       (graph-pipeline system)
        (observation-pipeline system))))
+
+(defn scrap []
+  (dev/with-system [system ["drafter-client.edn"
+                            "local.edn"
+                            "elasticsearch-test.edn"
+                            "project/fixture/data.edn"]]
+    (let [system (assoc system
+                        :es-conn (esu/get-connection
+                                  (:ook.concerns.elastic/endpoint system)))]
+      (pipeline system))))
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql
