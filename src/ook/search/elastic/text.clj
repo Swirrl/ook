@@ -37,7 +37,7 @@
   if the observation using them matches on another dimension)"
   [selection]
   (into {} (map (fn [dim] (let [dim (append-id dim)]
-                            [dim {:terms {:field dim, :size 5}}]))
+                            [dim {:terms {:field dim, :size size-limit}}]))
                 (keys selection))))
 
 (defn- observation-query
@@ -49,7 +49,6 @@
   All criteria are combined with 'should' i.e. OR. Provides counts of observations by dataset
   and identifies the top three codes by dimension"
   [selection]
-  (println "Matching " (->> selection (mapcat val) count) " selections")
   {:size 0
    :query {:bool {:should (terms-clauses selection)}} ;;:minimum_should_match "2"
    :aggregations {:cubes {:terms {:field "qb:dataSet.@id" :size size-limit} ;; roll-up dimensions within each dataset
