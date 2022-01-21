@@ -229,32 +229,31 @@
   [deferred & body]
   `(let [res# (do ~@body)] ~deferred res#))
 
-(defn pipeline-fn* [pager-fn construct-query jsonld-frame index]
-  (fn [system]
-    (log/info (str "Pipeline Started: " index))
-    (with-deferred (log/info (str "Pipeline Complete: " index))
-      (reduce
-       (fn [counter [var-name & uris]]
-         (log/info "Processing page starting with" index "subject" counter)
-         (if uris
-           (with-retry
-             (->> (extract system construct-query var-name uris)
-                  (transform jsonld-frame)
-                  (load-documents system index)))
-           (log/warn (str "No compatible (" index ") subjects found!")))
-         (+ counter (count uris)))
-       0
-       (pager-fn system)))))
+(defn pipeline* [system pages construct-query jsonld-frame index]
+  (log/info (str "Pipeline Started: " index))
+  (with-deferred (log/info (str "Pipeline Complete: " index))
+    (reduce
+     (fn [counter [var-name & uris]]
+       (log/info "Processing page starting with" index "subject" counter)
+       (if uris
+         (with-retry
+           (->> (extract system construct-query var-name uris)
+                (transform jsonld-frame)
+                (load-documents system index)))
+         (log/warn (str "No compatible (" index ") subjects found!")))
+       (+ counter (count uris)))
+     0
+     pages)))
 
-(defn pipeline-fn
-  ([subject-query construct-query jsonld-frame index]
-   (pipeline-fn*
-    (fn [system] (subject-pages system subject-query))
-    construct-query jsonld-frame index))
-  ([graphs subject-query construct-query jsonld-frame index]
-   (pipeline-fn*
-    (fn [system] (subject-pages system graphs subject-query))
-    construct-query jsonld-frame index)))
+(defn pipeline
+  ([system subject-query construct-query jsonld-frame index]
+   (pipeline* system
+              (subject-pages system subject-query)
+              construct-query jsonld-frame index))
+  ([system graphs subject-query construct-query jsonld-frame index]
+   (pipeline* system
+              (subject-pages system graphs subject-query)
+              construct-query jsonld-frame index)))
 
 ;; TODO conceptually these functions belong in ook.index, but can't live there
 ;; without removing index's dependency on this ns.
@@ -263,7 +262,7 @@
   ([system index]
    (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
   ([system index mapping-file]
-   (esi/create (:es-conn system)
+   (esi/create (esu/get-connection (:ook.concerns.elastic/endpoint system))
                index
                {:mappings (get (-> mapping-file io/reader json/read) "mappings")
                 :settings
@@ -274,66 +273,67 @@
                     :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
 (defn delete-index [system index]
-  (esi/delete (:es-conn system) index))
+  (esi/delete (esu/get-connection (:ook.concerns.elastic/endpoint system))
+              index))
 
 (defn dataset-pipeline [system]
   (delete-index system "dataset")
   (create-index system "dataset")
-  ((pipeline-fn
-    (slurp (io/resource "etl/dataset-select.sparql"))
-    (slurp (io/resource "etl/dataset-construct.sparql"))
-    (slurp (io/resource "etl/dataset-frame.json"))
-    "dataset")
-   system))
+  (pipeline system
+            (slurp (io/resource "etl/dataset-select.sparql"))
+            (slurp (io/resource "etl/dataset-construct.sparql"))
+            (slurp (io/resource "etl/dataset-frame.json"))
+            "dataset"))
 
 (defn component-pipeline [system]
   (delete-index system "component")
   (create-index system "component")
-  ((pipeline-fn
-    (slurp (io/resource "etl/component-select.sparql"))
-    (slurp (io/resource "etl/component-construct.sparql"))
-    (slurp (io/resource "etl/component-frame.json"))
-    "component")
-   system))
+  (pipeline system
+            (slurp (io/resource "etl/component-select.sparql"))
+            (slurp (io/resource "etl/component-construct.sparql"))
+            (slurp (io/resource "etl/component-frame.json"))
+            "component"))
 
 (defn code-pipeline [system]
   (delete-index system "code")
   (create-index system "code")
-  ((pipeline-fn
-    (slurp (io/resource "etl/code-select.sparql"))
-    (slurp (io/resource "etl/code-construct.sparql"))
-    (slurp (io/resource "etl/code-frame.json"))
-    "code")
-   system))
+  (pipeline system
+            (slurp (io/resource "etl/code-select.sparql"))
+            (slurp (io/resource "etl/code-construct.sparql"))
+            (slurp (io/resource "etl/code-frame.json"))
+            "code"))
 
-(def code-used-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/code-select.sparql"))
-   (slurp (io/resource "etl/code-used-construct.sparql"))
-   (slurp (io/resource "etl/code-used-frame.json"))
-   "code"))
+(defn code-used-pipeline [system]
+  (pipeline system
+            (slurp (io/resource "etl/code-select.sparql"))
+            (slurp (io/resource "etl/code-used-construct.sparql"))
+            (slurp (io/resource "etl/code-used-frame.json"))
+            "code"))
 
 (defn graph-pipeline [system]
   (delete-index system "graph")
   (create-index system "graph")
-  ((pipeline-fn
-    (slurp (io/resource "etl/observation-graph.sparql"))
-    (slurp (io/resource "etl/graph-construct.sparql"))
-    (slurp (io/resource "etl/graph-frame.json"))
-    "graph")
-   system))
+  (pipeline system
+            (slurp (io/resource "etl/observation-graph.sparql"))
+            (slurp (io/resource "etl/graph-construct.sparql"))
+            (slurp (io/resource "etl/graph-frame.json"))
+            "graph"))
 
 (defn graph->modified [system]
   ;; 10000 is the most hits you can return in one go from a search. If we're
   ;; ever likely to have more than 10000 graphs, we will have to use the scroll
   ;; API, paginate with search_after, or store the data elsewhere. (Just write
   ;; it to disk as a blob of EDN?)
-  (->> (esd/search (:es-conn system) "graph" "_doc" {:size 10000})
+  (->> (esd/search (esu/get-connection (:ook.concerns.elastic/endpoint system))
+                   "graph" "_doc" {:size 10000})
        :hits :hits
        (map (juxt :_id (comp :modified :_source)))
        (into {})))
 
 (defn graph-diff [system]
+  ;; It would be better to use the graph version here to differentiate changes
+  ;; that happen within a millisecond, but version is not currently exposed by
+  ;; drafter.
   (let [prev (graph->modified system)
         _ (graph-pipeline system)
         curr (graph->modified system)]
@@ -343,28 +343,25 @@
 (defn observation-pipeline [system]
   (let [{:keys [rem add]} (graph-diff system)]
     (log/info "removing observations for" (count rem) "graphs")
-    (esd/delete-by-query (:es-conn system) "observation" "_doc"
-                         {:terms {:graph rem}})
+    (esd/delete-by-query (esu/get-connection (:ook.concerns.elastic/endpoint system))
+                         "observation" "_doc" {:terms {:graph rem}})
     (log/info "adding observations for" (count add) "graphs")
-    ((pipeline-fn (map #(str "http://gss-data.org.uk/" %) add)
-                  (slurp (io/resource "etl/observation-select.sparql"))
-                  (slurp (io/resource "etl/observation-construct.sparql"))
-                  (slurp (io/resource "etl/observation-frame.json"))
-                  "observation")
-     system)))
+    (pipeline system
+              (map #(str "http://gss-data.org.uk/" %) add)
+              (slurp (io/resource "etl/observation-select.sparql"))
+              (slurp (io/resource "etl/observation-construct.sparql"))
+              (slurp (io/resource "etl/observation-frame.json"))
+              "observation")))
 
-(defn pipeline [system]
+(defn all-pipelines [system]
   (log/info "Running all pipelines")
-  (let [system (assoc system
-                      :es-conn (esu/get-connection
-                                (:ook.concerns.elastic/endpoint system)))]
-    (with-deferred (log/info "All pipelines complete")
-      (+ (dataset-pipeline system)
-         (component-pipeline system)
-         (code-pipeline system)
-         (let [system (assoc system :ook.etl/select-page-size 200)]
-           (code-used-pipeline system))
-         (observation-pipeline system)))))
+  (with-deferred (log/info "All pipelines complete")
+    (+ (dataset-pipeline system)
+       (component-pipeline system)
+       (code-pipeline system)
+       (let [system (assoc system :ook.etl/select-page-size 200)]
+         (code-used-pipeline system))
+       (observation-pipeline system))))
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql

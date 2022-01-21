@@ -111,21 +111,22 @@
                "1111-11-11T11:11:11.111Z")))))
 
 (deftest observation-pipeline-test
-  (testing "Observation pipeline schema"
-    (with-system [system ["drafter-client.edn"
-                          ;; TODO test against idp-beta and use cassette
-                          ;; currently blocked by idp-beta not having modified
-                          ;; times
-                          "local.edn"
-                          "elasticsearch-test.edn"
-                          "project/fixture/data.edn"]]
+  (with-system [system ["drafter-client.edn"
+                        ;; TODO test against idp-beta. currently blocked by
+                        ;; idp-beta not having modified times
+                        "local.edn"
+                        "elasticsearch-test.edn"
+                        "project/fixture/data.edn"]]
+    (vcr/with-cassette {:name :observation-pipeline
+                        :recordable? setup/not-localhost?}
       (setup/reset-indicies! system)
       ;; We start with a blank slate so load everything
       (let [total-observations (etl/observation-pipeline system)]
         (is (pos? total-observations))
         ;; But on the second load observations haven't changed
         (is (zero? (etl/observation-pipeline system)))
-        ;; We can simulate changing one dataset by faking ook.etl/graph->modified
+        ;; We can simulate changing one dataset by faking
+        ;; ook.etl/graph->modified
         (let [orig-graph->modified ook.etl/graph->modified]
           (intern 'ook.etl 'graph->modified (fake-graph->modified system))
           (is (< 0 (etl/observation-pipeline system) total-observations))

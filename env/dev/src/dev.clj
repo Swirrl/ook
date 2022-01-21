@@ -34,9 +34,7 @@
 
 
 (defn start-system! [profiles]
-  (let [system (i/exec-config {:profiles profiles})]
-    (assoc system :es-conn (esu/get-connection
-                            (:ook.concerns.elastic/endpoint system)))))
+  (i/exec-config {:profiles profiles}))
 
 (def stop-system! ig/halt!)
 

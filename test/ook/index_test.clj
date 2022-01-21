@@ -2,7 +2,8 @@
   (:require [ook.index :as sut]
             [clojure.test :refer :all]
             [ook.test.util.setup :refer [with-system]]
-            [clojurewerkz.elastisch.rest :as cer]))
+            [clojurewerkz.elastisch.rest :as cer]
+            [ook.search.elastic.util :as esu]))
 
 (defn acknowledged? [response]
   (true? (:acknowledged response)))
@@ -19,7 +20,7 @@
                  "keyword")
               (str "Code mapping is " mapping))))
       (testing "Analyser settings"
-        (let [conn (-> system :ook.concerns.elastic/endpoint sut/connect)
+        (let [conn (-> system :ook.concerns.elastic/endpoint esu/get-connection)
               tokens (fn [input]
                        ;; clojurewerkz.elastisch.rest.document/analyze doesn't work here
                        ;; seems like ES is expecting a json request body on a get request!

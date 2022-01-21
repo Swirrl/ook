@@ -4,13 +4,14 @@
             [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [ook.etl :as etl]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [ook.search.elastic.util :as esu]))
 
 (defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
-  (esi/update-settings (:es-conn endpoint) index settings))
+  (esi/update-settings (esu/get-connection endpoint) index settings))
 
 (defn get-mapping [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/get-mapping (:es-conn endpoint) index))
+  (esi/get-mapping (esu/get-connection endpoint) index))
 
 (defn each-index [f]
   (let [indicies ["dataset" "component" "code" "observation" "graph"]]
@@ -39,7 +40,7 @@
 (defmethod ig/init-key ::data [_ system]
   (bulk-mode system)
   (etl/with-deferred (normal-mode system)
-    (etl/pipeline system)))
+    (etl/all-pipelines system)))
 
 (defn -main
   "CLI Entry point for populating the index

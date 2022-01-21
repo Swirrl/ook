@@ -31,9 +31,7 @@
 
      ;; TODO lot of duplication between here and dev?
      (defn start-system! [profiles]
-       (let [system (i/exec-config {:profiles profiles})]
-         (assoc system :es-conn (esu/get-connection
-                                 (:ook.concerns.elastic/endpoint system)))))
+       (i/exec-config {:profiles profiles}))
 
      (def stop-system! ig/halt!)
 
@@ -68,7 +66,7 @@
        (reset-indicies! system)
 
        (with-cassette {:name :fixtures :recordable? not-localhost?}
-         (etl/pipeline system)))
+         (etl/all-pipelines system)))
 
      (defn get-db [system]
        (es/->Elasticsearch
