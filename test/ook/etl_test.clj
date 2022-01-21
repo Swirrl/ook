@@ -5,7 +5,6 @@
             [vcr-clj.clj-http :as vcr]
             [ook.test.util.setup :as setup :refer [with-system]]
             [ook.index :as idx]
-            [ook.etl :as sut]
             [ook.etl :as etl]
             [ook.search.db :as db]
             [ook.util :as util]))
@@ -20,7 +19,7 @@
     (with-system [system ["drafter-client.edn", "idp-beta.edn"]]
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
-            jsonld (sut/transform frame datasets)]
+            jsonld (etl/transform frame datasets)]
         (is (= "Alcohol Bulletin - Clearances"
                (-> jsonld (get "@graph") first (get "label"))))))))
 
@@ -29,8 +28,8 @@
     (with-system [system ["drafter-client.edn" "idp-beta.edn" "elasticsearch-test.edn"]]
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
-            jsonld (sut/transform frame datasets)
-            result (sut/load-documents system "dataset" jsonld)]
+            jsonld (etl/transform frame datasets)
+            result (etl/load-documents system "dataset" jsonld)]
         (is (= false (:errors (first result))))
         (is (= true (get-in (idx/delete-indicies system) [:dataset :acknowledged])))))))
 
@@ -100,14 +99,34 @@
           :broader nil
           :topConceptOf "def/trade/concept-scheme/alcohol-type")))))
 
+(defn fake-graph->modified [system]
+  (let [fake-graph->modified-call-count (atom 0)
+        fake-graph->modified-res (ook.etl/graph->modified system)]
+    (fn [_]
+      (swap! fake-graph->modified-call-count inc)
+      (if (< @fake-graph->modified-call-count 2)
+        fake-graph->modified-res
+        (assoc fake-graph->modified-res
+               (-> fake-graph->modified-res keys sort first)
+               "1111-11-11T11:11:11.111Z")))))
+
 (deftest observation-pipeline-test
   (testing "Observation pipeline schema"
     (with-system [system ["drafter-client.edn"
+                          ;; TODO test against idp-beta and use cassette
+                          ;; currently blocked by idp-beta not having modified
+                          ;; times
                           "local.edn"
                           "elasticsearch-test.edn"
                           "project/fixture/data.edn"]]
       (setup/reset-indicies! system)
-      ;; TODO vcr
-      (is (= 4206 (etl/pipeline system)))
-      ;; TODO modify just one graph, run pipeline again, assert fewer changes
-      )))
+      ;; We start with a blank slate so load everything
+      (let [total-observations (etl/observation-pipeline system)]
+        (is (pos? total-observations))
+        ;; But on the second load observations haven't changed
+        (is (zero? (etl/observation-pipeline system)))
+        ;; We can simulate changing one dataset by faking ook.etl/graph->modified
+        (let [orig-graph->modified ook.etl/graph->modified]
+          (intern 'ook.etl 'graph->modified (fake-graph->modified system))
+          (is (< 0 (etl/observation-pipeline system) total-observations))
+          (intern 'ook.etl 'graph->modified orig-graph->modified))))))

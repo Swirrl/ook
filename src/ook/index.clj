@@ -1,53 +1,29 @@
 (ns ook.index
   (:require [clojurewerkz.elastisch.rest :as es]
             [clojurewerkz.elastisch.rest.index :as esi]
-            [clojure.data.json :as json]
-            [clojure.java.io :as io]
             [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [ook.etl :as etl]
             [clojure.tools.logging :as log]))
 
-(defn connect [endpoint]
-  (es/connect endpoint {:content-type :json}))
-
-
-(defn create-index
-  ([system index]
-   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
-  ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
-                                         :settings
-                                         {:analysis
-                                          {:analyzer
-                                           {:ook_std
-                                            {:tokenizer "standard"
-                                             :filter ["lowercase" "stop" "stemmer"]}}}}})))
-
-(defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/delete (connect endpoint) index))
-
 (defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
-  (esi/update-settings (connect endpoint) index settings))
+  (esi/update-settings (:es-conn endpoint) index settings))
 
 (defn get-mapping [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/get-mapping (connect endpoint) index))
+  (esi/get-mapping (:es-conn endpoint) index))
 
-
-(defn each-index [f & {:keys [exclude] :or {exclude #{}}}]
-  (let [indicies (remove exclude
-                         ["dataset" "component" "code" "observation" "graph"])]
+(defn each-index [f]
+  (let [indicies ["dataset" "component" "code" "observation" "graph"]]
     (zipmap (map keyword indicies)
             (map f indicies))))
 
-
 (defn create-indicies [system]
   (log/info "Creating indicies")
-  (each-index (partial create-index system)))
+  (each-index (partial etl/create-index system)))
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
-  (each-index (partial delete-index system) :exclude (comment #{"observation" "graph"})))
+  (each-index (partial etl/delete-index system)))
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")
@@ -61,12 +37,9 @@
 
 ;; Loads an index with the configured content
 (defmethod ig/init-key ::data [_ system]
-  (delete-indicies system) ;; todo, make this "ensure indicies"
-  (create-indicies system)
   (bulk-mode system)
-  (let [result (etl/pipeline system)]
-    (normal-mode system)
-    result))
+  (etl/with-deferred (normal-mode system)
+    (etl/pipeline system)))
 
 (defn -main
   "CLI Entry point for populating the index

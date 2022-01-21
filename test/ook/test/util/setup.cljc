@@ -5,6 +5,7 @@
              [ook.etl :as etl]
              [ook.index :as idx]
              [ook.search.elastic :as es]
+             [ook.search.elastic.util :as esu]
              [integrant.core :as ig]
              [ook.concerns.integrant :as i]
              [vcr-clj.clj-http :refer [with-cassette]]
@@ -28,8 +29,11 @@
                [(io/resource "test.edn")
                 (io/resource "project/fixture/facets.edn")]))
 
+     ;; TODO lot of duplication between here and dev?
      (defn start-system! [profiles]
-       (i/exec-config {:profiles profiles}))
+       (let [system (i/exec-config {:profiles profiles})]
+         (assoc system :es-conn (esu/get-connection
+                                 (:ook.concerns.elastic/endpoint system)))))
 
      (def stop-system! ig/halt!)
 

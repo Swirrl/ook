@@ -256,26 +256,55 @@
     (fn [system] (subject-pages system graphs subject-query))
     construct-query jsonld-frame index)))
 
-(def dataset-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/dataset-select.sparql"))
-   (slurp (io/resource "etl/dataset-construct.sparql"))
-   (slurp (io/resource "etl/dataset-frame.json"))
-   "dataset"))
+;; TODO conceptually these functions belong in ook.index, but can't live there
+;; without removing index's dependency on this ns.
 
-(def component-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/component-select.sparql"))
-   (slurp (io/resource "etl/component-construct.sparql"))
-   (slurp (io/resource "etl/component-frame.json"))
-   "component"))
+(defn create-index
+  ([system index]
+   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
+  ([system index mapping-file]
+   (esi/create (:es-conn system)
+               index
+               {:mappings (get (-> mapping-file io/reader json/read) "mappings")
+                :settings
+                {:analysis
+                 {:analyzer
+                  {:ook_std
+                   {:tokenizer "standard"
+                    :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
-(def code-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/code-select.sparql"))
-   (slurp (io/resource "etl/code-construct.sparql"))
-   (slurp (io/resource "etl/code-frame.json"))
-   "code"))
+(defn delete-index [system index]
+  (esi/delete (:es-conn system) index))
+
+(defn dataset-pipeline [system]
+  (delete-index system "dataset")
+  (create-index system "dataset")
+  ((pipeline-fn
+    (slurp (io/resource "etl/dataset-select.sparql"))
+    (slurp (io/resource "etl/dataset-construct.sparql"))
+    (slurp (io/resource "etl/dataset-frame.json"))
+    "dataset")
+   system))
+
+(defn component-pipeline [system]
+  (delete-index system "component")
+  (create-index system "component")
+  ((pipeline-fn
+    (slurp (io/resource "etl/component-select.sparql"))
+    (slurp (io/resource "etl/component-construct.sparql"))
+    (slurp (io/resource "etl/component-frame.json"))
+    "component")
+   system))
+
+(defn code-pipeline [system]
+  (delete-index system "code")
+  (create-index system "code")
+  ((pipeline-fn
+    (slurp (io/resource "etl/code-select.sparql"))
+    (slurp (io/resource "etl/code-construct.sparql"))
+    (slurp (io/resource "etl/code-frame.json"))
+    "code")
+   system))
 
 (def code-used-pipeline
   (pipeline-fn
@@ -283,30 +312,6 @@
    (slurp (io/resource "etl/code-used-construct.sparql"))
    (slurp (io/resource "etl/code-used-frame.json"))
    "code"))
-
-;; TODO refactor ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; copied from index.clj to avoid circular import
-
-(defn create-index
-  ([system index]
-   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
-  ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
-                                         :settings
-                                         {:analysis
-                                          {:analyzer
-                                           {:ook_std
-                                            {:tokenizer "standard"
-                                             :filter ["lowercase" "stop" "stemmer"]}}}}})))
-
-(defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/delete (connect endpoint) index))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; TODO reuse a single connection
-;; TODO have all the pipelines handle their own index so we don't need
-;; exceptions in index.clj for graph and observation
 
 (defn graph-pipeline [system]
   (delete-index system "graph")
@@ -326,9 +331,6 @@
   (->> (esd/search (:es-conn system) "graph" "_doc" {:size 10000})
        :hits :hits
        (map (juxt :_id (comp :modified :_source)))
-       ;; TODO remove, this is just for testing
-       (map (fn [[graph modified]]
-              [graph (rand-nth ["a" "b"])]))
        (into {})))
 
 (defn graph-diff [system]
@@ -340,10 +342,10 @@
 
 (defn observation-pipeline [system]
   (let [{:keys [rem add]} (graph-diff system)]
-    (log/info "removing observations from" (count rem) "graphs")
+    (log/info "removing observations for" (count rem) "graphs")
     (esd/delete-by-query (:es-conn system) "observation" "_doc"
                          {:terms {:graph rem}})
-    (log/info "adding observations from" (count add) "graphs")
+    (log/info "adding observations for" (count add) "graphs")
     ((pipeline-fn (map #(str "http://gss-data.org.uk/" %) add)
                   (slurp (io/resource "etl/observation-select.sparql"))
                   (slurp (io/resource "etl/observation-construct.sparql"))
@@ -353,23 +355,16 @@
 
 (defn pipeline [system]
   (log/info "Running all pipelines")
-  (with-deferred (log/info "All pipelines complete")
-    (+ (dataset-pipeline system)
-       (component-pipeline system)
-       (code-pipeline system)
-       (let [system (assoc system :ook.etl/select-page-size 200)]
-         (code-used-pipeline system))
-       (observation-pipeline system))))
-
-(defn scrap []
-  (dev/with-system [system ["drafter-client.edn"
-                            "local.edn"
-                            "elasticsearch-test.edn"
-                            "project/fixture/data.edn"]]
-    (let [system (assoc system
-                        :es-conn (esu/get-connection
-                                  (:ook.concerns.elastic/endpoint system)))]
-      (pipeline system))))
+  (let [system (assoc system
+                      :es-conn (esu/get-connection
+                                (:ook.concerns.elastic/endpoint system)))]
+    (with-deferred (log/info "All pipelines complete")
+      (+ (dataset-pipeline system)
+         (component-pipeline system)
+         (code-pipeline system)
+         (let [system (assoc system :ook.etl/select-page-size 200)]
+           (code-used-pipeline system))
+         (observation-pipeline system)))))
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql
