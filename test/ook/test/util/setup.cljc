@@ -5,7 +5,6 @@
              [ook.etl :as etl]
              [ook.index :as idx]
              [ook.search.elastic :as es]
-             [ook.search.elastic.util :as esu]
              [integrant.core :as ig]
              [ook.concerns.integrant :as i]
              [vcr-clj.clj-http :refer [with-cassette]]
@@ -29,7 +28,6 @@
                [(io/resource "test.edn")
                 (io/resource "project/fixture/facets.edn")]))
 
-     ;; TODO lot of duplication between here and dev?
      (defn start-system! [profiles]
        (i/exec-config {:profiles profiles}))
 
@@ -70,7 +68,7 @@
 
      (defn get-db [system]
        (es/->Elasticsearch
-        {:elastic/endpoint (:ook.concerns.elastic/endpoint system)
+        {:elastic/conn (:ook.concerns.elastic/conn system)
          :ook/facets (:ook.search/facets system)})))
 
    ;;;;; CLJS test setup

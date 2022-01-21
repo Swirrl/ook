@@ -12,8 +12,7 @@
    [drafter-client.client.interceptors :as interceptors]
    [grafter-2.rdf.protocols :as gpr]
    [grafter-2.rdf4j.io :as gio]
-   [integrant.core :as ig]
-   [ook.search.elastic.util :as esu])
+   [integrant.core :as ig])
   (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
@@ -200,12 +199,11 @@
         docs (map (fn [doc] {"doc" (dissoc doc :_id), "doc_as_upsert" true}) docs)]
     (interleave ops docs)))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint
+(defn load-documents [{:keys [:ook.concerns.elastic/conn
                               :ook.etl/load-page-size
                               :ook.etl/load-synchronously] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
-  (let [conn (es/connect endpoint {:content-type :json})
-        docs (map add-id (get jsonld "@graph"))
+  (let [docs (map add-id (get jsonld "@graph"))
         batches (partition-all (or load-page-size 10000) docs)
         params (if load-synchronously {:refresh "wait_for"} {})]
     (doall
@@ -262,7 +260,7 @@
   ([system index]
    (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
   ([system index mapping-file]
-   (esi/create (esu/get-connection (:ook.concerns.elastic/endpoint system))
+   (esi/create (:ook.concerns.elastic/conn system)
                index
                {:mappings (get (-> mapping-file io/reader json/read) "mappings")
                 :settings
@@ -273,8 +271,7 @@
                     :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
 (defn delete-index [system index]
-  (esi/delete (esu/get-connection (:ook.concerns.elastic/endpoint system))
-              index))
+  (esi/delete (:ook.concerns.elastic/conn system) index))
 
 (defn dataset-pipeline [system]
   (delete-index system "dataset")
@@ -324,7 +321,7 @@
   ;; ever likely to have more than 10000 graphs, we will have to use the scroll
   ;; API, paginate with search_after, or store the data elsewhere. (Just write
   ;; it to disk as a blob of EDN?)
-  (->> (esd/search (esu/get-connection (:ook.concerns.elastic/endpoint system))
+  (->> (esd/search (:ook.concerns.elastic/conn system)
                    "graph" "_doc" {:size 10000})
        :hits :hits
        (map (juxt :_id (comp :modified :_source)))
@@ -335,15 +332,18 @@
   ;; that happen within a millisecond, but version is not currently exposed by
   ;; drafter.
   (let [prev (graph->modified system)
-        _ (graph-pipeline system)
+        _ (graph-pipeline (assoc system :ook.etl/load-synchronously true))
         curr (graph->modified system)]
     {:rem (remove #(= (curr %) (prev %)) (keys prev))
      :add (remove #(= (prev %) (curr %)) (keys curr))}))
 
 (defn observation-pipeline [system]
+  ;; create the graph index in case it doesn't exist (only needed for
+  ;; migration, we can delete this line once this change is deployed.)
+  (create-index system "graph")
   (let [{:keys [rem add]} (graph-diff system)]
     (log/info "removing observations for" (count rem) "graphs")
-    (esd/delete-by-query (esu/get-connection (:ook.concerns.elastic/endpoint system))
+    (esd/delete-by-query (:ook.concerns.elastic/conn system)
                          "observation" "_doc" {:terms {:graph rem}})
     (log/info "adding observations for" (count add) "graphs")
     (pipeline system

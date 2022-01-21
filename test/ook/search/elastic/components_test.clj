@@ -12,7 +12,7 @@
 
     (setup/load-fixtures! system)
 
-    (let [opts {:elastic/endpoint (:ook.concerns.elastic/endpoint system)}
+    (let [opts {:elastic/conn (:ook.concerns.elastic/conn system)}
           codelist-uris ["def/trade/concept-scheme/alcohol-type"
                          "def/trade/concept-scheme/bulletin-type"]]
 

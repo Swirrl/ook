@@ -1,5 +1,5 @@
 {:ook.index/data
- {:ook.concerns.elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
+ {:ook.concerns.elastic/conn #ig/ref :ook.concerns.elastic/conn
   :drafter-client/client #ig/ref :drafter-client/client
   :ook.etl/target-datasets #ig/ref :ook.etl/target-datasets
   :ook.etl/select-page-size #env ["OOK_ETL_SELECT_PAGE_SIZE" 50000]

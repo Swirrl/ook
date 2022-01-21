@@ -6,7 +6,8 @@
   ;; results returned by private method (here we're testing parsing not the query construction which is integration tested in elastic-test) 
   #_(sut/find-observations {"data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dimension/period" []
                           "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dimension/period" []}
-                         {:elastic/endpoint "http://localhost:9201"})
+                         {:elastic/conn (esr/connect "http://localhost:9201"
+                                                     {:content-type :json})})
   (let [results {:aggregations
                  {:datasets
                   {:buckets ;; NB: each dataset only finds observations to aggregate with it's own dimensions

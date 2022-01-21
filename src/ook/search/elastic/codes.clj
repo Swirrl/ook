@@ -12,9 +12,8 @@
 
 (defn get-codes
   "Find codes using their URIs."
-  [uris {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        uris (u/box uris)]
+  [uris {:keys [elastic/conn]}]
+  (let [uris (u/box uris)]
     (->> (get-codes* conn uris)
          :hits :hits
          (map :_source)
@@ -34,12 +33,11 @@
 
 (defn get-codes-in-scheme
   "Find codes using the scheme URI"
-  [scheme-uri {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (->> (esu/all-hits conn "code" {:query {:term {:scheme scheme-uri}}})
-         (map :_source)
-         (map esu/normalize-keys)
-         (map (partial build-code scheme-uri)))))
+  [scheme-uri {:keys [elastic/conn]}]
+  (->> (esu/all-hits conn "code" {:query {:term {:scheme scheme-uri}}})
+       (map :_source)
+       (map esu/normalize-keys)
+       (map (partial build-code scheme-uri))))
 
 (defn- build-codes
   "Map the codes from the elasticsearch result format to a more succinct format used internally.
@@ -95,10 +93,9 @@
     (assoc concept :children (build-sub-tree code-lookup children))
     concept))
 
-(defn build-concept-tree [codelist-id {:keys [elastic/endpoint] :as opts}]
+(defn build-concept-tree [codelist-id {:keys [elastic/conn] :as opts}]
   (if codelist-id
-    (let [conn (esu/get-connection endpoint)
-          code-lookup (u/id-lookup (get-codes-in-scheme codelist-id opts))]
+    (let [code-lookup (u/id-lookup (get-codes-in-scheme codelist-id opts))]
       (doall
        (map (partial find-narrower-concepts code-lookup)
             (get-top-concepts conn codelist-id))))
@@ -124,9 +121,8 @@
          (filter codelists)
          (map (partial assoc code :scheme)))))
 
-(defn search [{:keys [codelists] :as params} {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (->> params
-         (search-codes conn)
-         :hits :hits
-         (mapcat (partial build-code-for-each-scheme (set codelists))))))
+(defn search [{:keys [codelists] :as params} {:keys [elastic/conn]}]
+  (->> params
+       (search-codes conn)
+       :hits :hits
+       (mapcat (partial build-code-for-each-scheme (set codelists)))))

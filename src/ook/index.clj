@@ -4,14 +4,13 @@
             [integrant.core :as ig]
             [ook.concerns.integrant :as i]
             [ook.etl :as etl]
-            [clojure.tools.logging :as log]
-            [ook.search.elastic.util :as esu]))
+            [clojure.tools.logging :as log]))
 
-(defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
-  (esi/update-settings (esu/get-connection endpoint) index settings))
+(defn update-settings [{:keys [:ook.concerns.elastic/conn] :as system} index settings]
+  (esi/update-settings conn index settings))
 
-(defn get-mapping [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/get-mapping (esu/get-connection endpoint) index))
+(defn get-mapping [{:keys [:ook.concerns.elastic/conn] :as system} index]
+  (esi/get-mapping conn index))
 
 (defn each-index [f]
   (let [indicies ["dataset" "component" "code" "observation" "graph"]]

@@ -25,9 +25,8 @@
 
 (defn get-facets
   "Resolves a facet configuration by looking up sub-properties"
-  [{:keys [ook/facets elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (map (partial append-child-dimensions conn) facets)))
+  [{:keys [ook/facets elastic/conn]}]
+  (map (partial append-child-dimensions conn) facets))
 
 (defn get-facets-for-selections
   "Gets only those facets that are included in the selections"

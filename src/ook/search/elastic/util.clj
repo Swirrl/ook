@@ -5,9 +5,6 @@
    [clojurewerkz.elastisch.rest :as esr]
    [clojurewerkz.elastisch.rest.document :as esrd]))
 
-(defn get-connection [endpoint]
-  (esr/connect endpoint {:content-type :json}))
-
 (defn- replace-problematic-char [k]
   (if (= (keyword "@id") k)
     :ook/uri

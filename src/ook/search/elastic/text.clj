@@ -28,28 +28,24 @@
    :query {:bool {:should (terms-clauses selection)}} ;;:minimum_should_match "2"
    :aggregations {:cubes {:terms {:field "qb:dataSet.@id" :size size-limit}}}})
 
-(defn observation-hits [selection {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (doall (->> (esd/search conn "observation" "_doc"
-                            (observation-query selection))))))
+(defn observation-hits [selection {:keys [elastic/conn]}]
+  (esd/search conn "observation" "_doc" (observation-query selection)))
 
 (defn codes
   "Queries for codes"
-  [query {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)]
-    (->> (esd/search conn "code" "_doc"
-                     {:query {:bool {:must [{:match {:label {:query query}}}
-                                            {:term {:used "true"}}]}}
-                      :size size-limit})
-         :hits :hits
-         (map :_source)
-         (map esu/normalize-keys))))
+  [query {:keys [elastic/conn]}]
+  (->> (esd/search conn "code" "_doc"
+                   {:query {:bool {:must [{:match {:label {:query query}}}
+                                          {:term {:used "true"}}]}}
+                    :size size-limit})
+       :hits :hits
+       (map :_source)
+       (map esu/normalize-keys)))
 
 (defn codes-to-selection
   "Creates a `selection` map (from dimension to values) from an sequence of codes"
-  [codes {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        codes-for-codelist (->> codes
+  [codes {:keys [elastic/conn]}]
+  (let [codes-for-codelist (->> codes
                                 (mapcat (fn [{:keys [ook/uri scheme]}]
                                           (let [schemes (u/box scheme)]
                                             (map (fn [scheme] {scheme [uri]}) schemes))))
@@ -91,9 +87,8 @@
 
 (defn datasets-with-components
   "Retrieves dataset definitions (with components defined) for cube-uris"
-  [cube-uris {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        datasets (->> (esd/search conn "dataset" "_doc"
+  [cube-uris {:keys [elastic/conn]}]
+  (let [datasets (->> (esd/search conn "dataset" "_doc"
                                   {:query {:terms {"cube" cube-uris}}
                                    :size size-limit})
                       :hits :hits
@@ -112,9 +107,8 @@
 
 (defn datasets-from-results
   "Converts observation hits into a seq of dataset results for display"
-  [hits codes {:keys [elastic/endpoint] :as opts}]
+  [hits codes {:keys [elastic/conn] :as opts}]
   (let [cubes (get-in hits [:aggregations :cubes :buckets])
-        conn (esu/get-connection endpoint)
         cube-uris (map (fn [d] {:ook/uri (:key d)}) cubes)
         datasets (datasets-with-components cube-uris opts)
         describe-matches (match-describer cubes codes)]
@@ -138,5 +132,6 @@
       (list))))
 
 (comment
-  (let [opts {:elastic/endpoint "http://localhost:9200"}]
+  (let [opts {:elastic/conn
+              (esr/connect "http://localhost:9200" {:content-type :json})}]
     (dataset-search "imports of cars from Germany" opts)))

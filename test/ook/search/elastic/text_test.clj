@@ -12,7 +12,7 @@
 
     (setup/load-fixtures! system)
 
-    (let [opts {:elastic/endpoint (:ook.concerns.elastic/endpoint system)}]
+    (let [opts {:elastic/conn (:ook.concerns.elastic/conn system)}]
 
       (testing "codes-to-selection returns dimension-value criteria"
         (let [codes (sut/codes "beer" opts)

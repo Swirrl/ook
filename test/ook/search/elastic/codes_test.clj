@@ -12,7 +12,7 @@
 
     (setup/load-fixtures! system)
 
-    (let [opts {:elastic/endpoint (:ook.concerns.elastic/endpoint system)}
+    (let [opts {:elastic/conn (:ook.concerns.elastic/conn system)}
           codelist-uri "def/trade/concept-scheme/bulletin-type"
           tree (sut/build-concept-tree codelist-uri opts)]
 
