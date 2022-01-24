@@ -18,13 +18,13 @@
         (let [codes (sut/codes "beer" opts)
               selection (sut/codes-to-selection codes opts)]
           (is (= {"def/trade/property/dimension/alcohol-type"
-                  ["def/trade/concept/alcohol-type/beer-and-cider"]
+                  ["def/trade/concept/alcohol-type/beer"]
                   "def/trade/property/dimension/bulletin-type"
-	          ["def/trade/concept/bulletin-type/total-beer-clearances"
-	           "def/trade/concept/bulletin-type/uk-beer-production"
-	           "def/trade/concept/bulletin-type/total-beer-clearances-alcohol"
-	           "def/trade/concept/bulletin-type/total-beer-duty-receipts"
-	           "def/trade/concept/bulletin-type/uk-beer-production-alcohol"]}
+                  ["def/trade/concept/bulletin-type/total-beer-clearances-thousand-of-alcohol"
+                   "def/trade/concept/bulletin-type/total-beerclearances-thousand"
+                   "def/trade/concept/bulletin-type/uk-beer-production-thousand"
+                   "def/trade/concept/bulletin-type/uk-beer-production-thousand-of-alcohol"
+                   "def/trade/concept/bulletin-type/total-beer-duty-receipts"]}
                  selection))))
 
       (testing "observation-hits returns results"
@@ -37,7 +37,7 @@
                          "http://reference.data.gov.uk/id/government-year/2000-2001"
                          "http://reference.data.gov.uk/id/government-year/2001-2002"]}
               observations (sut/observation-hits criteria opts)]
-          (is (= 24
+          (is (= 33
                  (get-in observations [:hits :total :value])))))
 
       (testing "ordered datasets"
@@ -62,11 +62,11 @@
           (testing "returns dataset metadata"
             (are [field value] (= value (get result field))
               :cube "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dataset"
-              :label "Alcohol Bulletin - Duty Receipts"
-              :comment "Monthly Duty Receipts statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs"))
+              :label "Alcohol Bulletin - duty-receipts"
+              :comment "Monthly Production statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs"))
 
           (testing "adds observation counts"
-            (is (= 304
+            (is (= 1256
                    (result :matching-observation-count))))
 
           (testing "adds matches to components"

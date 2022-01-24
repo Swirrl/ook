@@ -1,4 +1,5 @@
-{:drafter/endpoint-url "https://idp-beta-drafter.publishmydata.com"
+;; TODO revert to https://idp-beta-drafter.publishmydata.com before merge
+{:drafter/endpoint-url "https://drafter-bump-drafter.publishmydata.com"
  ;;:auth0.client/id #env ["AUTH0_ID" "OS2GgkrjYyb7EXdawNfk6HViXznpf7Dh"]
  ;;:auth0.client/secret #secret ["AUTH0_SECRET_IDP_BETA"]
  :auth0.client/endpoint "https://swirrl-ons-prod.eu.auth0.com"

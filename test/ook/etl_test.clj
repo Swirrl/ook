@@ -12,7 +12,7 @@
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
     (with-system [system ["drafter-client.edn" "idp-beta.edn"]]
-      (is (= 36 (count (setup/example-datasets system)))))))
+      (is (= 38 (count (setup/example-datasets system)))))))
 
 (deftest transform-test
   (testing "Transform triples into json-ld"
@@ -20,7 +20,7 @@
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (etl/transform frame datasets)]
-        (is (= "Alcohol Bulletin - Clearances"
+        (is (= "Alcohol Bulletin - clearances"
                (-> jsonld (get "@graph") first (get "label"))))))))
 
 (deftest load-test
@@ -57,7 +57,7 @@
             doc (first (db/all-datasets db))]
         (are [key value] (found? doc key value)
           :ook/uri "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
-          :label "Alcohol Bulletin - Duty Receipts"
+          :label "Alcohol Bulletin - duty-receipts"
           :publisher {:altlabel "HMRC"})))))
 
 (deftest component-pipeline-test
@@ -94,7 +94,7 @@
           :ook/uri "def/trade/concept/alcohol-type/beer"
           :label "Beer"
           :notation "beer"
-          :used "false"
+          :used "true"
           :narrower nil
           :broader nil
           :topConceptOf "def/trade/concept-scheme/alcohol-type")))))
