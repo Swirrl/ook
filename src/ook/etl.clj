@@ -1,18 +1,16 @@
 (ns ook.etl
   (:require
-   [clojure.data.json :as json]
    [clojure.java.io :as io]
    [clojure.string :as s]
    [clojure.tools.logging :as log]
-   [clojurewerkz.elastisch.rest :as es]
    [clojurewerkz.elastisch.rest.bulk :as esb]
    [clojurewerkz.elastisch.rest.document :as esd]
-   [clojurewerkz.elastisch.rest.index :as esi]
    [drafter-client.client.impl :as dci]
    [drafter-client.client.interceptors :as interceptors]
    [grafter-2.rdf.protocols :as gpr]
    [grafter-2.rdf4j.io :as gio]
-   [integrant.core :as ig])
+   [integrant.core :as ig]
+   [ook.index :as index])
   (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
@@ -253,29 +251,9 @@
               (subject-pages system graphs subject-query)
               construct-query jsonld-frame index)))
 
-;; TODO conceptually these functions belong in ook.index, but can't live there
-;; without removing index's dependency on this ns.
-
-(defn create-index
-  ([system index]
-   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
-  ([system index mapping-file]
-   (esi/create (:ook.concerns.elastic/conn system)
-               index
-               {:mappings (get (-> mapping-file io/reader json/read) "mappings")
-                :settings
-                {:analysis
-                 {:analyzer
-                  {:ook_std
-                   {:tokenizer "standard"
-                    :filter ["lowercase" "stop" "stemmer"]}}}}})))
-
-(defn delete-index [system index]
-  (esi/delete (:ook.concerns.elastic/conn system) index))
-
 (defn dataset-pipeline [system]
-  (delete-index system "dataset")
-  (create-index system "dataset")
+  (index/delete system "dataset")
+  (index/create system "dataset")
   (pipeline system
             (slurp (io/resource "etl/dataset-select.sparql"))
             (slurp (io/resource "etl/dataset-construct.sparql"))
@@ -283,8 +261,8 @@
             "dataset"))
 
 (defn component-pipeline [system]
-  (delete-index system "component")
-  (create-index system "component")
+  (index/delete system "component")
+  (index/create system "component")
   (pipeline system
             (slurp (io/resource "etl/component-select.sparql"))
             (slurp (io/resource "etl/component-construct.sparql"))
@@ -292,8 +270,8 @@
             "component"))
 
 (defn code-pipeline [system]
-  (delete-index system "code")
-  (create-index system "code")
+  (index/delete system "code")
+  (index/create system "code")
   (pipeline system
             (slurp (io/resource "etl/code-select.sparql"))
             (slurp (io/resource "etl/code-construct.sparql"))
@@ -308,8 +286,8 @@
             "code"))
 
 (defn graph-pipeline [system]
-  (delete-index system "graph")
-  (create-index system "graph")
+  (index/delete system "graph")
+  (index/create system "graph")
   (pipeline system
             (slurp (io/resource "etl/observation-graph.sparql"))
             (slurp (io/resource "etl/graph-construct.sparql"))
@@ -340,7 +318,7 @@
 (defn observation-pipeline [system]
   ;; create the graph index in case it doesn't exist (only needed for
   ;; migration, we can delete this line once this change is deployed.)
-  (create-index system "graph")
+  (index/create system "graph")
   (let [{:keys [rem add]} (graph-diff system)]
     (log/info "removing observations for" (count rem) "graphs")
     (esd/delete-by-query (:ook.concerns.elastic/conn system)
@@ -370,6 +348,12 @@
       (rest results))
     opts))
 
+;; Loads an index with the configured content
+(defmethod ig/init-key :ook.index/data [_ system]
+  (index/bulk-mode system)
+  (with-deferred (index/normal-mode system)
+    (all-pipelines system)))
+
 (comment
   (require 'ook.concerns.integrant)
   (def result
@@ -388,8 +372,8 @@
                      "idp-beta.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    ;(ook.index/delete-index system "code")
-    ;(ook.index/create-index system "code")
+    ;(ook.index/delete system "code")
+    ;(ook.index/create system "code")
     #_(let [system (assoc system :ook.etl/select-page-size 50000)]
       (code-pipeline system))
     (let [system (assoc system :ook.etl/select-page-size 200)]

@@ -1,10 +1,28 @@
 (ns ook.index
-  (:require [clojurewerkz.elastisch.rest :as es]
-            [clojurewerkz.elastisch.rest.index :as esi]
-            [integrant.core :as ig]
-            [ook.concerns.integrant :as i]
-            [ook.etl :as etl]
-            [clojure.tools.logging :as log]))
+  (:require
+   [clojure.data.json :as json]
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [clojurewerkz.elastisch.rest.index :as esi]
+   [integrant.core :as ig]
+   [ook.concerns.integrant :as i]))
+
+(defn create
+  ([system index]
+   (create system index (io/resource (str "etl/" index "-mapping.json"))))
+  ([system index mapping-file]
+   (esi/create (:ook.concerns.elastic/conn system)
+               index
+               {:mappings (get (-> mapping-file io/reader json/read) "mappings")
+                :settings
+                {:analysis
+                 {:analyzer
+                  {:ook_std
+                   {:tokenizer "standard"
+                    :filter ["lowercase" "stop" "stemmer"]}}}}})))
+
+(defn delete [system index]
+  (esi/delete (:ook.concerns.elastic/conn system) index))
 
 (defn update-settings [{:keys [:ook.concerns.elastic/conn] :as system} index settings]
   (esi/update-settings conn index settings))
@@ -12,34 +30,28 @@
 (defn get-mapping [{:keys [:ook.concerns.elastic/conn] :as system} index]
   (esi/get-mapping conn index))
 
-(defn each-index [f]
+(defn each [f]
   (let [indicies ["dataset" "component" "code" "observation" "graph"]]
     (zipmap (map keyword indicies)
             (map f indicies))))
 
 (defn create-indicies [system]
   (log/info "Creating indicies")
-  (each-index (partial etl/create-index system)))
+  (each (partial create system)))
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
-  (each-index (partial etl/delete-index system)))
+  (each (partial delete system)))
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")
-  (each-index #(update-settings system % {"index.refresh_interval" "-1"
+  (each #(update-settings system % {"index.refresh_interval" "-1"
                                           "index.number_of_replicas" "0"})))
 
 (defn normal-mode [system]
   (log/info "Configuring indicies for search")
-  (each-index #(update-settings system % {"index.refresh_interval" nil
+  (each #(update-settings system % {"index.refresh_interval" nil
                                           "index.number_of_replicas" "1"})))
-
-;; Loads an index with the configured content
-(defmethod ig/init-key ::data [_ system]
-  (bulk-mode system)
-  (etl/with-deferred (normal-mode system)
-    (etl/all-pipelines system)))
 
 (defn -main
   "CLI Entry point for populating the index
