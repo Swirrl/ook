@@ -17,7 +17,7 @@
           tree (sut/build-concept-tree codelist-uri opts)]
 
       (testing "build-concept-tree"
-        (is (= 30 (count tree)))
+        (is (= 47 (count tree)))
         (is (= (-> tree first keys sort)
                [:children :label :scheme :used :ook/uri]))
         (is (= ["1.2% to 5.5% ABV clearances" "Cider clearances"]

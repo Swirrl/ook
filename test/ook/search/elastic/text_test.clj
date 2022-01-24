@@ -20,11 +20,11 @@
           (is (= {"def/trade/property/dimension/alcohol-type"
                   ["def/trade/concept/alcohol-type/beer-and-cider"]
                   "def/trade/property/dimension/bulletin-type"
-	          ["def/trade/concept/bulletin-type/total-beer-clearances"
-	           "def/trade/concept/bulletin-type/uk-beer-production"
-	           "def/trade/concept/bulletin-type/total-beer-clearances-alcohol"
-	           "def/trade/concept/bulletin-type/total-beer-duty-receipts"
-	           "def/trade/concept/bulletin-type/uk-beer-production-alcohol"]}
+                  ["def/trade/concept/bulletin-type/total-beer-clearances-thousand-of-alcohol"
+                   "def/trade/concept/bulletin-type/total-beerclearances-thousand"
+                   "def/trade/concept/bulletin-type/uk-beer-production-thousand"
+                   "def/trade/concept/bulletin-type/uk-beer-production-thousand-of-alcohol"
+                   "def/trade/concept/bulletin-type/total-beer-duty-receipts"]}
                  selection))))
 
       (testing "observation-hits returns results"
@@ -37,7 +37,7 @@
                          "http://reference.data.gov.uk/id/government-year/2000-2001"
                          "http://reference.data.gov.uk/id/government-year/2001-2002"]}
               observations (sut/observation-hits criteria opts)]
-          (is (= 24
+          (is (= 27
                  (get-in observations [:hits :total :value])))))
 
       (testing "ordered datasets"
@@ -66,7 +66,7 @@
               :comment "Monthly Duty Receipts statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs"))
 
           (testing "adds observation counts"
-            (is (= 304
+            (is (= 933
                    (result :matching-observation-count))))
 
           (testing "adds matches to components"
@@ -92,4 +92,6 @@
                                :matches)]
                   (is (= matches
                          [{:ook/uri "def/trade/concept/alcohol-type/wine"
-                           :label "Wine"}])))))))))))
+                           :label "Wine"}
+                          {:ook/uri "def/trade/concept/alcohol-type/made-wine"
+                           :label "Made-Wine"}])))))))))))

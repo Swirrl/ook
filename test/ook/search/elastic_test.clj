@@ -111,20 +111,31 @@
               (is (= {:name "Bulletin Type"
                       :dimensions
                       [{:ook/uri "def/trade/property/dimension/bulletin-type"
-                        :label "Alcohol Bulletin Type" 
+                        :label "Alcohol Bulletin Type"
                         :codes
-                        [{:ook/uri
-                          "def/trade/concept/bulletin-type/total-wine-duty-receipts"
-                          :ook/type "skos:Concept",
-                          :notation "total-wine-duty-receipts",
-                          :label "Total Wine Duty receipts",
-                          :priority "8",
-                          :narrower nil,
-                          :broader nil,
-                          :topConceptOf "def/trade/concept-scheme/bulletin-type",
+                        [{:ook/uri "def/trade/concept/bulletin-type/total-alcohol-duty-receipts"
+                          :ook/type "skos:Concept"
+                          :priority "9"
+                          :label "Total alcohol duty receipts"
+                          :narrower nil
+                          :broader nil
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type"
+                          :notation "total-alcohol-duty-receipts"
                           :scheme
-                          [{:ook/uri "def/trade/concept-scheme/bulletin-type",
-                            :label "Bulletin Type"}],
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type"
+                            :label "Bulletin Type"}]
+                          :used "true"}
+                         {:ook/uri "def/trade/concept/bulletin-type/total-wine-duty-receipts"
+                          :ook/type "skos:Concept"
+                          :priority "8"
+                          :label "Total Wine Duty receipts"
+                          :narrower nil
+                          :broader nil
+                          :topConceptOf "def/trade/concept-scheme/bulletin-type"
+                          :notation "total-wine-duty-receipts"
+                          :scheme
+                          [{:ook/uri "def/trade/concept-scheme/bulletin-type"
+                            :label "Bulletin Type"}]
                           :used "true"}]}]}
                      (description-for-facet "Bulletin Type")))
               (is (= nil
