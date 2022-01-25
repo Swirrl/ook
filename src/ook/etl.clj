@@ -171,10 +171,10 @@
 (defn transform [frame-string statements]
   (log/info "Transforming objects")
   (let [frame-doc (JsonUtils/fromString frame-string)]
-    (-> statements
-        ->jsonld
-        ((partial compact frame-doc))
-        ((partial frame frame-doc)))))
+    (->> statements
+         ->jsonld
+         (compact frame-doc)
+         (frame frame-doc))))
 
 
 

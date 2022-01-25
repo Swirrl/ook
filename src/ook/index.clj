@@ -37,21 +37,21 @@
 
 (defn create-indicies [system]
   (log/info "Creating indicies")
-  (each (partial create system)))
+  (each #(create system %)))
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
-  (each (partial delete system)))
+  (each #(delete system %)))
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")
   (each #(update-settings system % {"index.refresh_interval" "-1"
-                                          "index.number_of_replicas" "0"})))
+                                    "index.number_of_replicas" "0"})))
 
 (defn normal-mode [system]
   (log/info "Configuring indicies for search")
   (each #(update-settings system % {"index.refresh_interval" nil
-                                          "index.number_of_replicas" "1"})))
+                                    "index.number_of_replicas" "1"})))
 
 (defn -main
   "CLI Entry point for populating the index
