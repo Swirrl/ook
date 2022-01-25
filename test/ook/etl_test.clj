@@ -112,9 +112,7 @@
 
 (deftest observation-pipeline-test
   (with-system [system ["drafter-client.edn"
-                        ;; TODO test against idp-beta. currently blocked by
-                        ;; idp-beta not having modified times
-                        "local.edn"
+                        "idp-beta.edn"
                         "elasticsearch-test.edn"
                         "project/fixture/data.edn"]]
     (vcr/with-cassette {:name :observation-pipeline

@@ -1,5 +1,0 @@
-{:drafter/endpoint-url "http://localhost:3001"
- ;;:auth0.client/id #env ["AUTH0_ID" "br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8"]
- ;;:auth0.client/secret #secret ["AUTH0_SECRET_COGS_STAGING"]
- :auth0.client/endpoint "https://swirrl-staging.eu.auth0.com"
- :auth0.client/api "https://swirrl-staging.eu.auth0.com/api/v2/"}
