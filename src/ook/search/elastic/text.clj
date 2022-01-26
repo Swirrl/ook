@@ -7,23 +7,6 @@
 
 (def size-limit 1000)
 
-#_(defn add-snippet [codes conn cube]
-  (let [matches (apply merge-with concat
-                       (map (fn [code] {(:scheme code) [(select-keys code [:ook/uri :label])]}) codes))
-        components (->> (esd/search conn "component" "_doc"
-                                    {:query {:terms {"@id" (:component cube)}}
-                                     :size size-limit})
-                        :hits :hits
-                        (map :_source)
-                        (map esu/normalize-keys)
-                        (map #(select-keys % [:ook/uri :label :codelist]))
-                        (map (fn [component]
-                               (update component :codelist (fn [codelist]
-                                                             (assoc codelist :matches
-                                                                    (matches (:ook/uri codelist))))))))
-        snippet {:dimensions components}]
-    (assoc cube :snippet snippet)))
-
 (defn- append-id [x] (str x ".@id"))
 
 (defn- terms-clauses
