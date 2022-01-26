@@ -26,6 +26,11 @@
   Duplicates clobber, latest wins."
   (partial lookup :ook/uri))
 
+(defn lookup-coll
+  "Turns a sequence of hashmaps into a lookup from key to a sequence of matching docs."
+  [key xs]
+  (apply merge-with concat (map (fn [x] {(get x key) [x]}) xs)))
+
 (defn join-by
   "Joins two sequences of docs (hashmaps) x and y by x-key and y-key.
   Docs having the same key within a sequence clobber, latest wins.

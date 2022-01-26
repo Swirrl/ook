@@ -7,7 +7,7 @@
 
 (def size-limit 1000)
 
-(defn add-snippet [codes conn cube]
+#_(defn add-snippet [codes conn cube]
   (let [matches (apply merge-with concat
                        (map (fn [code] {(:scheme code) [(select-keys code [:ook/uri :label])]}) codes))
         components (->> (esd/search conn "component" "_doc"
@@ -32,14 +32,6 @@
   (map (fn [[d vs]] {:terms {(append-id d) vs}})
        selection))
 
-(defn- dimension-rollup
-  "Aggregation clause to select the top values per dimension (mightn't all match the query
-  if the observation using them matches on another dimension)"
-  [selection]
-  (into {} (map (fn [dim] (let [dim (append-id dim)]
-                            [dim {:terms {:field dim, :size size-limit}}]))
-                (keys selection))))
-
 (defn- observation-query
   "Creates a query for finding observations with selected dimensions and dimension-values.
 
@@ -51,9 +43,7 @@
   [selection]
   {:size 0
    :query {:bool {:should (terms-clauses selection)}} ;;:minimum_should_match "2"
-   :aggregations {:cubes {:terms {:field "qb:dataSet.@id" :size size-limit} ;; roll-up dimensions within each dataset
-                          :aggregations (dimension-rollup selection)
-                          }}})
+   :aggregations {:cubes {:terms {:field "qb:dataSet.@id" :size size-limit}}}})
 
 (defn observation-hits [selection {:keys [elastic/endpoint]}]
   (let [conn (esu/get-connection endpoint)]
@@ -101,21 +91,7 @@
   [cubes codes]
   (fn [dataset]
     (let [cube (first (filter #(= (:cube dataset) (:key %)) cubes))
-          code-lookup (u/id-lookup codes)
-          match-lookup (->
-                        cube
-                        (dissoc :key :doc_count)
-                        (u/map-values
-                         (fn [dimension]
-                           (->> (:buckets dimension)
-                                (map (fn [bucket]
-                                       (-> bucket
-                                           :key
-                                           code-lookup
-                                           (select-keys [:ook/uri :label]))))
-                                ;; drop codes not matching the query that appear because
-                                ;; the observations match another dimension
-                                (remove empty?)))))]
+          code-lookup (u/lookup-coll :scheme codes)]
       (-> dataset
           (assoc
            :matching-observation-count
@@ -124,8 +100,7 @@
            :component
            (fn [components]
              (map (fn [component]
-                    (let [component-id (-> component :ook/uri append-id keyword)
-                          matches (match-lookup component-id)]
+                    (let [matches (code-lookup (get-in component [:codelist :ook/uri]))]
                       (if (not-empty matches)
                         (assoc component :matches matches)
                         component)))
