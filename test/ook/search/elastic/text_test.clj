@@ -89,7 +89,9 @@
                                (filter #(= "def/trade/property/dimension/alcohol-type"
                                            (:ook/uri %)))
                                first
-                               :matches)]
-                  (is (= matches
-                         [{:ook/uri "def/trade/concept/alcohol-type/wine"
-                           :label "Wine"}])))))))))))
+                               :matches)
+                      match (first matches)]
+                  (are [field value] (= (get match field)
+                                        value)
+                    :ook/uri "def/trade/concept/alcohol-type/wine"
+                    :label "Wine"))))))))))

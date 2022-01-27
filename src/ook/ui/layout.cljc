@@ -103,15 +103,26 @@
       :value "Search"
       :aria-label "Submit search"}]]])
 
+(defn- ellipsise-coll
+  "Return first 5 matches and ellipsise any further matches"
+  [xs]
+  (let [max 3
+        count (count xs)
+        too-long? (> count max)]
+    (if too-long?
+      (concat (take max xs) [(str "... " count " codes in total")])
+      xs)))
+
 (defn- component-matches
   [{:keys [:ook/uri label codelist matches]}]
   (let [ldim (if (and (contains? codelist :label)
                       (not= label (:label codelist)))
                (str label " (" (:label codelist) ")")
                label)
-        lvalue (if (seq? matches)
+        lvalue (if (not-empty matches)
                  (->> matches
                       (map :label)
+                      ellipsise-coll
                       (st/join " | ")))]
     [:div.col-12
      [:span
@@ -142,7 +153,7 @@
          [:a.text-decoration-none
           {:href (pmd-link-from-dataset dataset)}
           [:h3 label]]
-         [:small (str matching-observation-count " matching observations")]
+         [:small (str (format "%,d" matching-observation-count) " matching observations")]
          ]]
        [:div
         [:p.mb-2.text-muted comment]
