@@ -153,7 +153,7 @@
          [:a.text-decoration-none
           {:href (pmd-link-from-dataset dataset)}
           [:h3 label]]
-         [:small (str matching-observation-count " matching observations")]
+         [:small (str (format "%,d" matching-observation-count) " matching observations")]
          ]]
        [:div
         [:p.mb-2.text-muted comment]
