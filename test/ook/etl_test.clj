@@ -125,7 +125,5 @@
         (is (zero? (etl/observation-pipeline system)))
         ;; We can simulate changing one dataset by faking
         ;; ook.etl/graph->modified
-        (let [orig-graph->modified ook.etl/graph->modified]
-          (intern 'ook.etl 'graph->modified (fake-graph->modified system))
-          (is (< 0 (etl/observation-pipeline system) total-observations))
-          (intern 'ook.etl 'graph->modified orig-graph->modified))))))
+        (with-redefs [ook.etl/graph->modified (fake-graph->modified system)]
+          (is (< 0 (etl/observation-pipeline system) total-observations)))))))
