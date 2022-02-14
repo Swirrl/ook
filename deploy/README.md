@@ -4,7 +4,7 @@
 
 ### To deploy a jar
 
-Check [the Book pipeline on Circle CI](https://app.circleci.com/pipelines/github/Swirrl/ook) for the omni package version number, e.g. `main-circle_297_f492fa` then do:
+Check [the ook pipeline on Circle CI](https://app.circleci.com/pipelines/github/Swirrl/ook) for the omni package version number, e.g. `main-circle_297_f492fa` then do:
 
     cd deploy
     ./deploy_build.sh
