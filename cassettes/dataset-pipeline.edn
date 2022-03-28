@@ -1,6 +1,6 @@
 {:calls [{:arg-key {:query-string nil,
                     :request-method :post,
-                    :server-name "drafter-bump-drafter.publishmydata.com",
+                    :server-name "idp-beta-drafter.publishmydata.com",
                     :server-port nil,
                     :uri "/v1/sparql/live"},
           :return {:body #vcr-clj/input-stream
@@ -30,7 +30,7 @@
           :var-name "clj-http.core/request"}
          {:arg-key {:query-string nil,
                     :request-method :post,
-                    :server-name "drafter-bump-drafter.publishmydata.com",
+                    :server-name "idp-beta-drafter.publishmydata.com",
                     :server-port nil,
                     :uri "/v1/sparql/live"},
           :return {:body #vcr-clj/input-stream
