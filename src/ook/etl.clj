@@ -349,7 +349,7 @@
     opts))
 
 ;; Loads an index with the configured content
-(defmethod ig/init-key :ook.index/data [_ system]
+(defmethod ig/init-key ::load [_ system]
   (index/bulk-mode system)
   (with-deferred (index/normal-mode system)
     (all-pipelines system)))

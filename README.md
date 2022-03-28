@@ -107,7 +107,12 @@ You can check that the indicies have some documents loaded with:
 curl -X GET "localhost:9200/_cat/indices?v=true"
 ```
 
-Alternatively you can create an integrant profile with the `:ook.index/data` component which will populate the database when the system is started. Use `:ook.etl/target-datasets` to scope the data to a vector of `pmdcat:Dataset` URIs (e.g. [resources/fixture/data.edn](resources/fixture/data.edn)) or provide a SPARQL query to set the scope (e.g. [resources/trade/data.edn](resources/trade/data.end)).
+Alternatively you can create an integrant profile with the `:ook.etl/load`
+component which will populate the database when the system is started. Use
+`:ook.etl/target-datasets` to scope the data to a vector of `pmdcat:Dataset`
+URIs (e.g. [resources/fixture/data.edn](resources/fixture/data.edn)) or provide
+a SPARQL query to set the scope (e.g.
+[resources/trade/data.edn](resources/trade/data.end)).
 
 ## Testing
 

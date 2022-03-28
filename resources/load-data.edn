@@ -1,4 +1,4 @@
-{:ook.index/data
+{:ook.etl/load
  {:ook.concerns.elastic/conn #ig/ref :ook.concerns.elastic/conn
   :drafter-client/client #ig/ref :drafter-client/client
   :ook.etl/target-datasets #ig/ref :ook.etl/target-datasets
