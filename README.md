@@ -1,4 +1,4 @@
-# Ook Objekt Katalog (Structural Search) <img src="resource/ook-logo.png" align="right" height="256" />
+# Ook Objekt Katalog (Structural Search) <img src="resources/ook-logo.png" align="right" height="256" />
 
 > if someone ever reported that there was an orang-utan in the Library, the wizards would probably go and ask the Librarian if he'd seen it.
 >
@@ -8,7 +8,7 @@ OOK is a structural search engine for data cubes.
 
 Typically search engines allow users to find data by matching against terms in the dataset-metadata. For example a query like "Balance of Payments" would be needed to match that publication's title or summary.
 
-OOK goes deeper, indexing the reference data terms that describe and identify each numerical observation within a datacube. This let's users find data with queries like "imports of cars from Germany". Users can search without first needing to know how data was packaged and publised.
+OOK goes deeper, indexing the reference data terms that describe and identify each numerical observation within a datacube. This let's users find data with queries like "imports of cars from Germany". Users can search without first needing to know how data was packaged and published.
 
 OOK also understands the structure of data cubes so users can cross-filter for different facets, asking things like "what's the trade-off between geographic precision and recency?".
 
