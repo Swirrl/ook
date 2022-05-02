@@ -165,7 +165,15 @@ We can also update ook on an already provisioned server using ansible.
 
 The [deploy_build.sh](./deploy_build.sh) script uses omni to install a given build (package version).
 
-## 3. Backing-up and restoring the elasticsearch indices
+## 3. Running the ETL pipeline
+
+The ETL pipeline runs as a systemd clojure process called `etl`.
+
+You can use the [start_etl.sh](./start_etl.sh) script to trigger this remotely with an ansible playbook.
+
+This process can take several hours. If you want to check on it then `ssh` into the box and run `journalctl -f -u etl`.
+
+## 4. Backing-up and restoring the elasticsearch indices
 
 The [ensure_bucket.sh](./ensure_bucket.sh) script will ensure that a GCS bucket called `ook-es-repository` is in place.
 

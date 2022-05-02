@@ -1,10 +1,26 @@
-# OOK (ONS trade search)
+# Ook Objekt Katalog (Structural Search) <img src="resource/ook-logo.png" align="right" height="256" />
 
-## Running the project
+> if someone ever reported that there was an orang-utan in the Library, the wizards would probably go and ask the Librarian if he'd seen it.
+>
+> Terry Pratchett - Night Watch
 
-### Elasticsearch
+OOK is a structural search engine for data cubes.
 
-You can use docker-compose to provide and manage elasticsearch.
+Typically search engines allow users to find data by matching against terms in the dataset-metadata. For example a query like "Balance of Payments" would be needed to match that publication's title or summary.
+
+OOK goes deeper, indexing the reference data terms that describe and identify each numerical observation within a datacube. This let's users find data with queries like "imports of cars from Germany". Users can search without first needing to know how data was packaged and publised.
+
+OOK also understands the structure of data cubes so users can cross-filter for different facets, asking things like "what's the trade-off between geographic precision and recency?".
+
+OOK is powered by linked-data written to match the [PublishMyData Application Profile](https://swirrl.github.io/PMD-AP/index.html). We extract data from a triplestore using SPARQL then transform this into compacted and framed JSON-LD before loading it into Elasticsearch for querying. The ETL process and front-end are written in Clojure.
+
+## Running OOK
+
+### Elasticsearch Database
+
+OOK uses [Elasticsearch](https://www.elastic.co/elasticsearch/) as it's database.
+
+We provide a docker-compose file for running elasticsearch in your local development environment.
 
 The `bin/cider` and `bin/test` scripts provide a demonstration.
 
@@ -20,7 +36,7 @@ Or one for dev on port 9200 like this:
 docker-compose up -d elasticsearch-development
 ```
 
-You can bring the services down like:
+You can bring the services down with:
 
 ```bash
 docker-compose down
@@ -28,9 +44,37 @@ docker-compose down
 
 You might also like to use the docker-compose `start` and `stop` commands. To see what's running use `docker-compose ps`.
 
-### Server
+### Clojurescript Front-end
 
-Start a repl with the dev alias (using e.g. `bin/repl` or `bin/cider`). Within the repl run:
+The front-end is written in [Clojurescript](https://clojurescript.org/guides/quick-start). You'll need to compile this to JavaScript.
+
+Using a recent version of the [Yarn](https://yarnpkg.com/getting-started) package manager, you can install the JavaScript dependencies:
+
+```bash
+yarn install
+```
+
+Then compile the CLJS to JS:
+
+```bash
+yarn compile
+```
+
+If you want to develop the CLJS you can have yarn watch for changes and recompile as necessary:
+
+```bash
+yarn watch
+```
+or, if you also want the tests:
+```bash
+yarn watch-all
+```
+
+With the shadow-cljs watcher running, cljs tests are run and reloaded at `localhost:8021`.
+
+### Clojure Application Server
+
+The application server is written in [Clojure](https://clojure.org/guides/getting_started). You can run it locally by starting a clojure REPL with the dev alias using e.g. `bin/repl` (or `bin/cider` if you're using [emacs/cider](https://cider.mx/)). Within the REPL, you can load and start the server with:
 
 ```clojure
 (dev)
@@ -39,34 +83,22 @@ Start a repl with the dev alias (using e.g. `bin/repl` or `bin/cider`). Within t
 
 Visit `localhost:3000` in your browser (or whatever port you set if you overwrite it in `env/dev/resources/local.edn`).
 
-### Clojurescript
+## Loading Data
 
-If you don't have a recent version of the Yarn package manager installed, get it [here](https://classic.yarnpkg.com/en/docs/install/#mac-stable).
+You'll need to run the ETL pipeline to populate your Elasticsearch database.
 
-From the root directory of the project install JS dependencies:
+We provide configurations for extracting data from the [Integrated Data Service](https://beta.gss-data.org.uk/).
 
-```bash
-yarn install
-```
-
-Then compile the cljs to JS and watch for changes:
-```bash
-yarn watch
-```
-
-or, if you also want the tests:
-```bash
-yarn watch-all
-```
-
-With the shadow-cljs watcher running, cljs tests are run and watched at `localhost:8021`.
-
-## Fixtures
-
-You can load data from a drafter server into your elasticsearch development index from the shell as follows:
+For a small set of fixtures you can use:
 
 ```bash
 clojure -X:dev:ook.etl/fixtures
+```
+
+Or to load all trade datasets you can use:
+
+```bash
+clojures -X:dev:ook.etl/trade
 ```
 
 You can check that the indicies have some documents loaded with:
@@ -75,7 +107,7 @@ You can check that the indicies have some documents loaded with:
 curl -X GET "localhost:9200/_cat/indices?v=true"
 ```
 
-Alternatively you can create an integrant profile with the `:ook.index/data` component which will populate the database when the system is started. Use `:ook.etl/target-datasets` to scope the data to a set of `pmdcat:Dataset` URIs. See e.g. [resources/fixture-data.edn](resources/fixture-data.edn).
+Alternatively you can create an integrant profile with the `:ook.index/data` component which will populate the database when the system is started. Use `:ook.etl/target-datasets` to scope the data to a vector of `pmdcat:Dataset` URIs (e.g. [resources/fixture/data.edn](resources/fixture/data.edn)) or provide a SPARQL query to set the scope (e.g. [resources/trade/data.edn](resources/trade/data.end)).
 
 ## Testing
 
@@ -101,23 +133,13 @@ This runs the cljs tests in a way that can be reported programatically for CI.
 
 See the [deployment readme](./deploy/README.md).
 
-To load the data, ssh into the box and do:
-
-```
-cd /opt/ook
-export AUTH0_SECRET=XXX
-java -cp "ook.jar:lib/*" -Xmx3g clojure.main -m ook.index
-```
-
-It takes a couple of hours so you'll likely want to run this with gnu-screen/ tmux/ NOHUP so a drop in the connection doesn't kill the pipeline run.
-
 ## Drafter Authentication
 
 We're downloading RDF using drafter client.
 
-Since we're only using the public endpoint, the AUTH0 credentials are being ignore.
+Since we're only using the public endpoint by default, the AUTH0 credentials are being ignored. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like.
 
-There is still infastructure for providing these if you need to use a draft endpoint. You can configure an `AUTH0_SECRET` environmental variable with a dummy value if you like. You could also set it to the secret key for the ook application (e.g. on [cogs staging](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8) or [idp beta](https://manage.auth0.com/dashboard/eu/swirrl-ons-prod/applications/OS2GgkrjYyb7EXdawNfk6HViXznpf7Dh/settings)). You can store this locally in an encrypted file:
+If you need to use a draft endpoint then you can specify AUTH0 credentials using e.g. a secret key for the ook application (e.g. on [cogs staging](https://manage.auth0.com/dashboard/eu/swirrl-staging/applications/br25ZFYNX0wHK3z7FIql2mK91z8ZZcC8) or [idp beta](https://manage.auth0.com/dashboard/eu/swirrl-ons-prod/applications/OS2GgkrjYyb7EXdawNfk6HViXznpf7Dh/settings)). You can store this locally in an encrypted file:
 
 ```bash
 echo VALUE_OF_THE_SECRET | gpg -e -r YOUR_PGP_ID > env/dev/resources/secrets/AUTH0_SECRET.gpg
