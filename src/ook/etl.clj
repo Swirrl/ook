@@ -316,9 +316,8 @@
      :add (remove #(= (prev %) (curr %)) (keys curr))}))
 
 (defn observation-pipeline [system]
-  ;; create the graph index in case it doesn't exist (only needed for
-  ;; migration, we can delete this line once this change is deployed.)
-  (index/create system "graph")
+  (index/create-if-not-exists system "graph")
+  (index/create-if-not-exists system "observation")
   (let [{:keys [rem add]} (graph-diff system)]
     (log/info "removing observations for" (count rem) "graphs")
     (esd/delete-by-query (:ook.concerns.elastic/conn system)

@@ -21,6 +21,12 @@
                    {:tokenizer "standard"
                     :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
+(defn create-if-not-exists
+  "Creates index if it doesn't already exist"
+  [system index]
+  (if (not (esi/exists? (:ook.concerns.elastic/conn system) index))
+    (create system index)))
+
 (defn delete [system index]
   (esi/delete (:ook.concerns.elastic/conn system) index))
 
