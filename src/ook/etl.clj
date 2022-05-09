@@ -289,7 +289,7 @@
   (index/delete system "graph")
   (index/create system "graph")
   (pipeline system
-            (slurp (io/resource "etl/observation-graph.sparql"))
+            (slurp (io/resource "etl/graph-select.sparql"))
             (slurp (io/resource "etl/graph-construct.sparql"))
             (slurp (io/resource "etl/graph-frame.json"))
             "graph"))
