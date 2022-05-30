@@ -98,7 +98,7 @@ clojure -X:dev:ook.etl/fixtures
 Or to load all trade datasets you can use:
 
 ```bash
-clojures -X:dev:ook.etl/trade
+clojure -X:dev:ook.etl/trade
 ```
 
 You can check that the indicies have some documents loaded with:
