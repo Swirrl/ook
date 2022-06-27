@@ -246,7 +246,7 @@
      (fn [counter [var-name & uris]]
        (log/info "Processing page starting with" index "subject" counter)
        (if uris
-         (with-logged-retry construct-query
+         (with-logged-retry (insert-values-clause construct-query var-name uris)
            (->> (extract system construct-query var-name uris)
                 (transform jsonld-frame)
                 (load-documents system index)))
