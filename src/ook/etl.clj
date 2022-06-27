@@ -52,6 +52,20 @@
        (log/info "Retrying")
        ~expr)))
 
+(defmacro with-logged-retry
+  "If an exception is raised during expr, save the logmsg to a tempfile before retrying"
+  [logmsg expr]
+  `(try
+     ~expr
+     (catch Exception e#
+       (log/warn "Caught Exception: " (.toString e#))
+       (let [tmpfile# (File/createTempFile "ook-etl-error-" ".tmp")]
+         (log/warn "Logging value to" (str tmpfile#))
+         (spit tmpfile# ~logmsg))
+       (wait)
+       (log/info "Retrying")
+       ~expr)))
+
 
 ;; Query utilities
 
@@ -232,7 +246,7 @@
      (fn [counter [var-name & uris]]
        (log/info "Processing page starting with" index "subject" counter)
        (if uris
-         (with-retry
+         (with-logged-retry construct-query
            (->> (extract system construct-query var-name uris)
                 (transform jsonld-frame)
                 (load-documents system index)))
