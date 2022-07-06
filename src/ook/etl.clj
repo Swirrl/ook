@@ -330,19 +330,25 @@
      :add (remove #(= (prev %) (curr %)) (keys curr))}))
 
 (defn observation-pipeline [system]
-  (index/create-if-not-exists system "graph")
-  (index/create-if-not-exists system "observation")
-  (let [{:keys [rem add]} (graph-diff system)]
-    (log/info "removing observations for" (count rem) "graphs")
-    (esd/delete-by-query (:ook.concerns.elastic/conn system)
-                         "observation" "_doc" {:terms {:graph rem}})
-    (log/info "adding observations for" (count add) "graphs")
-    (pipeline system
-              (map #(str "http://gss-data.org.uk/" %) add)
-              (slurp (io/resource "etl/observation-select.sparql"))
-              (slurp (io/resource "etl/observation-construct.sparql"))
-              (slurp (io/resource "etl/observation-frame.json"))
-              "observation")))
+  (try
+    (index/create-if-not-exists system "graph")
+    (index/create-if-not-exists system "observation")
+    (let [{:keys [rem add]} (graph-diff system)]
+      (log/info "removing observations for" (count rem) "graphs")
+      (esd/delete-by-query (:ook.concerns.elastic/conn system)
+                           "observation" "_doc" {:terms {:graph rem}})
+      (log/info "adding observations for" (count add) "graphs")
+      (pipeline system
+                (map #(str "http://gss-data.org.uk/" %) add)
+                (slurp (io/resource "etl/observation-select.sparql"))
+                (slurp (io/resource "etl/observation-construct.sparql"))
+                (slurp (io/resource "etl/observation-frame.json"))
+                "observation"))
+    (catch Throwable err
+      ;; graph and observations indices might be in an inconsistent state
+      (index/delete system "observation")
+      (index/delete system "graph")
+      (throw err))))
 
 (defn all-pipelines [system]
   (log/info "Running all pipelines")

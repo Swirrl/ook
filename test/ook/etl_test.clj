@@ -127,3 +127,31 @@
         ;; ook.etl/graph->modified
         (with-redefs [ook.etl/graph->modified (fake-graph->modified system)]
           (is (< 0 (etl/observation-pipeline system) total-observations)))))))
+
+;; Just like the real pipeline function, but fails when trying to populate the
+;; observation index
+(defn fake-pipeline []
+  (let [real-pipeline ook.etl/pipeline]
+    (fn [& args]
+      (when (= "observation" (last args)) (/ 1 0))
+      (apply real-pipeline args))))
+
+(deftest observation-pipeline-is-transactional-test
+  (with-system [system ["drafter-client.edn"
+                        "idp-beta.edn"
+                        "elasticsearch-test.edn"
+                        "project/fixture/data.edn"]]
+    (vcr/with-cassette {:name :observation-pipeline-is-transactional
+                        :recordable? setup/not-localhost?}
+      (setup/reset-indicies! system)
+      ;; Make a note of how many observations should be loaded on a clean slate
+      (let [total-observations (etl/observation-pipeline system)]
+        (setup/reset-indicies! system)
+        ;; Simulate the pipeline encountering an error half way through
+        (try
+          (with-redefs [ook.etl/pipeline (fake-pipeline)]
+            (etl/observation-pipeline system))
+          (catch Exception _ nil))
+        ;; When we try again, we should load all the observations (no left over
+        ;; state from the failed run)
+        (is (= total-observations (etl/observation-pipeline system)))))))
