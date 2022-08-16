@@ -12,7 +12,7 @@
 (deftest extract-test
   (testing "Extracting a page of RDF from a drafter endpoint"
     (with-system [system ["drafter-client.edn" "idp-beta.edn"]]
-      (is (= 38 (count (setup/example-datasets system)))))))
+      (is (= 28 (count (setup/example-datasets system)))))))
 
 (deftest transform-test
   (testing "Transform triples into json-ld"
@@ -20,7 +20,7 @@
       (let [datasets (setup/example-datasets system)
             frame (slurp (io/resource "etl/dataset-frame.json"))
             jsonld (etl/transform frame datasets)]
-        (is (= "Alcohol Bulletin - clearances"
+        (is (= "Annual mean rainfall with trends actual"
                (-> jsonld (get "@graph") first (get "label"))))))))
 
 (deftest load-test
@@ -56,9 +56,8 @@
       (let [db (setup/get-db system)
             doc (first (db/all-datasets db))]
         (are [key value] (found? doc key value)
-          :ook/uri "data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"
-          :label "Alcohol Bulletin - duty-receipts"
-          :publisher {:altlabel "HMRC"})))))
+          :ook/uri "data/gss_data/climate-change/met-office-annual-mean-rainfall-with-trends-actual-catalog-entry"
+          :label "Annual mean rainfall with trends actual")))))
 
 (deftest component-pipeline-test
   (testing "Component pipeline schema"
@@ -89,15 +88,15 @@
         (etl/code-used-pipeline system))
 
       (let [db (setup/get-db system)
-            doc (first (db/get-codes db ["def/trade/concept/alcohol-type/beer"]))]
+            doc (first (db/get-codes db ["data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#concept/geography/wales"]))]
         (are [key value] (found? doc key value)
-          :ook/uri "def/trade/concept/alcohol-type/beer"
-          :label "Beer"
-          :notation "beer"
+          :ook/uri "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#concept/geography/wales"
+          :label "Wales"
+          :notation "wales"
           :used "true"
           :narrower nil
           :broader nil
-          :topConceptOf "def/trade/concept-scheme/alcohol-type")))))
+          :topConceptOf "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/geography")))))
 
 (defn fake-graph->modified [system]
   (let [fake-graph->modified-call-count (atom 0)
@@ -115,18 +114,26 @@
                         "idp-beta.edn"
                         "elasticsearch-test.edn"
                         "project/fixture/data.edn"]]
-    (vcr/with-cassette {:name :observation-pipeline
-                        :recordable? setup/not-localhost?}
       (setup/reset-indicies! system)
       ;; We start with a blank slate so load everything
-      (let [total-observations (etl/observation-pipeline system)]
+      (let [total-observations
+            (vcr/with-cassette {:name :observation-pipeline-1
+                                :recordable? setup/not-localhost?}
+              (etl/observation-pipeline system))]
         (is (pos? total-observations))
         ;; But on the second load observations haven't changed
-        (is (zero? (etl/observation-pipeline system)))
+        (is (zero?
+             (vcr/with-cassette {:name :observation-pipeline-2
+                                 :recordable? setup/not-localhost?}
+               (etl/observation-pipeline system))))
         ;; We can simulate changing one dataset by faking
         ;; ook.etl/graph->modified
         (with-redefs [ook.etl/graph->modified (fake-graph->modified system)]
-          (is (< 0 (etl/observation-pipeline system) total-observations)))))))
+          (is (< 0
+                 (vcr/with-cassette {:name :observation-pipeline-3
+                                     :recordable? setup/not-localhost?}
+                   (etl/observation-pipeline system))
+                 total-observations))))))
 
 ;; Just like the real pipeline function, but fails when trying to populate the
 ;; observation index
@@ -141,17 +148,23 @@
                         "idp-beta.edn"
                         "elasticsearch-test.edn"
                         "project/fixture/data.edn"]]
-    (vcr/with-cassette {:name :observation-pipeline-is-transactional
-                        :recordable? setup/not-localhost?}
       (setup/reset-indicies! system)
       ;; Make a note of how many observations should be loaded on a clean slate
-      (let [total-observations (etl/observation-pipeline system)]
+      (let [total-observations
+            (vcr/with-cassette {:name :observation-pipeline-is-transactional-1
+                                :recordable? setup/not-localhost?}
+              (etl/observation-pipeline system))]
         (setup/reset-indicies! system)
         ;; Simulate the pipeline encountering an error half way through
         (try
           (with-redefs [ook.etl/pipeline (fake-pipeline)]
-            (etl/observation-pipeline system))
+            (vcr/with-cassette {:name :observation-pipeline-is-transactional-2
+                                :recordable? setup/not-localhost?}
+              (etl/observation-pipeline system)))
           (catch Exception _ nil))
         ;; When we try again, we should load all the observations (no left over
         ;; state from the failed run)
-        (is (= total-observations (etl/observation-pipeline system)))))))
+        (is (= total-observations
+               (vcr/with-cassette {:name :observation-pipeline-is-transactional-3
+                                   :recordable? setup/not-localhost?}
+                 (etl/observation-pipeline system)))))))

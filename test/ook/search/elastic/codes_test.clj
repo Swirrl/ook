@@ -13,15 +13,15 @@
     (setup/load-fixtures! system)
 
     (let [opts {:elastic/conn (:ook.concerns.elastic/conn system)}
-          codelist-uri "def/trade/concept-scheme/bulletin-type"
+          codelist-uri "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/geography"
           tree (sut/build-concept-tree codelist-uri opts)]
 
       (testing "build-concept-tree"
-        (is (= 47 (count tree)))
+        (is (= 10 (count tree)))
         (is (= (-> tree first keys sort)
                [:children :label :scheme :used :ook/uri]))
-        (is (= ["1.2% to 5.5% ABV clearances" "Cider clearances"]
-               (->> tree (map :label) sort (take 2))))))))
+        (is (= ["England" "England trend" "Northern Ireland"]
+               (->> tree (map :label) sort (take 3))))))))
 
 (deftest build-code-for-each-scheme-test
   (testing "it spreads a single code result into one for each scheme it has,
