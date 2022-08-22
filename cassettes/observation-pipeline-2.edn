@@ -1,0 +1,73 @@
+{:calls [{:arg-key {:query-string nil,
+                    :request-method :post,
+                    :server-name "idp-beta-drafter.publishmydata.com",
+                    :server-port nil,
+                    :uri "/v1/sparql/live"},
+          :return {:body #vcr-clj/input-stream
+                   ["Z3JhcGgNCmh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZ3JhcGgvZ3NzX2RhdGEvY2xpbWF0ZS1jaGF"
+                    "uZ2UvbWV0LW9mZmljZS1hbm51YWwtbWVhbi10ZW1wLXdpdGgtdHJlbmRzLWFjdHVhbA0KaHR0cD"
+                    "ovL2dzcy1kYXRhLm9yZy51ay9ncmFwaC9nc3NfZGF0YS9jbGltYXRlLWNoYW5nZS9tZXQtb2Zma"
+                    "WNlLWFubnVhbC1tZWFuLXJhaW5mYWxsLXdpdGgtdHJlbmRzLWFjdHVhbA0KaHR0cDovL2dzcy1k"
+                    "YXRhLm9yZy51ay9ncmFwaC9nc3NfZGF0YS9jbGltYXRlLWNoYW5nZS9tZXQtb2ZmaWNlLWFubnV"
+                    "hbC1tZWFuLXRlbXAtd2l0aC10cmVuZHMtYW5vbWFseQ0K"],
+                   :cached nil,
+                   :chunked? true,
+                   :headers #vcr-clj/clj-http-header-map
+                   {"Alt-Svc" "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+                    "Connection" "close",
+                    "Content-Type" "text/csv",
+                    "Date" "Wed, 17 Aug 2022 17:01:28 GMT",
+                    "Server" "nginx",
+                    "Strict-Transport-Security" "max-age=15768000",
+                    "Transfer-Encoding" "chunked",
+                    "Vary" "Accept-Encoding",
+                    "Via" "1.1 google"},
+                   :http-client "-- clj-http cannot serialize instances of org.apache.http.client.HttpClient --",
+                   :length -1,
+                   :protocol-version {:major 1, :minor 1, :name "HTTP"},
+                   :reason-phrase "OK",
+                   :repeatable? false,
+                   :status 200,
+                   :streaming? true,
+                   :trace-redirects []},
+          :var-name "clj-http.core/request"}
+         {:arg-key {:query-string nil,
+                    :request-method :post,
+                    :server-name "idp-beta-drafter.publishmydata.com",
+                    :server-port nil,
+                    :uri "/v1/sparql/live"},
+          :return {:body #vcr-clj/input-stream
+                   ["PGh0dHA6Ly9nc3MtZGF0YS5vcmcudWsvZ3JhcGgvZ3NzX2RhdGEvY2xpbWF0ZS1jaGFuZ2UvbWV"
+                    "0LW9mZmljZS1hbm51YWwtbWVhbi10ZW1wLXdpdGgtdHJlbmRzLWFjdHVhbD4gPGh0dHA6Ly9wdX"
+                    "JsLm9yZy9kYy90ZXJtcy9tb2RpZmllZD4gIjIwMjEtMTAtMTVUMDg6MjI6NTUuOTY1WiJeXjxod"
+                    "HRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSNkYXRlVGltZT4gLgo8aHR0cDovL2dzcy1k"
+                    "YXRhLm9yZy51ay9ncmFwaC9nc3NfZGF0YS9jbGltYXRlLWNoYW5nZS9tZXQtb2ZmaWNlLWFubnV"
+                    "hbC1tZWFuLXJhaW5mYWxsLXdpdGgtdHJlbmRzLWFjdHVhbD4gPGh0dHA6Ly9wdXJsLm9yZy9kYy"
+                    "90ZXJtcy9tb2RpZmllZD4gIjIwMjEtMTAtMTVUMDg6MjM6MDMuMDQ3WiJeXjxodHRwOi8vd3d3L"
+                    "nczLm9yZy8yMDAxL1hNTFNjaGVtYSNkYXRlVGltZT4gLgo8aHR0cDovL2dzcy1kYXRhLm9yZy51"
+                    "ay9ncmFwaC9nc3NfZGF0YS9jbGltYXRlLWNoYW5nZS9tZXQtb2ZmaWNlLWFubnVhbC1tZWFuLXR"
+                    "lbXAtd2l0aC10cmVuZHMtYW5vbWFseT4gPGh0dHA6Ly9wdXJsLm9yZy9kYy90ZXJtcy9tb2RpZm"
+                    "llZD4gIjIwMjEtMTAtMjdUMTU6MDg6MjEuMTA1WiJeXjxodHRwOi8vd3d3LnczLm9yZy8yMDAxL"
+                    "1hNTFNjaGVtYSNkYXRlVGltZT4gLgo="],
+                   :cached nil,
+                   :chunked? true,
+                   :headers #vcr-clj/clj-http-header-map
+                   {"Alt-Svc" "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+                    "Connection" "close",
+                    "Content-Type" "application/n-triples",
+                    "Date" "Wed, 17 Aug 2022 17:01:28 GMT",
+                    "Server" "nginx",
+                    "Strict-Transport-Security" "max-age=15768000",
+                    "Transfer-Encoding" "chunked",
+                    "Vary" "Accept-Encoding",
+                    "Via" "1.1 google"},
+                   :http-client "-- clj-http cannot serialize instances of org.apache.http.client.HttpClient --",
+                   :length -1,
+                   :protocol-version {:major 1, :minor 1, :name "HTTP"},
+                   :reason-phrase "OK",
+                   :repeatable? false,
+                   :status 200,
+                   :streaming? true,
+                   :trace-redirects []},
+          :var-name "clj-http.core/request"}],
+ :recorded-at #inst "2022-08-17T17:01:27.712-00:00"}

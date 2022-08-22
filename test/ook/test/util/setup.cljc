@@ -43,9 +43,9 @@
               (stop-system! ~sym)))))
 
      (def example-cubes
-       ["http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dataset"
-        "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dataset"
-        "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-clearances#dataset"])
+       ["http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dataset"
+        "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-anomaly#dataset"
+        "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-rainfall-with-trends-actual#dataset"])
 
      (defn example-datasets [system]
        (with-cassette :extract-datasets

@@ -13,15 +13,15 @@
     (setup/load-fixtures! system)
 
     (let [opts {:elastic/conn (:ook.concerns.elastic/conn system)}
-          codelist-uris ["def/trade/concept-scheme/alcohol-type"
-                         "def/trade/concept-scheme/bulletin-type"]]
+          codelist-uris ["data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/geography"
+                         "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/year"]]
 
       (testing "codelist-to-dimensions-lookup"
         (let [lookup (sut/codelist-to-dimensions-lookup codelist-uris opts)]
-          (is (= {"def/trade/concept-scheme/alcohol-type"
-                  ["def/trade/property/dimension/alcohol-type"]
-                  "def/trade/concept-scheme/bulletin-type"
-                  ["def/trade/property/dimension/bulletin-type"]}
+          (is (= {"data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/geography"
+                  ["data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dimension/geography"]
+                  "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/year"
+                  ["data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dimension/year"]}
                  lookup))))
 
       (testing "get-codelists"
@@ -30,12 +30,12 @@
             (is (= codelist-uris
                    (map :ook/uri codelists))))
           (testing "provides labels"
-            (is (= '("Alcohol Type" "Bulletin Type")
+            (is (= ["Geography" "Year"]
                    (map :label codelists))))))
 
       (testing "components->codelists"
-        (let [component-uris ["def/trade/property/dimension/alcohol-type"
-                              "def/trade/property/dimension/bulletin-type"]]
-          (is (=  [{:ook/uri "def/trade/concept-scheme/alcohol-type" :label "Alcohol Type"}
-                   {:ook/uri "def/trade/concept-scheme/bulletin-type" :label "Bulletin Type"}]
-                  (sut/components->codelists component-uris opts))))))))
+        (let [component-uris ["data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dimension/geography"
+                              "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dimension/year"]]
+          (is (= [{:ook/uri "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/geography" :label "Geography"}
+                  {:ook/uri "data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#scheme/year" :label "Year"}]
+                 (sut/components->codelists component-uris opts))))))))

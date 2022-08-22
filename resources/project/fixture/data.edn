@@ -1,3 +1,4 @@
 {:ook.etl/target-datasets
- ["http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production-catalog-entry"
-  "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts-catalog-entry"]}
+ ["http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual-catalog-entry"
+  "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-anomaly-catalog-entry"
+  "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-rainfall-with-trends-actual-catalog-entry"]}
