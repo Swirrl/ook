@@ -1,5 +1,6 @@
 (ns ook.etl
   (:require
+   [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.string :as s]
    [clojure.tools.logging :as log]
@@ -98,13 +99,14 @@
   Pages are vectors - the variable name followed by the values."
   [file page-size]
   (let [rdr (io/reader file)
-        var-name (.readLine rdr)
-        read-lines (fn this [r]
+        data (map first (csv/read-csv rdr))
+        var-name (first data)
+        read-lines (fn this [data]
                      (lazy-seq
-                      (if-let [line (.readLine r)]
-                        (cons line (this r))
-                        (.close r))))]
-    (->> (read-lines rdr)
+                      (if-let [line (first data)]
+                        (cons line (this (rest data)))
+                        (.close rdr))))]
+    (->> (read-lines (rest data))
          (partition-all page-size)
          (map (fn [page] (cons var-name page))))))
 
@@ -120,6 +122,8 @@
        (let [client (interceptors/accept client "text/csv")]
          (spill-to-disk (query client subject-query) subject-cache))
        (read-paged subject-cache page-size)
+       ;; TODO this doesn't look safe. read-paged returns a lazy sequence which
+       ;; could still be trying to read from subject-cache after we delete it.
        (finally (.delete subject-cache)))))
   ([client graphs subject-query page-size]
    (mapcat (fn [graph]
@@ -330,19 +334,25 @@
      :add (remove #(= (prev %) (curr %)) (keys curr))}))
 
 (defn observation-pipeline [system]
-  (index/create-if-not-exists system "graph")
-  (index/create-if-not-exists system "observation")
-  (let [{:keys [rem add]} (graph-diff system)]
-    (log/info "removing observations for" (count rem) "graphs")
-    (esd/delete-by-query (:ook.concerns.elastic/conn system)
-                         "observation" "_doc" {:terms {:graph rem}})
-    (log/info "adding observations for" (count add) "graphs")
-    (pipeline system
-              (map #(str "http://gss-data.org.uk/" %) add)
-              (slurp (io/resource "etl/observation-select.sparql"))
-              (slurp (io/resource "etl/observation-construct.sparql"))
-              (slurp (io/resource "etl/observation-frame.json"))
-              "observation")))
+  (try
+    (index/create-if-not-exists system "graph")
+    (index/create-if-not-exists system "observation")
+    (let [{:keys [rem add]} (graph-diff system)]
+      (log/info "removing observations for" (count rem) "graphs")
+      (esd/delete-by-query (:ook.concerns.elastic/conn system)
+                           "observation" "_doc" {:terms {:graph rem}})
+      (log/info "adding observations for" (count add) "graphs")
+      (pipeline system
+                (map #(str "http://gss-data.org.uk/" %) add)
+                (slurp (io/resource "etl/observation-select.sparql"))
+                (slurp (io/resource "etl/observation-construct.sparql"))
+                (slurp (io/resource "etl/observation-frame.json"))
+                "observation"))
+    (catch Throwable err
+      ;; graph and observations indices might be in an inconsistent state
+      (index/delete system "observation")
+      (index/delete system "graph")
+      (throw err))))
 
 (defn all-pipelines [system]
   (log/info "Running all pipelines")
@@ -358,7 +368,7 @@
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql
     (let [client (interceptors/accept client "text/csv")
-          results (s/split-lines (slurp (io/reader (query client sparql))))]
+          results (map first (csv/read-csv (query client sparql)))]
       (rest results))
     opts))
 
