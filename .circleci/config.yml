@@ -116,6 +116,6 @@ workflows:
             branches:
               only:
                 - main
-                - etl-use-graph-versions
+                - parse-csv-query-results
           requires:
             - run_tests
