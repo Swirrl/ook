@@ -1,6 +1,8 @@
 (ns ook.reframe.codes.db.selection
   (:require
-    [meta-merge.core :as mm]))
+    [meta-merge.core :as mm]
+    [clojure.set :as set]
+    [ook.reframe.codes.db.disclosure :as disclosure]))
 
 (defn- codelist? [option]
   (nil? (:scheme option)))
@@ -37,6 +39,19 @@
     (-> selection (get scheme) (get uri) boolean)
     (and (contains? selection uri) (nil? (get selection uri)))))
 
+(defn- all-child-uris [node]
+  (let [walk (fn walk* [node]
+               (cons (:ook/uri node)
+                     (when-let [children (:children node)]
+                       (when-not (= :no-children children)
+                         (mapcat walk* children)))))]
+    (set (walk node))))
+
+(defn indeterminate? [selected-uris option]
+  (let [walk (memoize all-child-uris)
+        all-child-uris (walk option)]
+    (boolean (seq (set/intersection selected-uris all-child-uris)))))
+
 (defn toggle [facet option]
   (if (option-selected? facet option)
     (remove-from-selection facet option)
@@ -60,3 +75,13 @@
             (update-in selection [scheme] disj uri))
           current-selection
           codes))
+
+(defn all-selected-uris [db]
+  (let [selection (-> db :ui.facets/current :selection)]
+    (set
+      (reduce (fn [uris [scheme code-uris]]
+                (if (seq code-uris)
+                  (concat uris code-uris)
+                  (conj uris scheme)))
+              []
+              selection))))

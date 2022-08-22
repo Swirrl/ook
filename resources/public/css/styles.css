@@ -107,3 +107,17 @@ button.applied-facet:hover svg {
   left: -1px;
   top: 0px;
 }
+
+/* Indeterminate checkboxes -----
+ Style lifted directly from Bootstrap 5 but applied via a class instead of
+ setting the `indeterminate` attribute on checkbox elements (which can only
+ be done with js, there is no pure-html way), because getting a hold of
+ actual html dom elements and setting their attributes directly is "impure"
+ and therefore painful in reframe */
+
+/* .form-check-input[type=checkbox]:indeterminate */
+.indeterminate-checkbox {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
