@@ -367,9 +367,10 @@
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql
-    (let [client (interceptors/accept client "text/csv")
-          results (map first (csv/read-csv (query client sparql)))]
-      (rest results))
+    (let [client (interceptors/accept client "text/csv")]
+      (with-open [rdr (io/reader (query client sparql))]
+        (let [results (map first (csv/read-csv rdr))]
+          (doall (rest results)))))
     opts))
 
 ;; Loads an index with the configured content
