@@ -3,4 +3,5 @@
   :drafter-client/client #ig/ref :drafter-client/client
   :ook.etl/target-datasets #ig/ref :ook.etl/target-datasets
   :ook.etl/select-page-size #env ["OOK_ETL_SELECT_PAGE_SIZE" 10000]
+  :ook.etl/select-small-page-size #env ["OOK_ETL_SELECT_SMALL_PAGE_SIZE" 200]
   :oot.etl/load-page-size #env ["OOK_ETL_LOAD_PAGE_SIZE" 10000]}}

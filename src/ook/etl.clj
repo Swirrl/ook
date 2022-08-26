@@ -359,9 +359,9 @@
   (with-deferred (log/info "All pipelines complete")
     (+ (dataset-pipeline system)
        (component-pipeline system)
-       (let [system (assoc system :ook.etl/select-page-size 500)]
-         (code-pipeline system))
-       (let [system (assoc system :ook.etl/select-page-size 200)]
+       (let [small-size (or (:ook.etl/select-small-page-size system) 200)
+             system (assoc system :ook.etl/select-page-size small-size)]
+         (code-pipeline system)
          (code-used-pipeline system))
        (observation-pipeline system))))
 
