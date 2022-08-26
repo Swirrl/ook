@@ -1,72 +1,63 @@
 (ns ook.index
-  (:require [clojurewerkz.elastisch.rest :as es]
-            [clojurewerkz.elastisch.rest.index :as esi]
-            [clojure.data.json :as json]
-            [clojure.java.io :as io]
-            [integrant.core :as ig]
-            [ook.concerns.integrant :as i]
-            [ook.etl :as etl]
-            [clojure.tools.logging :as log]))
+  (:require
+   [clojure.data.json :as json]
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [clojurewerkz.elastisch.rest.index :as esi]
+   [integrant.core :as ig]
+   [ook.concerns.integrant :as i]))
 
-(defn connect [endpoint]
-  (es/connect endpoint {:content-type :json}))
-
-
-(defn create-index
+(defn create
   ([system index]
-   (create-index system index (io/resource (str "etl/" index "-mapping.json"))))
-  ([{:keys [:ook.concerns.elastic/endpoint] :as system} index mapping-file]
-   (esi/create (connect endpoint) index {:mappings (get (-> mapping-file io/reader json/read) "mappings")
-                                         :settings
-                                         {:analysis
-                                          {:analyzer
-                                           {:ook_std
-                                            {:tokenizer "standard"
-                                             :filter ["lowercase" "stop" "stemmer"]}}}}})))
+   (create system index (io/resource (str "etl/" index "-mapping.json"))))
+  ([system index mapping-file]
+   (esi/create (:ook.concerns.elastic/conn system)
+               index
+               {:mappings (get (-> mapping-file io/reader json/read) "mappings")
+                :settings
+                {:analysis
+                 {:analyzer
+                  {:ook_std
+                   {:tokenizer "standard"
+                    :filter ["lowercase" "stop" "stemmer"]}}}}})))
 
-(defn delete-index [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/delete (connect endpoint) index))
+(defn create-if-not-exists
+  "Creates index if it doesn't already exist"
+  [system index]
+  (if (not (esi/exists? (:ook.concerns.elastic/conn system) index))
+    (create system index)))
 
-(defn update-settings [{:keys [:ook.concerns.elastic/endpoint] :as system} index settings]
-  (esi/update-settings (connect endpoint) index settings))
+(defn delete [system index]
+  (esi/delete (:ook.concerns.elastic/conn system) index))
 
-(defn get-mapping [{:keys [:ook.concerns.elastic/endpoint] :as system} index]
-  (esi/get-mapping (connect endpoint) index))
+(defn update-settings [{:keys [:ook.concerns.elastic/conn] :as system} index settings]
+  (esi/update-settings conn index settings))
 
+(defn get-mapping [{:keys [:ook.concerns.elastic/conn] :as system} index]
+  (esi/get-mapping conn index))
 
-(defn each-index [f]
-  (let [indicies ["dataset" "component" "code" "observation"]]
+(defn each [f]
+  (let [indicies ["dataset" "component" "code" "observation" "graph"]]
     (zipmap (map keyword indicies)
             (map f indicies))))
 
-
 (defn create-indicies [system]
   (log/info "Creating indicies")
-  (each-index (partial create-index system)))
+  (each #(create system %)))
 
 (defn delete-indicies [system]
   (log/info "Deleting indicies")
-  (each-index (partial delete-index system)))
-
+  (each #(delete system %)))
 
 (defn bulk-mode [system]
   (log/info "Configuring indicies for load")
-  (each-index #(update-settings system % {"index.refresh_interval" "-1"
-                                          "index.number_of_replicas" "0"})))
+  (each #(update-settings system % {"index.refresh_interval" "-1"
+                                    "index.number_of_replicas" "0"})))
 
 (defn normal-mode [system]
   (log/info "Configuring indicies for search")
-  (each-index #(update-settings system % {"index.refresh_interval" nil
-                                          "index.number_of_replicas" "1"})))
-
-;; Loads an index with the configured content
-(defmethod ig/init-key ::data [_ system]
-  (delete-indicies system) ;; todo, make this "ensure indicies"
-  (create-indicies system)
-  (bulk-mode system)
-  (let [result (etl/pipeline system)]
-    (normal-mode system)
-    result))
+  (each #(update-settings system % {"index.refresh_interval" nil
+                                    "index.number_of_replicas" "1"})))
 
 (defn -main
   "CLI Entry point for populating the index

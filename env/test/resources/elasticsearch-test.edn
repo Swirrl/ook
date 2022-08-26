@@ -1,2 +1,2 @@
-{:ook.concerns.elastic/endpoint "http://localhost:9201"
+{:ook.concerns.elastic/conn {:endpoint "http://localhost:9201"}
  :ook.etl/load-synchronously true}

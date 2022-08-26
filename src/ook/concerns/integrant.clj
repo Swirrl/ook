@@ -4,12 +4,14 @@
 
   This file should be explicitly required by entry points to the
   app."
-  (:require [integrant.core :as ig]
-            [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
-            [clojure.string :as st]
-            [clojure.tools.logging :as log]
-            [meta-merge.core :as mm]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.java.shell :as shell]
+   [clojure.string :as st]
+   [clojure.tools.logging :as log]
+   [clojurewerkz.elastisch.rest :as esr]
+   [integrant.core :as ig]
+   [meta-merge.core :as mm]))
 
 ;; init of constants is a no-op
 (defmethod ig/init-key :ook/const [_ v] v)
@@ -19,9 +21,11 @@
 (derive :auth0.client/endpoint :ook/const)
 (derive :auth0.client/api :ook/const)
 (derive :drafter/endpoint-url :ook/const)
-(derive :ook.concerns.elastic/endpoint :ook/const)
 (derive :ook.search/facets :ook/const)
 (derive :ook.assets/root :ook/const)
+
+(defmethod ig/init-key :ook.concerns.elastic/conn [_ opts]
+  (esr/connect (:endpoint opts) {:content-type :json}))
 
 (defn env
   "Reader to lookup an env-var. If the default is an integer, the env-var's value

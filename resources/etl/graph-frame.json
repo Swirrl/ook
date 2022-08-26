@@ -1,0 +1,11 @@
+{
+  "@context": {
+    "@base": "http://gss-data.org.uk/",
+    "@vocab": "http://gss-data.org.uk/",
+    "modified": {
+      "@id": "http://purl.org/dc/terms/modified",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    }
+  },
+  "modified": {}
+}

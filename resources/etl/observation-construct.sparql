@@ -5,7 +5,11 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 
 CONSTRUCT {
   ?observation ?p ?o .
+  # TODO replace pmdcat:graph with an ook:graph
+  # https://github.com/Swirrl/ook/issues/116
+  ?observation pmdcat:graph ?graph .
 } WHERE {
-  ?observation ?p ?o .
-#  FILTER isIRI(?o)
+  GRAPH ?graph {
+    ?observation ?p ?o .
+  }
 }

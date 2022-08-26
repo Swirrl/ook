@@ -1,16 +1,17 @@
 (ns ook.etl
   (:require
+   [clojure.data.csv :as csv]
+   [clojure.java.io :as io]
+   [clojure.string :as s]
+   [clojure.tools.logging :as log]
+   [clojurewerkz.elastisch.rest.bulk :as esb]
+   [clojurewerkz.elastisch.rest.document :as esd]
    [drafter-client.client.impl :as dci]
    [drafter-client.client.interceptors :as interceptors]
-   [clojure.java.io :as io]
-   [grafter-2.rdf4j.io :as gio]
    [grafter-2.rdf.protocols :as gpr]
-   [clojurewerkz.elastisch.rest :as es]
-   [clojurewerkz.elastisch.rest.bulk :as esb]
-   [clojure.data.json :as json]
-   [clojure.tools.logging :as log]
-   [clojure.string :as s]
-   [integrant.core :as ig])
+   [grafter-2.rdf4j.io :as gio]
+   [integrant.core :as ig]
+   [ook.index :as index])
   (:import (java.io File ByteArrayOutputStream)
            (com.github.jsonldjava.utils JsonUtils)
            (com.github.jsonldjava.core JsonLdOptions JsonLdProcessor)))
@@ -52,6 +53,20 @@
        (log/info "Retrying")
        ~expr)))
 
+(defmacro with-logged-retry
+  "If an exception is raised during expr, save the logmsg to a tempfile before retrying"
+  [logmsg expr]
+  `(try
+     ~expr
+     (catch Exception e#
+       (log/warn "Caught Exception: " (.toString e#))
+       (let [tmpfile# (File/createTempFile "ook-etl-error-" ".tmp")]
+         (log/warn "Logging value to" (str tmpfile#))
+         (spit tmpfile# ~logmsg))
+       (wait)
+       (log/info "Retrying")
+       ~expr)))
+
 
 ;; Query utilities
 
@@ -84,13 +99,14 @@
   Pages are vectors - the variable name followed by the values."
   [file page-size]
   (let [rdr (io/reader file)
-        var-name (.readLine rdr)
-        read-lines (fn this [r]
+        data (map first (csv/read-csv rdr))
+        var-name (first data)
+        read-lines (fn this [data]
                      (lazy-seq
-                      (if-let [line (.readLine r)]
-                        (cons line (this r))
-                        (.close r))))]
-    (->> (read-lines rdr)
+                      (if-let [line (first data)]
+                        (cons line (this (rest data)))
+                        (.close rdr))))]
+    (->> (read-lines (rest data))
          (partition-all page-size)
          (map (fn [page] (cons var-name page))))))
 
@@ -106,17 +122,15 @@
        (let [client (interceptors/accept client "text/csv")]
          (spill-to-disk (query client subject-query) subject-cache))
        (read-paged subject-cache page-size)
+       ;; TODO this doesn't look safe. read-paged returns a lazy sequence which
+       ;; could still be trying to read from subject-cache after we delete it.
        (finally (.delete subject-cache)))))
-  ([client graph-query subject-query page-size]
-   (let [graph-cache (File/createTempFile "ook-etl-graph-cache-" ".tmp")]
-     (try
-       (let [client (interceptors/accept client "text/csv")]
-         (spill-to-disk (query client graph-query) graph-cache))
-       (mapcat (fn [[var-name values]]
-                 (let [subject-query (insert-values-clause subject-query var-name [values])]
-                   (select-paged client subject-query page-size)))
-               (read-paged graph-cache 1)) ;; read multi-graph datasets one graph
-       (finally (.delete graph-cache))))))
+  ([client graphs subject-query page-size]
+   (mapcat (fn [graph]
+             (select-paged client
+                           (insert-values-clause subject-query "graph" [graph])
+                           page-size))
+           graphs)))
 
 
 
@@ -140,14 +154,10 @@
                  (with-dataset-scope subject-query target-datasets)
                  select-page-size))
   ([{:keys [drafter-client/client
-            ook.etl/target-datasets
             ook.etl/select-page-size]
      :as system
-     :or {select-page-size 50000}} graph-query subject-query]
-   (select-paged client
-                 (with-dataset-scope graph-query target-datasets)
-                 subject-query
-                 select-page-size)))
+     :or {select-page-size 50000}} graphs subject-query]
+   (select-paged client graphs subject-query select-page-size)))
 
 (defn extract
   "Executes the construct query binding in values from page"
@@ -179,10 +189,10 @@
 (defn transform [frame-string statements]
   (log/info "Transforming objects")
   (let [frame-doc (JsonUtils/fromString frame-string)]
-    (-> statements
-        ->jsonld
-        ((partial compact frame-doc))
-        ((partial frame frame-doc)))))
+    (->> statements
+         ->jsonld
+         (compact frame-doc)
+         (frame frame-doc))))
 
 
 
@@ -205,12 +215,11 @@
         docs (map (fn [doc] {"doc" (dissoc doc :_id), "doc_as_upsert" true}) docs)]
     (interleave ops docs)))
 
-(defn load-documents [{:keys [:ook.concerns.elastic/endpoint
+(defn load-documents [{:keys [:ook.concerns.elastic/conn
                               :ook.etl/load-page-size
                               :ook.etl/load-synchronously] :as system} index jsonld]
   (log/info "Loading documents into" index "index")
-  (let [conn (es/connect endpoint {:content-type :json})
-        docs (map add-id (get jsonld "@graph"))
+  (let [docs (map add-id (get jsonld "@graph"))
         batches (partition-all (or load-page-size 10000) docs)
         params (if load-synchronously {:refresh "wait_for"} {})]
     (doall
@@ -228,86 +237,147 @@
 
 ;; Pipeline
 
-(defn pipeline-fn* [pager-fn construct-query jsonld-frame index]
-  (fn [system]
-    (log/info (str "Pipeline Started: " index))
-    (let [counter (atom 0)]
-      (doseq [[var-name & uris] (pager-fn system)]
-        (log/info "Processing page starting with" index "subject" @counter)
-        (if uris
-          (do
-            (swap! counter + (count uris))
-            (with-retry
-              (doall
-               (->> (extract system construct-query var-name uris)
-                    (transform jsonld-frame)
-                    (load-documents system index)))))
-          (log/warn (str "No compatible (" index ") subjects found!")))))
-    (log/info (str "Pipeline Complete: " index))))
+(defmacro with-deferred
+  "Evaluates deferred after evaluating body, but returns the result of
+   evaluating body."
+  [deferred & body]
+  `(let [res# (do ~@body)] ~deferred res#))
 
-(defn pipeline-fn
-  ([subject-query construct-query jsonld-frame index]
-   (pipeline-fn*
-    (fn [system] (subject-pages system subject-query))
-    construct-query jsonld-frame index))
-  ([graph-query subject-query construct-query jsonld-frame index]
-   (pipeline-fn*
-    (fn [system] (subject-pages system graph-query subject-query))
-    construct-query jsonld-frame index)))
+(defn pipeline* [system pages construct-query jsonld-frame index]
+  (log/info (str "Pipeline Started: " index))
+  (with-deferred (log/info (str "Pipeline Complete: " index))
+    (reduce
+     (fn [counter [var-name & uris]]
+       (log/info "Processing page starting with" index "subject" counter)
+       (if uris
+         (with-logged-retry (insert-values-clause construct-query var-name uris)
+           (->> (extract system construct-query var-name uris)
+                (transform jsonld-frame)
+                (load-documents system index)))
+         (log/warn (str "No compatible (" index ") subjects found!")))
+       (+ counter (count uris)))
+     0
+     pages)))
 
-(def dataset-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/dataset-select.sparql"))
-   (slurp (io/resource "etl/dataset-construct.sparql"))
-   (slurp (io/resource "etl/dataset-frame.json"))
-   "dataset"))
+(defn pipeline
+  ([system subject-query construct-query jsonld-frame index]
+   (pipeline* system
+              (subject-pages system subject-query)
+              construct-query jsonld-frame index))
+  ([system graphs subject-query construct-query jsonld-frame index]
+   (pipeline* system
+              (subject-pages system graphs subject-query)
+              construct-query jsonld-frame index)))
 
-(def component-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/component-select.sparql"))
-   (slurp (io/resource "etl/component-construct.sparql"))
-   (slurp (io/resource "etl/component-frame.json"))
-   "component"))
+(defn dataset-pipeline [system]
+  (index/delete system "dataset")
+  (index/create system "dataset")
+  (pipeline system
+            (slurp (io/resource "etl/dataset-select.sparql"))
+            (slurp (io/resource "etl/dataset-construct.sparql"))
+            (slurp (io/resource "etl/dataset-frame.json"))
+            "dataset"))
 
-(def code-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/code-select.sparql"))
-   (slurp (io/resource "etl/code-construct.sparql"))
-   (slurp (io/resource "etl/code-frame.json"))
-   "code"))
+(defn component-pipeline [system]
+  (index/delete system "component")
+  (index/create system "component")
+  (pipeline system
+            (slurp (io/resource "etl/component-select.sparql"))
+            (slurp (io/resource "etl/component-construct.sparql"))
+            (slurp (io/resource "etl/component-frame.json"))
+            "component"))
 
-(def code-used-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/code-select.sparql"))
-   (slurp (io/resource "etl/code-used-construct.sparql"))
-   (slurp (io/resource "etl/code-used-frame.json"))
-   "code"))
+(defn code-pipeline [system]
+  (index/delete system "code")
+  (index/create system "code")
+  (pipeline system
+            (slurp (io/resource "etl/code-select.sparql"))
+            (slurp (io/resource "etl/code-construct.sparql"))
+            (slurp (io/resource "etl/code-frame.json"))
+            "code"))
 
-(def observation-pipeline
-  (pipeline-fn
-   (slurp (io/resource "etl/observation-graph.sparql"))
-   (slurp (io/resource "etl/observation-select.sparql"))
-   (slurp (io/resource "etl/observation-construct.sparql"))
-   (slurp (io/resource "etl/observation-frame.json"))
-   "observation"))
+(defn code-used-pipeline [system]
+  (pipeline system
+            (slurp (io/resource "etl/code-select.sparql"))
+            (slurp (io/resource "etl/code-used-construct.sparql"))
+            (slurp (io/resource "etl/code-used-frame.json"))
+            "code"))
 
-(defn pipeline [system]
+(defn graph-pipeline [system]
+  (index/delete system "graph")
+  (index/create system "graph")
+  (pipeline system
+            (slurp (io/resource "etl/graph-select.sparql"))
+            (slurp (io/resource "etl/graph-construct.sparql"))
+            (slurp (io/resource "etl/graph-frame.json"))
+            "graph"))
+
+(defn graph->modified [system]
+  ;; 10000 is the most hits you can return in one go from a search. If we're
+  ;; ever likely to have more than 10000 graphs, we will have to use the scroll
+  ;; API, paginate with search_after, or store the data elsewhere. (Just write
+  ;; it to disk as a blob of EDN?)
+  (->> (esd/search (:ook.concerns.elastic/conn system)
+                   "graph" "_doc" {:size 10000})
+       :hits :hits
+       (map (juxt :_id (comp :modified :_source)))
+       (into {})))
+
+(defn graph-diff [system]
+  ;; It would be better to use the graph version here to differentiate changes
+  ;; that happen within a millisecond, but version is not currently exposed by
+  ;; drafter.
+  (let [prev (graph->modified system)
+        _ (graph-pipeline (assoc system :ook.etl/load-synchronously true))
+        curr (graph->modified system)]
+    {:rem (remove #(= (curr %) (prev %)) (keys prev))
+     :add (remove #(= (prev %) (curr %)) (keys curr))}))
+
+(defn observation-pipeline [system]
+  (try
+    (index/create-if-not-exists system "graph")
+    (index/create-if-not-exists system "observation")
+    (let [{:keys [rem add]} (graph-diff system)]
+      (log/info "removing observations for" (count rem) "graphs")
+      (esd/delete-by-query (:ook.concerns.elastic/conn system)
+                           "observation" "_doc" {:terms {:graph rem}})
+      (log/info "adding observations for" (count add) "graphs")
+      (pipeline system
+                (map #(str "http://gss-data.org.uk/" %) add)
+                (slurp (io/resource "etl/observation-select.sparql"))
+                (slurp (io/resource "etl/observation-construct.sparql"))
+                (slurp (io/resource "etl/observation-frame.json"))
+                "observation"))
+    (catch Throwable err
+      ;; graph and observations indices might be in an inconsistent state
+      (index/delete system "observation")
+      (index/delete system "graph")
+      (throw err))))
+
+(defn all-pipelines [system]
   (log/info "Running all pipelines")
-  (dataset-pipeline system)
-  (component-pipeline system)
-  (code-pipeline system)
-  (let [system (assoc system :ook.etl/select-page-size 200)]
-    (code-used-pipeline system))
-  (observation-pipeline system)
-  (log/info "All pipelines complete"))
-
+  (with-deferred (log/info "All pipelines complete")
+    (+ (dataset-pipeline system)
+       (component-pipeline system)
+       (let [small-size (or (:ook.etl/select-small-page-size system) 200)
+             system (assoc system :ook.etl/select-page-size small-size)]
+         (code-pipeline system)
+         (code-used-pipeline system))
+       (observation-pipeline system))))
 
 (defmethod ig/init-key ::target-datasets [_ {:keys [sparql client] :as opts}]
   (if sparql
-    (let [client (interceptors/accept client "text/csv")
-          results (s/split-lines (slurp (io/reader (query client sparql))))]
-      (rest results))
+    (let [client (interceptors/accept client "text/csv")]
+      (with-open [rdr (io/reader (query client sparql))]
+        (let [results (map first (csv/read-csv rdr))]
+          (doall (rest results)))))
     opts))
+
+;; Loads an index with the configured content
+(defmethod ig/init-key ::load [_ system]
+  (index/bulk-mode system)
+  (with-deferred (index/normal-mode system)
+    (all-pipelines system)))
 
 (comment
   (require 'ook.concerns.integrant)
@@ -327,8 +397,8 @@
                      "idp-beta.edn"
                      "elasticsearch-development.edn"
                      "project/trade/data.edn"]]
-    ;(ook.index/delete-index system "code")
-    ;(ook.index/create-index system "code")
+    ;(ook.index/delete system "code")
+    ;(ook.index/create system "code")
     #_(let [system (assoc system :ook.etl/select-page-size 50000)]
       (code-pipeline system))
     (let [system (assoc system :ook.etl/select-page-size 200)]

@@ -1,11 +1,13 @@
 (ns dev
-  (:require [ook.main :as main]
-            [integrant.core :as ig]
-            [ook.concerns.integrant :as i]
-            [integrant.repl :as igr :refer [go reset halt]]
-            [integrant.repl.state :refer [system config]]
-            [clojure.tools.namespace.repl :as tns]
-            [clojure.java.io :as io]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.tools.namespace.repl :as tns]
+   [integrant.core :as ig]
+   [integrant.repl :as igr :refer [go reset halt]]
+   [integrant.repl.state :refer [system config]]
+   [ook.concerns.integrant :as i]
+   [ook.main :as main]
+   [ook.search.elastic.util :as esu]))
 
 ;; only automatically refresh/require project directories. Without
 ;; this tools.namespace (used by igr/reset) will load all namespaces

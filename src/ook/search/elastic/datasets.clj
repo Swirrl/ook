@@ -27,25 +27,22 @@
                     :ook/uri :matching-observation-count :facets])
       (update :publisher select-keys [:altlabel])))
 
-(defn all [{:keys [elastic/endpoint]}]
-  (->> (esd/search (esu/get-connection endpoint)
-                   "dataset" "_doc" {:query (q/match-all)
-                                     :size size-limit})
+(defn all [{:keys [elastic/conn]}]
+  (->> (esd/search conn "dataset" "_doc" {:query (q/match-all)
+                                          :size size-limit})
        clean-datasets-result
        (map select-relevant-fields)))
 
-(defn for-components [components {:keys [elastic/endpoint] :as opts}]
-  (let [conn (esu/get-connection endpoint)]
-    (->> (esd/search conn "dataset" "_doc"
-                     {:query {:terms {:component components}}
-                      :size size-limit})
-         :hits :hits (map :_source))))
+(defn for-components [components {:keys [elastic/conn] :as opts}]
+  (->> (esd/search conn "dataset" "_doc"
+                   {:query {:terms {:component components}}
+                    :size size-limit})
+       :hits :hits (map :_source)))
 
 (defn- for-cubes
   "Find datasets for cube URIs"
-  [cube-uris {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        uris (util/box cube-uris)]
+  [cube-uris {:keys [elastic/conn]}]
+  (let [uris (util/box cube-uris)]
     (->> (esd/search conn "dataset" "_doc"
                      {:query {:terms {:cube uris}}
                       :size (count uris)})
@@ -83,10 +80,9 @@
 
 (defn- find-observations
   "Finds observations with given dimensions and dimension-values. Groups results by dataset."
-  [dimension-selections {:keys [elastic/endpoint] :as opts}]
-  (let [conn (esu/get-connection endpoint)]
-    (esd/search conn "observation" "_doc"
-                (observation-query dimension-selections))))
+  [dimension-selections {:keys [elastic/conn] :as opts}]
+  (esd/search conn "observation" "_doc"
+              (observation-query dimension-selections)))
 
 (defn datasets-from-observation-hits
   "Parses observation-query results to return a sequence of datasets."
@@ -165,10 +161,8 @@
     (->> (explain-match datasets facets dimensions codelists codes)
          (map select-relevant-fields))))
 
-(defn total-count [{:keys [elastic/endpoint]}]
-  (-> (esu/get-connection endpoint)
-      (esd/count "dataset" "_doc")
-      :count))
+(defn total-count [{:keys [elastic/conn]}]
+  (:count (esd/count conn "dataset" "_doc")))
 
 (comment
-  (def conn (esu/get-connection "http://localhost:9200")))
+  (def conn (esr/connect "http://localhost:9200" {:content-type :json})))

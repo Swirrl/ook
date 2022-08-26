@@ -1,3 +1,0 @@
-SELECT ?graph WHERE {
-  ?dataset <http://publishmydata.com/pmdcat#graph> ?graph .
-}

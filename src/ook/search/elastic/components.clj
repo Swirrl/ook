@@ -9,9 +9,8 @@
 
 (defn get-components
   "Find components using their URIs."
-  [uris {:keys [elastic/endpoint]}]
-  (let [conn (esu/get-connection endpoint)
-        uris (when uris (u/box uris))]
+  [uris {:keys [elastic/conn]}]
+  (let [uris (when uris (u/box uris))]
     (if uris
       (->> (esd/search conn "component" "_doc"
                        {:query (q/ids "_doc" uris)
@@ -30,18 +29,16 @@
 
 (defn- get-components-for-codelists
   "Find components using codelist URIs."
-  [codelist-uris {:keys [elastic/endpoint] as :opts}]
-  (let [conn (esu/get-connection endpoint)]
-    (->>
-     (esd/search conn "component" "_doc"
-                 {:query
-                  {:nested
-                   {:path "codelist"
-                    :query {:terms {"codelist.@id" codelist-uris}}}}
-                  :size size-limit})
-     :hits :hits
-     (map :_source)
-     (map esu/normalize-keys))))
+  [codelist-uris {:keys [elastic/conn] as :opts}]
+  (->> (esd/search conn "component" "_doc"
+                   {:query
+                    {:nested
+                     {:path "codelist"
+                      :query {:terms {"codelist.@id" codelist-uris}}}}
+                    :size size-limit})
+       :hits :hits
+       (map :_source)
+       (map esu/normalize-keys)))
 
 (defn codelist-to-dimensions-lookup
   "A lookup from each of the given codelist-uris to a vector of component-uris"

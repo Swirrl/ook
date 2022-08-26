@@ -2,7 +2,8 @@
   (:require [ook.index :as sut]
             [clojure.test :refer :all]
             [ook.test.util.setup :refer [with-system]]
-            [clojurewerkz.elastisch.rest :as cer]))
+            [clojurewerkz.elastisch.rest :as cer]
+            [clojurewerkz.elastisch.rest.index :as cesi]))
 
 (defn acknowledged? [response]
   (true? (:acknowledged response)))
@@ -19,7 +20,7 @@
                  "keyword")
               (str "Code mapping is " mapping))))
       (testing "Analyser settings"
-        (let [conn (-> system :ook.concerns.elastic/endpoint sut/connect)
+        (let [conn (:ook.concerns.elastic/conn system)
               tokens (fn [input]
                        ;; clojurewerkz.elastisch.rest.document/analyze doesn't work here
                        ;; seems like ES is expecting a json request body on a get request!
@@ -35,3 +36,17 @@
                    ["import" "car"]))))))
     (let [responses (sut/delete-indicies system)]
       (is (every? acknowledged? (vals responses))))))
+
+(deftest create-if-not-exists-test
+  (with-system [system ["elasticsearch-test.edn"]]
+    (let [conn (:ook.concerns.elastic/conn system)
+          index "observation"]
+      (testing "Creates an index if it's missing"
+        (sut/delete-indicies system)
+        (is (not (cesi/exists? conn index)))
+        (is (acknowledged? (sut/create-if-not-exists system index)))
+        (is (cesi/exists? conn index)))
+      (testing "Doesn't create an existing index"
+        (sut/delete-indicies system)
+        (is (acknowledged? (sut/create-if-not-exists system index)))
+        (is (nil? (sut/create-if-not-exists system index)))))))

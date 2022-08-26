@@ -21,7 +21,7 @@
  :ook.handler/codes       {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/codelists   {:search/db #ig/ref :ook.search.elastic/db}
  :ook.handler/code-search {:search/db #ig/ref :ook.search.elastic/db}
- :ook.search.elastic/db   {:elastic/endpoint #ig/ref :ook.concerns.elastic/endpoint
+ :ook.search.elastic/db   {:elastic/conn #ig/ref :ook.concerns.elastic/conn
                            :ook/facets #ig/ref :ook.search/facets}
 
  :ook.assets/root "public"}

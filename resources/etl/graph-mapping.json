@@ -1,0 +1,8 @@
+{
+  "mappings": {
+    "properties": {
+      "@id": { "type": "keyword" },
+      "modified": { "type": "date" }
+    }
+  }
+}

@@ -43,9 +43,9 @@
               (stop-system! ~sym)))))
 
      (def example-cubes
-       ["http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-production#dataset"
-        "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-duty-receipts#dataset"
-        "http://gss-data.org.uk/data/gss_data/trade/hmrc-alcohol-bulletin/alcohol-bulletin-clearances#dataset"])
+       ["http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-actual#dataset"
+        "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-temp-with-trends-anomaly#dataset"
+        "http://gss-data.org.uk/data/gss_data/climate-change/met-office-annual-mean-rainfall-with-trends-actual#dataset"])
 
      (defn example-datasets [system]
        (with-cassette :extract-datasets
@@ -64,11 +64,11 @@
        (reset-indicies! system)
 
        (with-cassette {:name :fixtures :recordable? not-localhost?}
-         (etl/pipeline system)))
+         (etl/all-pipelines system)))
 
      (defn get-db [system]
        (es/->Elasticsearch
-        {:elastic/endpoint (:ook.concerns.elastic/endpoint system)
+        {:elastic/conn (:ook.concerns.elastic/conn system)
          :ook/facets (:ook.search/facets system)})))
 
    ;;;;; CLJS test setup
