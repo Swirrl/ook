@@ -74,6 +74,9 @@
 (defn all-selected-labels []
   (all-text-content ".filters input[type='checkbox']:checked + label"))
 
+(defn all-indeterminate-labels []
+  (all-text-content ".filters input[type='checkbox'].indeterminate-checkbox + label"))
+
 (defn expanded-labels-under-label [label]
   (-> label query-text .-parentNode (all-text-content selectable-code-label-query)))
 

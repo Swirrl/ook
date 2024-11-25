@@ -86,7 +86,12 @@
    (testing "unused codes are not selectable"
      (is (= [] (qh/all-selected-labels)))
      (eh/click-text "2-2 child 2")
-     (is (= [] (qh/all-selected-labels)))))
+     (is (= [] (qh/all-selected-labels))))
+
+   (testing "indeterminate select state"
+     (testing "selecting a code marks all of its parents as indeterminately selected"
+       (eh/click-text "2-2 child 1")
+       (is (= ["Codelist 2 Label" "2-1 child 2"] (qh/all-indeterminate-labels))))))
 
   (setup/cleanup!))
 
